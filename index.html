@@ -1,0 +1,2136 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>GLF · Directorio de Proveedores y KYC Unificado</title>
+  <!-- Google Fonts: Cabin & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --glf-navy: #002856;
+      --glf-navy-dark: #001d40;
+      --glf-blue: #00A0DF;
+      --glf-aqua: #00C1DE;
+      --glf-aqua-light: #E6F8FC;
+      --glf-bg: #F4F7FA;
+      --glf-card-bg: #FFFFFF;
+      --glf-text: #1E293B;
+      --glf-text-muted: #64748B;
+      --glf-border: #E2E8F0;
+      
+      --state-success-bg: #DCFCE7;
+      --state-success-text: #166534;
+      --state-warning-bg: #FEF3C7;
+      --state-warning-text: #92400E;
+      --state-danger-bg: #FEE2E2;
+      --state-danger-text: #991B1B;
+      --state-info-bg: #E0F2FE;
+      --state-info-text: #075985;
+      
+      --shadow-sm: 0 1px 3px rgba(0,40,86,0.06), 0 1px 2px rgba(0,40,86,0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0,40,86,0.08), 0 2px 4px -1px rgba(0,40,86,0.04);
+      --shadow-lg: 0 10px 25px -5px rgba(0,40,86,0.12), 0 8px 10px -6px rgba(0,40,86,0.06);
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Cabin', 'Arial', sans-serif;
+      background-color: var(--glf-bg);
+      color: var(--glf-text);
+      line-height: 1.5;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    /* DEMO BANNER FLOAT */
+    .demo-bar {
+      background: #001938;
+      color: #FFF;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 2px solid var(--glf-aqua);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .demo-bar-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--glf-aqua);
+    }
+    .demo-bar-badge {
+      background: rgba(0, 193, 222, 0.2);
+      border: 1px solid var(--glf-aqua);
+      color: #FFF;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+    .demo-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .demo-controls label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #E2E8F0;
+    }
+    .demo-controls select {
+      color-scheme: dark;
+      background: #001938;
+      color: #00C1DE; /* Celeste brillante */
+      border: 2px solid #00C1DE;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .demo-controls select:hover,
+    .demo-controls select:focus {
+      background: #002856;
+      color: #39FF14; /* Verde fosforescente en hover */
+      border-color: #39FF14;
+      box-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+    }
+    .demo-controls select option {
+      color-scheme: dark;
+      background-color: #001938;
+      color: #00C1DE; /* Celeste */
+      font-weight: 700;
+      padding: 10px 14px;
+    }
+    .demo-controls select option:hover,
+    .demo-controls select option:focus,
+    .demo-controls select option:checked {
+      background-color: #002856 !important;
+      color: #39FF14 !important; /* Verde fosforescente al sobrevolar o seleccionar */
+    }
+
+    /* TOP HEADER */
+    .app-header {
+      background: var(--glf-navy);
+      color: #FFF;
+      padding: 0 24px;
+      box-shadow: var(--shadow-md);
+    }
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #FFF;
+    }
+    .brand-logo-mark {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--glf-blue), var(--glf-aqua));
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      color: #FFF;
+      font-weight: 800;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(0, 193, 222, 0.3);
+    }
+    .brand-text h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      line-height: 1.1;
+    }
+    .brand-text span {
+      font-size: 11px;
+      color: var(--glf-aqua);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    /* TOP NAV TABS */
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      height: 100%;
+      align-items: flex-end;
+    }
+    .nav-tab {
+      padding: 12px 18px;
+      color: #94A3B8;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-tab:hover {
+      color: #FFF;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-tab.active {
+      color: #FFF;
+      border-bottom-color: var(--glf-aqua);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .user-profile-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      background: var(--glf-aqua);
+      color: var(--glf-navy);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .user-details {
+      line-height: 1.2;
+    }
+    .user-name {
+      font-weight: 700;
+      font-size: 12px;
+      color: #FFF;
+    }
+    .user-role {
+      font-size: 10px;
+      color: #94A3B8;
+    }
+
+    /* MAIN CONTENT SHELL */
+    .app-shell {
+      max-width: 1400px;
+      margin: 24px auto;
+      padding: 0 24px;
+    }
+
+    /* UI MODULE VIEWS CONTAINER */
+    .module-view {
+      display: none;
+    }
+    .module-view.active {
+      display: block;
+    }
+
+    /* CARDS & PANELS */
+    .card {
+      background: var(--glf-card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--glf-border);
+      box-shadow: var(--shadow-sm);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--glf-border);
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--glf-navy);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--glf-text-muted);
+      margin-top: 2px;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--glf-navy);
+      color: #FFF;
+    }
+    .btn-primary:hover {
+      background: var(--glf-navy-dark);
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-secondary {
+      background: #FFF;
+      border-color: var(--glf-border);
+      color: var(--glf-text);
+    }
+    .btn-secondary:hover {
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+    }
+    .btn-accent {
+      background: var(--glf-blue);
+      color: #FFF;
+    }
+    .btn-accent:hover {
+      background: #0089C2;
+    }
+    .btn-aqua {
+      background: var(--glf-aqua);
+      color: var(--glf-navy);
+      font-weight: 700;
+    }
+    .btn-aqua:hover {
+      background: #00B1CB;
+    }
+    .btn-danger {
+      background: #EF4444;
+      color: #FFF;
+    }
+    .btn-danger:hover {
+      background: #DC2626;
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    .btn-lg {
+      padding: 12px 24px;
+      font-size: 15px;
+    }
+
+    /* BADGES & STATUS */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .badge-active { background: var(--state-success-bg); color: var(--state-success-text); }
+    .badge-inactive { background: var(--state-danger-bg); color: var(--state-danger-text); }
+    .badge-pending { background: var(--state-warning-bg); color: var(--state-warning-text); }
+    .badge-info { background: var(--state-info-bg); color: var(--state-info-text); }
+    .badge-neutral { background: #E2E8F0; color: #475569; }
+
+    /* GRID & LAYOUT UTILITIES */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    @media (max-width: 1024px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .grid-2, .grid-4 { grid-template-columns: 1fr; }
+    }
+
+    /* METRIC CARDS */
+    .kpi-card {
+      background: #FFF;
+      border: 1px solid var(--glf-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--glf-blue);
+    }
+    .kpi-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--glf-aqua-light);
+      color: var(--glf-navy);
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .kpi-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--glf-navy);
+      line-height: 1.1;
+    }
+    .kpi-lbl {
+      font-size: 12px;
+      color: var(--glf-text-muted);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* TABLES */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .data-table th {
+      background: #F8FAFC;
+      color: var(--glf-navy);
+      padding: 12px 16px;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--glf-border);
+    }
+    .data-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--glf-border);
+      color: var(--glf-text);
+      font-size: 13px;
+    }
+    .data-table tr:hover td {
+      background: #F8FAFC;
+    }
+
+    /* FORMS & INPUTS */
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label {
+      display: block;
+      font-weight: 700;
+      color: var(--glf-navy);
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .form-label span.req { color: #EF4444; margin-left: 2px; }
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--glf-border);
+      border-radius: 8px;
+      background: #FFF;
+      color: var(--glf-text);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .form-control:focus {
+      border-color: var(--glf-blue);
+      box-shadow: 0 0 0 3px rgba(0, 160, 223, 0.15);
+    }
+    .form-hint {
+      font-size: 11px;
+      color: var(--glf-text-muted);
+      margin-top: 4px;
+    }
+
+    /* MODAL DIALOGS */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 40, 86, 0.5);
+      backdrop-filter: blur(4px);
+      display: none;
+      place-items: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: grid;
+    }
+    .modal-box {
+      background: #FFF;
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--glf-border);
+      animation: modalSlide 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-box.wide { max-width: 900px; }
+    @keyframes modalSlide {
+      from { transform: translateY(16px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--glf-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #F8FAFC;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--glf-navy);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--glf-text-muted);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .modal-close:hover { background: #E2E8F0; color: var(--glf-navy); }
+    .modal-body { padding: 24px; }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--glf-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      background: #F8FAFC;
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+
+    /* NOTICE CALLOUTS */
+    .notice-box {
+      background: var(--glf-aqua-light);
+      border-left: 4px solid var(--glf-aqua);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #0369A1;
+    }
+    .notice-box.warn {
+      background: #FEF3C7;
+      border-left-color: #F59E0B;
+      color: #92400E;
+    }
+    .notice-box.danger {
+      background: #FEE2E2;
+      border-left-color: #EF4444;
+      color: #991B1B;
+    }
+
+    /* SEARCH FILTER BAR */
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      background: #F8FAFC;
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--glf-border);
+      margin-bottom: 20px;
+    }
+    .filter-input {
+      flex: 1;
+      min-width: 240px;
+    }
+
+    /* EXTERNAL KYC STEP WIZARD */
+    .stepper {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    .stepper::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--glf-border);
+      z-index: 1;
+    }
+    .step-item {
+      position: relative;
+      z-index: 2;
+      background: var(--glf-bg);
+      padding: 0 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .step-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #FFF;
+      border: 2px solid var(--glf-border);
+      color: var(--glf-text-muted);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    .step-item.active .step-circle {
+      background: var(--glf-navy);
+      border-color: var(--glf-navy);
+      color: #FFF;
+    }
+    .step-item.completed .step-circle {
+      background: var(--glf-aqua);
+      border-color: var(--glf-aqua);
+      color: var(--glf-navy);
+    }
+    .step-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--glf-text-muted);
+      text-transform: uppercase;
+    }
+    .step-item.active .step-title { color: var(--glf-navy); }
+
+    /* CHOICE RADIO CARDS */
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .choice-card {
+      position: relative;
+    }
+    .choice-card input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+    }
+    .choice-card-label {
+      display: block;
+      border: 2px solid var(--glf-border);
+      border-radius: 12px;
+      padding: 16px;
+      background: #FFF;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      height: 100%;
+    }
+    .choice-card input[type="radio"]:checked + .choice-card-label {
+      border-color: var(--glf-blue);
+      background: var(--glf-aqua-light);
+      box-shadow: var(--shadow-sm);
+    }
+    .choice-card-title {
+      font-weight: 700;
+      color: var(--glf-navy);
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .choice-card-desc {
+      font-size: 12px;
+      color: var(--glf-text-muted);
+    }
+
+    /* ACCORDION / EXPANDABLE DETAILS */
+    .detail-row {
+      display: flex;
+      border-bottom: 1px solid var(--glf-border);
+      padding: 10px 0;
+    }
+    .detail-key {
+      width: 220px;
+      font-weight: 700;
+      color: var(--glf-navy);
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .detail-val {
+      flex: 1;
+      color: var(--glf-text);
+      font-size: 13px;
+    }
+
+    /* TIMELINE */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 4px;
+      bottom: 4px;
+      width: 2px;
+      background: var(--glf-border);
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -24px;
+      top: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--glf-aqua);
+      border: 3px solid #FFF;
+      box-shadow: 0 0 0 1px var(--glf-border);
+    }
+    .timeline-time {
+      font-size: 11px;
+      color: var(--glf-text-muted);
+      font-weight: 600;
+    }
+    .timeline-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--glf-navy);
+      margin-top: 2px;
+    }
+
+    /* PRINT / PDF SIMULATION SHEET */
+    .pdf-preview-sheet {
+      background: #FFF;
+      border: 1px solid #CBD5E1;
+      box-shadow: var(--shadow-md);
+      padding: 40px;
+      margin: 20px 0;
+      border-radius: 4px;
+      font-family: 'Arial', sans-serif;
+    }
+    .pdf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--glf-navy);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .pdf-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--glf-navy);
+    }
+    .pdf-sig-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-top: 40px;
+      padding-top: 20px;
+    }
+    .pdf-sig-box {
+      border-top: 1px solid #000;
+      padding-top: 8px;
+      text-align: center;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- DEMO CONTROL BAR -->
+  <div class="demo-bar">
+    <div class="demo-bar-title">
+      <span>✦ GALÁPAGOS LIFE FUND (GLF)</span>
+      <span class="demo-bar-badge">MODO DEMOSTRACIÓN INSTITUCIONAL</span>
+    </div>
+    <div class="demo-controls">
+      <label for="demoRoleSelect">Cambiar Rol:</label>
+      <select id="demoRoleSelect" onchange="switchRole(this.value)">
+        <option value="dani">Dani Rueda (Proyectos Gobierno - M1 Admin)</option>
+        <option value="mabel">Mabel (Proyectos Gobierno - Especialista)</option>
+        <option value="carolina" selected>Carolina Astudillo (Cumplimiento - M2 Operativo)</option>
+        <option value="monica">Mónica (Dirección Ejecutiva - Admin General)</option>
+        <option value="usuario">Usuario Interno Ordinario (Solo Lectura M1)</option>
+        <option value="externo">Destinatario KYC (Vista Externa)</option>
+      </select>
+
+      <label for="demoScenarioSelect">Salto a Escenario:</label>
+      <select id="demoScenarioSelect" onchange="jumpScenario(this.value)">
+        <option value="">-- Seleccionar Escenario --</option>
+        <option value="M1-1">M1-1: Alta de proveedor & Control Duplicados</option>
+        <option value="M1-2">M1-2: Búsqueda comercial por Especialidad</option>
+        <option value="M1-5">M1-5: Gestión de Usuarios y Permisos</option>
+        <option value="KYC-1">KYC-1: Invitar a Proveedor Existente (Ruta 1)</option>
+        <option value="KYC-2">KYC-2: Alta Rápida e Invitación (Ruta 2)</option>
+        <option value="KYC-EXT">KYC-EXT: Formulario Externe (5 Rutas)</option>
+        <option value="KYC-INT">KYC-INT: Panel Screening & Prompt Copiar</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- APP HEADER -->
+  <header class="app-header">
+    <div class="header-content">
+      <div class="brand-group">
+        <a href="#" class="brand-logo-container" onclick="showModule('mod1'); return false;">
+          <img src="LogoGLF.png" alt="Galápagos Life Fund" style="height: 46px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
+          <div class="brand-text" style="margin-left: 6px;">
+            <h1 style="font-size: 18px; font-weight: 700; color: #FFF; letter-spacing: 0.5px; line-height: 1.1;">Galápagos Life Fund</h1>
+            <span style="font-size: 11px; color: var(--glf-aqua); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Directorio de Proveedores y KYC</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- NAVIGATION TABS -->
+      <nav class="nav-tabs" id="appNavTabs">
+        <a class="nav-tab active" id="tab-mod1" onclick="showModule('mod1')">
+          🏢 Base de Proveedores
+        </a>
+        <a class="nav-tab" id="tab-mod2" onclick="showModule('mod2')">
+          🛡️ KYC y Cumplimiento
+        </a>
+        <a class="nav-tab" id="tab-kyc-ext" onclick="showModule('kyc-ext')">
+          📝 Formulario KYC Unificado
+        </a>
+        <a class="nav-tab" id="tab-config" onclick="showModule('config')">
+          ⚙️ Usuarios y Accesos
+        </a>
+        <a class="nav-tab" id="tab-obs" onclick="showModule('obs')">
+          📋 Guía de Observaciones
+        </a>
+      </nav>
+
+      <!-- ACTIVE USER BADGE -->
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="userAvatar">CA</div>
+        <div class="user-details">
+          <div class="user-name" id="userName">Carolina Astudillo</div>
+          <div class="user-role" id="userRoleTitle">Oficial de Cumplimiento</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP SHELL -->
+  <main class="app-shell">
+
+    <!-- ========================================== -->
+    <!-- MÓDULO 1: BASE DE DATOS DE PROVEEDORES     -->
+    <!-- ========================================== -->
+    <section id="mod1-view" class="module-view active">
+      
+      <!-- KPI METRICS DASHBOARD -->
+      <div class="grid-4" style="margin-bottom: 24px;">
+        <div class="kpi-card" onclick="filterM1('todas')">
+          <div class="kpi-icon">📋</div>
+          <div>
+            <div class="kpi-val" id="kpiTotalFichas">48</div>
+            <div class="kpi-lbl">Fichas Comerciales Activas</div>
+          </div>
+        </div>
+        <div class="kpi-card" onclick="filterM1('proyectos')">
+          <div class="kpi-icon">🏛️</div>
+          <div>
+            <div class="kpi-val">36</div>
+            <div class="kpi-lbl">Proyectos de Gobierno</div>
+          </div>
+        </div>
+        <div class="kpi-card" onclick="filterM1('operacion')">
+          <div class="kpi-icon">🌊</div>
+          <div>
+            <div class="kpi-val">12</div>
+            <div class="kpi-lbl">Operación GLF (Consultores)</div>
+          </div>
+        </div>
+        <div class="kpi-card" onclick="filterM1('sin_correo')">
+          <div class="kpi-icon">⚠️</div>
+          <div>
+            <div class="kpi-val">3</div>
+            <div class="kpi-lbl">Fichas por Completar Correo</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN DIRECTORY CARD -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Directorio de Proveedores y Consultores</h2>
+            <p class="card-subtitle">Consulta comercial, especialidades, ubicación y paso autorizado a KYC</p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary btn-sm" onclick="openModal('modalEspecialidades')">🏷️ Gestor de Especialidades</button>
+            <button class="btn btn-secondary btn-sm" onclick="openModal('modalImportacion')">📥 Importación Ilustrativa</button>
+            <button class="btn btn-secondary btn-sm" onclick="openModal('modalExportacion')">📤 Exportar Resultados</button>
+            <button class="btn btn-primary" id="btnAltaProveedor" onclick="openModal('modalAltaProveedor')">+ Nuevo Proveedor</button>
+          </div>
+        </div>
+
+        <!-- SEARCH AND FILTER BAR -->
+        <div class="filter-bar">
+          <input type="text" id="m1SearchInput" class="form-control filter-input" placeholder="🔍 Buscar por RUC, nombre legal, bien, servicio, especialidad o ciudad..." onkeyup="renderM1Table()">
+          
+          <select id="m1FilterTipo" class="form-control" style="width: 160px;" onchange="renderM1Table()">
+            <option value="">Todos los Tipos</option>
+            <option value="natural">Persona Natural</option>
+            <option value="juridica">Persona Jurídica</option>
+          </select>
+
+          <select id="m1FilterAmbito" class="form-control" style="width: 190px;" onchange="renderM1Table()">
+            <option value="">Todos los Ámbitos</option>
+            <option value="Proyectos Gobierno">Proyectos de Gobierno</option>
+            <option value="Operación GLF">Operación GLF</option>
+          </select>
+
+          <select id="m1FilterUbicacion" class="form-control" style="width: 160px;" onchange="renderM1Table()">
+            <option value="">Todas las Islas / Ciudades</option>
+            <option value="Santa Cruz">Santa Cruz</option>
+            <option value="San Cristóbal">San Cristóbal</option>
+            <option value="Quito">Quito</option>
+            <option value="Guayaquil">Guayaquil</option>
+          </select>
+
+          <select id="m1FilterEstado" class="form-control" style="width: 140px;" onchange="renderM1Table()">
+            <option value="activo">Solo Activas</option>
+            <option value="inactivo">Inactivas</option>
+            <option value="todos">Todos los Estados</option>
+          </select>
+
+          <button class="btn btn-secondary btn-sm" onclick="resetM1Filters()">Limpiar Filtros</button>
+        </div>
+
+        <!-- DIRECTORY TABLE -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nombre Legal / Razón Social</th>
+                <th>Identificación</th>
+                <th>Especialidades / Bienes</th>
+                <th>Ubicación</th>
+                <th>Contacto Principal</th>
+                <th>Ámbito</th>
+                <th>Estado KYC</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="m1TableBody">
+              <!-- Rendered via Javascript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- MÓDULO 2: KYC Y CUMPLIMIENTO (INTERNO)     -->
+    <!-- ========================================== -->
+    <section id="mod2-view" class="module-view">
+      
+      <div class="notice-box">
+        <strong>🔒 Área Reservada de Cumplimiento:</strong> Los expedientes KYC, informes de screening y datos bancarios son confidenciales. Solo visibles para Cumplimiento (Carolina Astudillo) y Dirección Ejecutiva (Mónica).
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Bandeja de Expedientes KYC y screening</h2>
+            <p class="card-subtitle">Gestión de invitaciones, recepción de documentos, debida diligencia e informes</p>
+          </div>
+          <div>
+            <button class="btn btn-aqua btn-lg" id="btnNuevaRevisionKYC" onclick="openModal('modalNuevaRevisionKYC')">⚡ Nueva Revisión KYC</button>
+          </div>
+        </div>
+
+        <!-- TAB FILTERS FOR KYC CASES -->
+        <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--glf-border); padding-bottom: 12px; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="filterKYCCases('todos')">Todos (8)</button>
+          <button class="btn btn-secondary btn-sm" onclick="filterKYCCases('invitacion_vigente')">Invitación Vigente (2)</button>
+          <button class="btn btn-secondary btn-sm" onclick="filterKYCCases('en_revision')">En Revisión (2)</button>
+          <button class="btn btn-secondary btn-sm" onclick="filterKYCCases('requiere_subsanacion')">Subsanación (1)</button>
+          <button class="btn btn-secondary btn-sm" onclick="filterKYCCases('apto')">Apto (2)</button>
+          <button class="btn btn-secondary btn-sm" onclick="filterKYCCases('cerrado')">Cerrado (1)</button>
+        </div>
+
+        <!-- KYC CASES TABLE -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Código Caso</th>
+                <th>Contraparte / Proveedor</th>
+                <th>Vínculo / Ruta</th>
+                <th>Fecha Emisión</th>
+                <th>Estado Expediente</th>
+                <th>Vencimiento Enlace</th>
+                <th>Screening AI</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="kycTableBody">
+              <!-- Rendered via Javascript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VISTA EXTERNA: FORMULARIO KYC UNIFICADO    -->
+    <!-- ========================================== -->
+    <section id="kyc-ext-view" class="module-view">
+      
+      <div class="card" style="background: linear-gradient(135deg, var(--glf-navy), #004080); color: #FFF; padding: 30px;">
+        <span style="color: var(--glf-aqua); font-weight: 700; font-size: 12px; letter-spacing: 1px;">GLF · FORMULARIO WEB DE CUMPLIMIENTO</span>
+        <h1 style="font-size: 28px; margin-top: 4px;">Formulario KYC unificado</h1>
+        <p style="color: #CBD5E1; max-width: 800px; margin-top: 6px; font-size: 14px;">
+          Estimada contraparte: complete la información solicitada para el proceso de debida diligencia del Galápagos Life Fund. Este enlace es individual, seguro y válido por 7 días.
+        </p>
+      </div>
+
+      <!-- WIZARD STEPPER -->
+      <div class="stepper">
+        <div class="step-item active" id="step-1-indicator">
+          <div class="step-circle">1</div>
+          <div class="step-title">Vínculo</div>
+        </div>
+        <div class="step-item" id="step-2-indicator">
+          <div class="step-circle">2</div>
+          <div class="step-title">Identidad</div>
+        </div>
+        <div class="step-item" id="step-3-indicator">
+          <div class="step-circle">3</div>
+          <div class="step-title">Actividad</div>
+        </div>
+        <div class="step-item" id="step-4-indicator">
+          <div class="step-circle">4</div>
+          <div class="step-title">Propiedad / Control</div>
+        </div>
+        <div class="step-item" id="step-5-indicator">
+          <div class="step-circle">5</div>
+          <div class="step-title">Declaraciones</div>
+        </div>
+        <div class="step-item" id="step-6-indicator">
+          <div class="step-circle">6</div>
+          <div class="step-title">PDF & Anexos</div>
+        </div>
+      </div>
+
+      <!-- DYNAMIC FORM CONTAINER -->
+      <div class="card" id="kycExternalFormCard">
+        
+        <!-- STEP 1: VÍNCULO Y TIPO PERSONA -->
+        <div id="kycFormStep1" class="kyc-step-panel">
+          <h3 style="color: var(--glf-navy); margin-bottom: 16px;">1. Selección de Vínculo con el GLF</h3>
+          
+          <div class="form-group">
+            <label class="form-label">¿Cuál es su vínculo o relación contractual con el GLF? <span class="req">*</span></label>
+            <select id="extVinculoSelect" class="form-control" onchange="updateExternalFormRoute()">
+              <option value="proveedor_externo">Proveedor externo de bienes o servicios</option>
+              <option value="consultor_nacional">Consultor/a nacional</option>
+              <option value="consultor_internacional">Consultor/a internacional</option>
+              <option value="staff_glf">Personal / Staff GLF</option>
+              <option value="board_member">Miembro del Directorio / Board</option>
+            </select>
+          </div>
+
+          <div id="extTipoPersonaGroup" class="form-group">
+            <label class="form-label">¿Actúa a título personal o como organización / entidad? <span class="req">*</span></label>
+            <div class="choice-grid">
+              <div class="choice-card">
+                <input type="radio" name="extTipoPersona" id="tpNatural" value="natural" checked onchange="updateExternalFormRoute()">
+                <label class="choice-card-label" for="tpNatural">
+                  <div class="choice-card-title">Persona Natural</div>
+                  <div class="choice-card-desc">Individuo actuando a título propio o servicios profesionales independientes.</div>
+                </label>
+              </div>
+              <div class="choice-card">
+                <input type="radio" name="extTipoPersona" id="tpJuridica" value="juridica" onchange="updateExternalFormRoute()">
+                <label class="choice-card-label" for="tpJuridica">
+                  <div class="choice-card-title">Persona Jurídica</div>
+                  <div class="choice-card-desc">Empresa, compañía, ONG, sociedad o entidad legalmente constituida.</div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">País de Domicilio Principal o Registro Legal <span class="req">*</span></label>
+            <select id="extPaisSelect" class="form-control" onchange="updateExternalFormRoute()">
+              <option value="Ecuador">Ecuador</option>
+              <option value="Estados Unidos">Estados Unidos</option>
+              <option value="Colombia">Colombia</option>
+              <option value="Perú">Perú</option>
+              <option value="Otro">Otro país</option>
+            </select>
+          </div>
+
+          <div class="notice-box" id="extRouteSummary">
+            <strong>Ruta seleccionada:</strong> Proveedor externo · Persona Natural · Ecuador (Cédula o RUC natural).
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+            <button class="btn btn-primary btn-lg" onclick="nextKYCStep(2)">Continuar a Identidad →</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: IDENTIDAD Y CONTACTO -->
+        <div id="kycFormStep2" class="kyc-step-panel" style="display: none;">
+          <h3 style="color: var(--glf-navy); margin-bottom: 16px;">2. Datos de Identificación y Contacto</h3>
+          
+          <div class="grid-2">
+            <div class="form-group" id="extNameGroup">
+              <label class="form-label">Nombres y Apellidos Completos <span class="req">*</span></label>
+              <input type="text" id="extNombre" class="form-control" placeholder="Ej. Jaime Alberto Torres Ruiz">
+            </div>
+            <div class="form-group" id="extRazonGroup" style="display: none;">
+              <label class="form-label">Razón Social / Nombre Legal de la Entidad <span class="req">*</span></label>
+              <input type="text" id="extRazonSocial" class="form-control" placeholder="Ej. Soluciones Marítimas Galápagos S.A.">
+            </div>
+
+            <!-- ECUADOR NATURAL ID SELECTOR -->
+            <div class="form-group" id="extEcDocNaturalGroup">
+              <label class="form-label">Documento para la Contratación <span class="req">*</span></label>
+              <select id="extDocNaturalEc" class="form-control" onchange="toggleNaturalDocEc()">
+                <option value="cedula">Cédula de Identidad Ecuatoriana</option>
+                <option value="ruc_natural">RUC de Persona Natural (Facturará por el servicio)</option>
+              </select>
+              <span class="form-hint">Nota: Elegir RUC natural no convierte a la persona en empresa ni pide estatutos o socios.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" id="extNumIdLabel">Número de Cédula / RUC <span class="req">*</span></label>
+              <input type="text" id="extNumId" class="form-control" placeholder="2000148592">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Correo Electrónico de Contacto <span class="req">*</span></label>
+              <input type="email" id="extEmail" class="form-control" placeholder="contacto@ejemplo.com">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Teléfono / WhatsApp de Contacto <span class="req">*</span></label>
+              <input type="text" id="extTelefono" class="form-control" placeholder="+593 99 123 4567">
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+            <button class="btn btn-secondary" onclick="nextKYCStep(1)">← Volver</button>
+            <button class="btn btn-primary btn-lg" onclick="nextKYCStep(3)">Continuar a Actividad →</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: ACTIVIDAD Y ORGANIZACIÓN -->
+        <div id="kycFormStep3" class="kyc-step-panel" style="display: none;">
+          <h3 style="color: var(--glf-navy); margin-bottom: 16px;">3. Actividad Económica y Organización</h3>
+          
+          <div class="grid-2">
+            <div class="form-group full">
+              <label class="form-label">Descripción de Bienes, Servicios o Función en el GLF <span class="req">*</span></label>
+              <textarea id="extActividadDesc" class="form-control" rows="3" placeholder="Describa brevemente la naturaleza del servicio o función a desempeñar..."></textarea>
+            </div>
+
+            <div class="form-group" id="extRepLegalGroup" style="display: none;">
+              <label class="form-label">Nombre del Representante Legal</label>
+              <input type="text" class="form-control" placeholder="Ej. Carlos Mendoza Benítez">
+            </div>
+
+            <div class="form-group" id="extCargoStaffGroup" style="display: none;">
+              <label class="form-label">Cargo Previsto / Institución representada</label>
+              <input type="text" class="form-control" placeholder="Ej. Director de Proyectos Marinos">
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+            <button class="btn btn-secondary" onclick="nextKYCStep(2)">← Volver</button>
+            <button class="btn btn-primary btn-lg" onclick="nextKYCStep(4)">Continuar a Propiedad/Control →</button>
+          </div>
+        </div>
+
+        <!-- STEP 4: PROPIEDAD Y CONTROL (PERSONA JURÍDICA) -->
+        <div id="kycFormStep4" class="kyc-step-panel" style="display: none;">
+          <h3 style="color: var(--glf-navy); margin-bottom: 16px;">4. Identificación de Propiedad y Control (10% o más)</h3>
+          
+          <div id="sociosNotice" class="notice-box">
+            Instrucción: Ingrese la nómina de socios/accionistas que posean el <strong>10 % o más</strong> del capital social, así como directores principales.
+          </div>
+
+          <table class="data-table" style="margin-bottom: 16px;">
+            <thead>
+              <tr>
+                <th>Nombre / Razón Social</th>
+                <th>Calidad / Cargo</th>
+                <th>% Participación</th>
+                <th>País Nacionalidad</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="extSociosTableBody">
+              <tr>
+                <td><input type="text" class="form-control" value="Inversiones Galápagos Cía. Ltda."></td>
+                <td>
+                  <select class="form-control">
+                    <option>Socio / Accionista (10%+)</option>
+                    <option>Director / Administrador</option>
+                  </select>
+                </td>
+                <td><input type="text" class="form-control" value="60 %"></td>
+                <td><input type="text" class="form-control" value="Ecuador"></td>
+                <td><button class="btn btn-danger btn-sm">Eliminar</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="btn btn-secondary btn-sm" onclick="addSocioRow()">+ Añadir Accionista / Director</button>
+
+          <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+            <button class="btn btn-secondary" onclick="nextKYCStep(3)">← Volver</button>
+            <button class="btn btn-primary btn-lg" onclick="nextKYCStep(5)">Continuar a Declaraciones →</button>
+          </div>
+        </div>
+
+        <!-- STEP 5: VÍNCULOS Y DECLARACIONES PEP -->
+        <div id="kycFormStep5" class="kyc-step-panel" style="display: none;">
+          <h3 style="color: var(--glf-navy); margin-bottom: 16px;">5. Vínculos, Cónyuge y Declaración PEP</h3>
+          
+          <div class="form-group">
+            <label class="form-label">¿Es usted o algún familiar cercano una Persona Expuesta Políticamente (PEP)? <span class="req">*</span></label>
+            <div style="display: flex; gap: 20px; margin-top: 6px;">
+              <label><input type="radio" name="pepRadio" value="no" checked onchange="togglePepDetails()"> NO</label>
+              <label><input type="radio" name="pepRadio" value="si" onchange="togglePepDetails()"> SÍ</label>
+            </div>
+          </div>
+
+          <div id="pepDetailsBox" class="notice-box warn" style="display: none;">
+            <label class="form-label">Detalle del Cargo PEP, Institución y Período:</label>
+            <input type="text" class="form-control" placeholder="Ej. Viceministro de Ambiente (2022-2024)">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">¿Tiene algún familiar laborando en el Galápagos Life Fund? <span class="req">*</span></label>
+            <div style="display: flex; gap: 20px; margin-top: 6px;">
+              <label><input type="radio" name="famGlfRadio" value="no" checked> NO</label>
+              <label><input type="radio" name="famGlfRadio" value="si"> SÍ</label>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+            <button class="btn btn-secondary" onclick="nextKYCStep(4)">← Volver</button>
+            <button class="btn btn-primary btn-lg" onclick="nextKYCStep(6)">Continuar a Firma & Anexos →</button>
+          </div>
+        </div>
+
+        <!-- STEP 6: PDF PREVIEW & ANEXOS -->
+        <div id="kycFormStep6" class="kyc-step-panel" style="display: none;">
+          <h3 style="color: var(--glf-navy); margin-bottom: 16px;">6. Generación de Formulario PDF, Firma y Carga de Anexos</h3>
+          
+          <div class="notice-box">
+            <strong>Paso 1:</strong> Haga clic en "Generar PDF" para revisar y firmar su declaración. <br>
+            <strong>Paso 2:</strong> Suba el PDF firmado y los anexos exigidos a continuación.
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <button class="btn btn-accent btn-lg" onclick="generateSimulatedPDF()">📄 Generar y Descargar PDF del Formulario</button>
+          </div>
+
+          <div id="pdfPreviewContainer" style="display: none;">
+            <div class="pdf-preview-sheet">
+              <div class="pdf-header">
+                <div>
+                  <div class="pdf-title">GALÁPAGOS LIFE FUND (GLF)</div>
+                  <div style="font-size: 12px; color: #64748B;">Formulario Declaratorio Conozca a su Cliente / Contraparte (KYC)</div>
+                </div>
+                <div style="text-align: right; font-size: 11px;">
+                  Código: KYC-2026-004<br>
+                  Fecha: 01/10/2026
+                </div>
+              </div>
+
+              <div class="detail-row"><div class="detail-key">Declarante:</div><div class="detail-val" id="pdfDeclaranteName">Jaime Alberto Torres Ruiz</div></div>
+              <div class="detail-row"><div class="detail-key">Identificación:</div><div class="detail-val">Cédula 2000148592</div></div>
+              <div class="detail-row"><div class="detail-key">Vínculo GLF:</div><div class="detail-val">Proveedor externo de bienes o servicios</div></div>
+              <div class="detail-row"><div class="detail-key">Declaración PEP:</div><div class="detail-val">Declarado NO es PEP ni tiene familiares PEP</div></div>
+
+              <div class="pdf-sig-grid">
+                <div class="pdf-sig-box">
+                  <br>____________________________________<br>
+                  <strong>Firma del Declarante / Rep. Legal</strong><br>
+                  (Firma Electrónica Avanzada exigida)
+                </div>
+                <div class="pdf-sig-box">
+                  <br>____________________________________<br>
+                  <strong>Firma Oficial de Cumplimiento GLF</strong><br>
+                  (Reservado tras screening y cierre)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h4 style="color: var(--glf-navy); margin: 24px 0 12px;">Carga de Documentos Obligatorios</h4>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">PDF del Formulario KYC Firmado Electronicamente <span class="req">*</span></label>
+              <input type="file" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Copia de Cédula / Pasaporte del Declarante <span class="req">*</span></label>
+              <input type="file" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Certificado Bancario Oficial <span class="req">*</span></label>
+              <input type="file" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Comprobante de Domicilio o RUC</label>
+              <input type="file" class="form-control">
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+            <button class="btn btn-secondary" onclick="nextKYCStep(5)">← Volver</button>
+            <button class="btn btn-aqua btn-lg" onclick="submitKYCExternalForm()">🚀 Enviar Expediente Completo al GLF</button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- CONFIGURACIÓN: USUARIOS Y ACCESOS          -->
+    <!-- ========================================== -->
+    <section id="config-view" class="module-view">
+      
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Configuración → Usuarios y Accesos Internos</h2>
+            <p class="card-subtitle">Administración de permisos para la Base de Proveedores y Módulo KYC</p>
+          </div>
+          <div>
+            <button class="btn btn-primary" onclick="openModal('modalInvitarUsuario')">+ Invitar Nuevo Usuario</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Usuario / Correo</th>
+                <th>Nombre Completo</th>
+                <th>Rol Principal</th>
+                <th>Permiso Directorio (M1)</th>
+                <th>Acceso KYC (M2)</th>
+                <th>Estado Cuenta</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>dani.rueda@glf.org.ec</strong></td>
+                <td>Dani Rueda</td>
+                <td>Proyectos de Gobierno</td>
+                <td><span class="badge badge-active">Edición y Alta</span></td>
+                <td><span class="badge badge-neutral">Sin Acceso (Confidencial)</span></td>
+                <td><span class="badge badge-active">Activo</span></td>
+                <td><button class="btn btn-secondary btn-sm" onclick="openModal('modalEditarPermisos')">Editar Permisos</button></td>
+              </tr>
+              <tr>
+                <td><strong>mabel@glf.org.ec</strong></td>
+                <td>Mabel</td>
+                <td>Proyectos de Gobierno</td>
+                <td><span class="badge badge-active">Edición y Especialidades</span></td>
+                <td><span class="badge badge-neutral">Sin Acceso (Confidencial)</span></td>
+                <td><span class="badge badge-active">Activo</span></td>
+                <td><button class="btn btn-secondary btn-sm" onclick="openModal('modalEditarPermisos')">Editar Permisos</button></td>
+              </tr>
+              <tr>
+                <td><strong>carolina.astudillo@glf.org.ec</strong></td>
+                <td>Carolina Astudillo</td>
+                <td>Oficial de Cumplimiento</td>
+                <td><span class="badge badge-info">Consulta Proyectos / Alta Operación</span></td>
+                <td><span class="badge badge-active">Acceso Total Operativo</span></td>
+                <td><span class="badge badge-active">Activo</span></td>
+                <td><button class="btn btn-secondary btn-sm" onclick="openModal('modalEditarPermisos')">Editar Permisos</button></td>
+              </tr>
+              <tr>
+                <td><strong>monica@glf.org.ec</strong></td>
+                <td>Mónica</td>
+                <td>Dirección Ejecutiva</td>
+                <td><span class="badge badge-active">Administrador Total</span></td>
+                <td><span class="badge badge-active">Acceso Total Reservado</span></td>
+                <td><span class="badge badge-active">Activo</span></td>
+                <td><button class="btn btn-secondary btn-sm" onclick="openModal('modalEditarPermisos')">Editar Permisos</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- GUÍA DE OBSERVACIONES INSTITUCIONALES      -->
+    <!-- ========================================== -->
+    <section id="obs-view" class="module-view">
+      
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Guía de Observaciones Institucionales y Puntos Pendientes GLF</h2>
+            <p class="card-subtitle">Temas normativos y procedimentales para revisión por Dani, Mabel, Carolina y Mónica</p>
+          </div>
+        </div>
+
+        <div class="notice-box warn">
+          <strong>Nota institucional:</strong> Esta guía recopila las decisiones de negocio que deben formalizarse antes del paso a producción.
+        </div>
+
+        <div class="grid-2">
+          <div class="card" style="background: #F8FAFC;">
+            <h3 style="color: var(--glf-navy); margin-bottom: 12px;">🏢 Módulo 1 — Base de Proveedores</h3>
+            <ul style="padding-left: 20px; line-height: 1.8;">
+              <li><strong>Migración inicial de datos:</strong> Confirmar si el archivo Excel de 17 registros se completará manualmente o mediante plantilla CSV oficial.</li>
+              <li><strong>Transferencia de proveedores entre ámbitos:</strong> Definir la regla cuando un proveedor de la Operación GLF pasa a cotizar en Proyectos de Gobierno.</li>
+              <li><strong>Frecuencia de actualización de contactos:</strong> Determinar si se exigirá reconfirmación anual de teléfono/correo.</li>
+              <li><strong>Exportación comercial:</strong> Validar si la exportación a Excel estará restringida solo a administradores.</li>
+            </ul>
+          </div>
+
+          <div class="card" style="background: #F8FAFC;">
+            <h3 style="color: var(--glf-navy); margin-bottom: 12px;">🛡️ Módulo 2 — KYC y Cumplimiento</h3>
+            <ul style="padding-left: 20px; line-height: 1.8;">
+              <li><strong>Vigencia de las evaluaciones KYC:</strong> Aprobar si la habilitación vence a los 12 o 24 meses.</li>
+              <li><strong>Exigencia del bloque "Pagador":</strong> Confirmar en qué casos de consultoría internacional aplica registrar la entidad pagadora.</li>
+              <li><strong>Firma Electrónica Avanzada:</strong> Validar si la herramienta interna del GLF soporta la doble firma en el mismo documento PDF.</li>
+              <li><strong>Resguardo en Google Drive:</strong> Establecer la estructura de carpetas restringidas para el respaldo de expedientes cerrados.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODALES DE INTERACCIÓN                     -->
+  <!-- ========================================== -->
+
+  <!-- MODAL: ALTA Y EDICIÓN DE PROVEEDOR (M1) -->
+  <div class="modal-overlay" id="modalAltaProveedor">
+    <div class="modal-box wide">
+      <div class="modal-header">
+        <div class="modal-title">Alta / Edición Guiada de Proveedor</div>
+        <button class="modal-close" onclick="closeModal('modalAltaProveedor')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="notice-box">
+          Control automático de duplicados activo. Al escribir el número de RUC o cédula se verificarán coincidencias en la base compartida.
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Tipo de Persona <span class="req">*</span></label>
+            <select id="newTipoPersona" class="form-control">
+              <option value="natural">Persona Natural</option>
+              <option value="juridica">Persona Jurídica (Empresa)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">País de Identificación <span class="req">*</span></label>
+            <select id="newPais" class="form-control">
+              <option value="Ecuador">Ecuador</option>
+              <option value="Otro">Otro País</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">RUC / Cédula / Tax ID <span class="req">*</span></label>
+            <input type="text" id="newDocNum" class="form-control" placeholder="Ingrese número..." oninput="checkDuplicateTrigger(this.value)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nombre Legal / Razón Social <span class="req">*</span></label>
+            <input type="text" id="newNombreLegal" class="form-control" placeholder="Nombre completo o legal">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Especialidades (Separadas por coma) <span class="req">*</span></label>
+            <input type="text" id="newEspecialidades" class="form-control" placeholder="Ej. Climatización, Transporte Marítimo">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ubicación / Isla / Ciudad <span class="req">*</span></label>
+            <select id="newUbicacion" class="form-control">
+              <option value="Santa Cruz">Santa Cruz</option>
+              <option value="San Cristóbal">San Cristóbal</option>
+              <option value="Isabela">Isabela</option>
+              <option value="Quito">Quito</option>
+              <option value="Guayaquil">Guayaquil</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Correo Comercial de Contacto <span class="req">*</span></label>
+            <input type="email" id="newEmail" class="form-control" placeholder="correo@proveedor.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Teléfono Comercial <span class="req">*</span></label>
+            <input type="text" id="newTelefono" class="form-control" placeholder="+593 99...">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalAltaProveedor')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveNewProvider()">Guardar Ficha Comercial</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONTROL DE DUPLICADOS ADVERTENCIA -->
+  <div class="modal-overlay" id="modalDuplicados">
+    <div class="modal-box">
+      <div class="modal-header" style="background: #FEF3C7;">
+        <div class="modal-title" style="color: #92400E;">⚠️ Posible Coincidencia o Duplicado Detectado</div>
+        <button class="modal-close" onclick="closeModal('modalDuplicados')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 12px;">Se ha encontrado una ficha existente con una identificación o nombre similar en la base compartida:</p>
+        <div style="background: #FFF; border: 1px solid #F59E0B; padding: 14px; border-radius: 8px; margin-bottom: 16px;">
+          <strong>Nombre:</strong> Servimar Galápagos Cía. Ltda.<br>
+          <strong>RUC:</strong> 2090014859001<br>
+          <strong>Ámbito actual:</strong> Proyectos de Gobierno<br>
+          <strong>Estado KYC:</strong> Habilitado (Apto)
+        </div>
+        <p>¿Qué desea hacer?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalDuplicados'); openModal('modalFichaComercial');">Abrir Ficha Existente</button>
+        <button class="btn btn-primary" onclick="closeModal('modalDuplicados')">Continuar (Es un Proveedor Distinto)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVA REVISIÓN KYC (DOS RUTAS) -->
+  <div class="modal-overlay" id="modalNuevaRevisionKYC">
+    <div class="modal-box wide">
+      <div class="modal-header">
+        <div class="modal-title">Crear Nueva Solicitud e Invitación KYC</div>
+        <button class="modal-close" onclick="closeModal('modalNuevaRevisionKYC')">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="notice-box">
+          <strong>Paso OBLIGATORIO:</strong> Busque primero en la base compartida para evitar registros duplicados.
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Buscar Proveedor o Consultor en la Base Compartida:</label>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="kycSearchInput" class="form-control" placeholder="Escriba RUC, Cédula o Nombre..." onkeyup="searchKYCSharedBase()">
+            <button class="btn btn-primary" onclick="searchKYCSharedBase()">Buscar</button>
+          </div>
+        </div>
+
+        <!-- SEARCH RESULTS FOR KYC INVITATION -->
+        <div id="kycSearchResults" style="margin: 20px 0;">
+          <!-- Javascript renders matches here -->
+        </div>
+
+        <div id="kycNoResultsBox" class="notice-box warn" style="display: none; align-items: center; justify-content: space-between;">
+          <div>
+            <strong>Sin coincidencias en la base compartida.</strong><br>
+            Puede registrar rápidamente la contraparte y enviarle la invitación KYC.
+          </div>
+          <button class="btn btn-aqua" onclick="openAltaRapidaCarolina()">+ Crear Registro e Invitar a KYC</button>
+        </div>
+
+        <!-- INVITATION PREVIEW PANEL (WHEN SELECTED) -->
+        <div id="kycInvitationPrepBox" class="card" style="display: none; background: #F8FAFC; margin-top: 20px;">
+          <h4 style="color: var(--glf-navy); margin-bottom: 12px;">Preparar Enlace e Invitación Institucional</h4>
+          <div class="grid-2">
+            <div><strong>Destinatario:</strong> <span id="prepDestNombre">Servicios Ambientales Insulares</span></div>
+            <div><strong>Correo Confirmado:</strong> <input type="email" id="prepDestEmail" class="form-control" value="contacto@ambientales.org"></div>
+            <div><strong>Vínculo Previsto:</strong> Consultor Nacional</div>
+            <div><strong>Vencimiento Enlace:</strong> 7 días (08/10/2026)</div>
+          </div>
+          
+          <div style="margin-top: 16px;">
+            <label class="form-label">Vista Previa del Mensaje Institucional:</label>
+            <div style="background: #FFF; border: 1px solid var(--glf-border); padding: 12px; border-radius: 6px; font-size: 12px;">
+              Estimado(a) contraparte: Se le invita a completar el Formulario KYC Unificado del Galápagos Life Fund en el siguiente enlace privado: 
+              <br><a href="#" onclick="return false;">https://kyc.galapagoslifefund.org.ec/invite/token-998234-x7</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalNuevaRevisionKYC')">Cancelar</button>
+        <button class="btn btn-aqua" id="btnSimularEnviarKYC" style="display: none;" onclick="sendSimulatedKYCInvite()">📧 Enviar Invitación KYC (Simulado)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PROMPT MAESTRO DE SCREENING -->
+  <div class="modal-overlay" id="modalPromptScreening">
+    <div class="modal-box wide">
+      <div class="modal-header">
+        <div class="modal-title">🤖 Prompt Maestro para Screening en Antigravity</div>
+        <button class="modal-close" onclick="closeModal('modalPromptScreening')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="notice-box">
+          Copie este prompt generado y péguelo en Antigravity para ejecutar la búsqueda estructurada de antecedentes, listas de sanciones (OFAC, ONU, Banco Mundial) y prensa adversa.
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Prompt Estructurado de Screening:</label>
+          <textarea id="screeningPromptText" class="form-control" rows="12" readonly style="font-family: monospace; font-size: 12px; background: #001938; color: #00C1DE;">
+PROMPT MAESTRO DE SCREENING KYC Y DEBIDA DILIGENCIA - GLF
+
+Sujeto de investigación: Jaime Alberto Torres Ruiz
+Identificación / RUC: 2000148592
+País de origen / domicilio: Ecuador (Galápagos)
+Calidad: Proveedor de Servicios Marítimos / Consultor
+
+Fuentes a consultar de manera obligatoria:
+1. Lista OFAC SDN y Listas de Sanciones de EEUU (Treasury)
+2. Listas de Sanciones del Consejo de Seguridad de la ONU
+3. Lista de Empresas Inhabilitadas del Banco Mundial y BID
+4. Portal de Contraloría General del Estado de Ecuador (Incapacidades)
+5. Búsqueda de Prensa Adversa (Google News / Fuentes locales)
+
+Instrucciones de entrega:
+- Verificar coincidencias exactas y homónimos.
+- Descartar falsos positivos justificando fecha de nacimiento / documento.
+- Emitir tabla de hallazgos con URL directa y evidencia recomendada.
+          </textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalPromptScreening')">Cerrar</button>
+        <button class="btn btn-aqua" onclick="copyScreeningPrompt()">📋 Copiar Prompt al Portapapeles</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GESTOR DE ESPECIALIDADES -->
+  <div class="modal-overlay" id="modalEspecialidades">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Gestor de Especialidades de Proveedores</div>
+        <button class="modal-close" onclick="closeModal('modalEspecialidades')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 12px;">Mabel puede añadir especialidades directamente sin requerir cola de aprobación previa.</p>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+          <input type="text" id="newSpecInput" class="form-control" placeholder="Nueva especialidad o término...">
+          <button class="btn btn-primary" onclick="addEspecialidadDirecta()">+ Añadir</button>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="specChipsContainer">
+          <span class="badge badge-info">Climatización / Aire Acondicionado</span>
+          <span class="badge badge-info">Transporte Marítimo Interislas</span>
+          <span class="badge badge-info">Consultoría Ambiental</span>
+          <span class="badge badge-info">Mantenimiento de Motores Fuera de Borda</span>
+          <span class="badge badge-info">Suministros de Oficina</span>
+          <span class="badge badge-info">Auditoría Financiera</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalEspecialidades')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: IMPORTACIÓN Y EXPORTACIÓN ILUSTRATIVA -->
+  <div class="modal-overlay" id="modalImportacion">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Importación Asistida de Fichas (Ilustrativa)</div>
+        <button class="modal-close" onclick="closeModal('modalImportacion')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="notice-box warn">
+          <strong>Por Validar:</strong> La carga masiva vía CSV/XLSX es una pantalla de demostración para evaluar la estructura de mapeo. Los archivos de muestra actuales no constituyen una migración oficial aprobada.
+        </div>
+        <div class="form-group">
+          <label class="form-label">Seleccionar archivo Excel / CSV de proveedores:</label>
+          <input type="file" class="form-control">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalImportacion')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalExportacion">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Exportación Comercial Autorizada</div>
+        <button class="modal-close" onclick="closeModal('modalExportacion')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="notice-box">
+          La descarga exportará las fichas comerciales filtradas. <strong>No incluye datos bancarios ni respuestas KYC reservadas.</strong>
+        </div>
+        <p>Formato de exportación: Excel (.xlsx) con registro de auditoría del usuario que realizó la descarga.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalExportacion')">Cancelar</button>
+        <button class="btn btn-primary" onclick="alert('Exportación comercial generada con éxito (Simulado).'); closeModal('modalExportacion');">Descargar Excel Comercial</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // GLOBAL STATE & DATA
+    let currentRole = 'carolina';
+    let currentModule = 'mod1';
+    
+    // MOCK PROVIDERS DATABASE (MÓDULO 1)
+    let providersData = [
+      { id: 'PROV-001', nombre: 'Servimar Galápagos Cía. Ltda.', doc: '2090014859001', tipo: 'juridica', especialidades: 'Transporte Marítimo, Climatización', ubicacion: 'Santa Cruz', contacto: 'Roberto Andrade (Gerente)', email: 'randrade@servimar.ec', ambito: 'Proyectos Gobierno', estado: 'activo', kycStatus: 'apto' },
+      { id: 'PROV-002', nombre: 'Jaime Alberto Torres Ruiz', doc: '2000148592', tipo: 'natural', especialidades: 'Mantenimiento de Motores, Mecánica', ubicacion: 'San Cristóbal', contacto: 'Jaime Torres', email: 'jtorres@sancresto.net', ambito: 'Proyectos Gobierno', estado: 'activo', kycStatus: 'solicitado' },
+      { id: 'PROV-003', nombre: 'EcoSoluciones Insulares S.A.', doc: '1792348592001', tipo: 'juridica', especialidades: 'Consultoría Ambiental, Manejo de Residuos', ubicacion: 'Quito', contacto: 'Elena Morales', email: 'contacto@ecosol.org', ambito: 'Operación GLF', estado: 'activo', kycStatus: 'en_revision' },
+      { id: 'PROV-004', nombre: 'Carlos Eduardo Benítez', doc: '0918234751', tipo: 'natural', especialidades: 'Auditoría Financiera, Consultoría', ubicacion: 'Guayaquil', contacto: 'Carlos Benítez', email: 'carlos.benitez@audit.ec', ambito: 'Operación GLF', estado: 'activo', kycStatus: 'sin_kyc' },
+      { id: 'PROV-005', nombre: 'TecnoMar Isabela Cía. Ltda.', doc: '2091234871001', tipo: 'juridica', especialidades: 'Suministros de Oficina, Equipos Navegación', ubicacion: 'Isabela', contacto: 'María Viteri', email: 'mviteri@tecnomar.ec', ambito: 'Proyectos Gobierno', estado: 'inactivo', kycStatus: 'sin_kyc' }
+    ];
+
+    // MOCK KYC CASES (MÓDULO 2)
+    let kycCasesData = [
+      { code: 'KYC-2026-001', provider: 'Servimar Galápagos Cía. Ltda.', ruta: 'Proveedor Jurídico Nac.', fecha: '20/09/2026', estado: 'apto', vencimiento: 'Finalizado', screening: 'Limpio (0 Hallazgos)' },
+      { code: 'KYC-2026-002', provider: 'Jaime Alberto Torres Ruiz', ruta: 'Proveedor Natural Nac.', fecha: '28/09/2026', estado: 'invitacion_vigente', vencimiento: 'En 5 días', screening: 'Pendiente Envío' },
+      { code: 'KYC-2026-003', provider: 'EcoSoluciones Insulares S.A.', ruta: 'Consultor Jurídico GLF', fecha: '25/09/2026', estado: 'en_revision', vencimiento: 'Recibido', screening: 'Posible Homónimo OFAC' },
+      { code: 'KYC-2026-004', provider: 'Dra. Sofia Moncayo (Staff)', ruta: 'Personal / Staff GLF', fecha: '29/09/2026', estado: 'requiere_subsanacion', vencimiento: 'Subsanando', screening: 'Limpio' }
+    ];
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      renderM1Table();
+      renderKYCTable();
+      updateRolePermissionsUI();
+    });
+
+    // NAVIGATION SYSTEM
+    function showModule(modId) {
+      currentModule = modId;
+      document.querySelectorAll('.module-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+      
+      const targetView = document.getElementById(modId + '-view');
+      const targetTab = document.getElementById('tab-' + modId);
+      
+      if (targetView) targetView.classList.add('active');
+      if (targetTab) targetTab.classList.add('active');
+    }
+
+    // ROLE SWITCHER LOGIC
+    function switchRole(roleKey) {
+      currentRole = roleKey;
+      const avatar = document.getElementById('userAvatar');
+      const name = document.getElementById('userName');
+      const title = document.getElementById('userRoleTitle');
+
+      if (roleKey === 'dani') {
+        avatar.innerText = 'DR';
+        name.innerText = 'Dani Rueda';
+        title.innerText = 'Proyectos de Gobierno (Admin M1)';
+      } else if (roleKey === 'mabel') {
+        avatar.innerText = 'MB';
+        name.innerText = 'Mabel';
+        title.innerText = 'Proyectos de Gobierno (Especialista)';
+      } else if (roleKey === 'carolina') {
+        avatar.innerText = 'CA';
+        name.innerText = 'Carolina Astudillo';
+        title.innerText = 'Oficial de Cumplimiento (M2 Operativo)';
+      } else if (roleKey === 'monica') {
+        avatar.innerText = 'MN';
+        name.innerText = 'Mónica';
+        title.innerText = 'Dirección Ejecutiva (Admin General)';
+      } else if (roleKey === 'usuario') {
+        avatar.innerText = 'UI';
+        name.innerText = 'Usuario Consultor';
+        title.innerText = 'Usuario Interno Ordinario';
+      } else if (roleKey === 'externo') {
+        avatar.innerText = 'EX';
+        name.innerText = 'Destinatario KYC';
+        title.innerText = 'Proveedor / Contraparte Externa';
+        showModule('kyc-ext');
+      }
+      updateRolePermissionsUI();
+    }
+
+    function updateRolePermissionsUI() {
+      const btnAlta = document.getElementById('btnAltaProveedor');
+      const btnRevisionKYC = document.getElementById('btnNuevaRevisionKYC');
+
+      if (currentRole === 'usuario') {
+        if (btnAlta) btnAlta.style.display = 'none';
+        if (btnRevisionKYC) btnRevisionKYC.style.display = 'none';
+      } else {
+        if (btnAlta) btnAlta.style.display = 'inline-flex';
+        if (btnRevisionKYC) btnRevisionKYC.style.display = 'inline-flex';
+      }
+    }
+
+    function jumpScenario(scen) {
+      if (!scen) return;
+      if (scen === 'M1-1') {
+        showModule('mod1');
+        openModal('modalAltaProveedor');
+      } else if (scen === 'M1-2') {
+        showModule('mod1');
+        document.getElementById('m1SearchInput').value = 'Climatización';
+        renderM1Table();
+      } else if (scen === 'M1-5') {
+        showModule('config');
+      } else if (scen === 'KYC-1') {
+        showModule('mod2');
+        openModal('modalNuevaRevisionKYC');
+      } else if (scen === 'KYC-2') {
+        showModule('mod2');
+        openModal('modalNuevaRevisionKYC');
+        document.getElementById('kycNoResultsBox').style.display = 'flex';
+      } else if (scen === 'KYC-EXT') {
+        showModule('kyc-ext');
+      } else if (scen === 'KYC-INT') {
+        showModule('mod2');
+        openModal('modalPromptScreening');
+      }
+    }
+
+    // RENDER M1 TABLE
+    function renderM1Table() {
+      const tbody = document.getElementById('m1TableBody');
+      const search = document.getElementById('m1SearchInput').value.toLowerCase();
+      const tipo = document.getElementById('m1FilterTipo').value;
+      const ambito = document.getElementById('m1FilterAmbito').value;
+      const ubi = document.getElementById('m1FilterUbicacion').value;
+      const estado = document.getElementById('m1FilterEstado').value;
+
+      tbody.innerHTML = '';
+
+      let filtered = providersData.filter(item => {
+        if (search && !item.nombre.toLowerCase().includes(search) && !item.doc.includes(search) && !item.especialidades.toLowerCase().includes(search)) return false;
+        if (tipo && item.tipo !== tipo) return false;
+        if (ambito && item.ambito !== ambito) return false;
+        if (ubi && item.ubicacion !== ubi) return false;
+        if (estado !== 'todos' && item.estado !== estado) return false;
+        return true;
+      });
+
+      filtered.forEach(p => {
+        let kycBadge = '<span class="badge badge-neutral">Sin KYC</span>';
+        if (p.kycStatus === 'apto') kycBadge = '<span class="badge badge-active">KYC Habilitado</span>';
+        if (p.kycStatus === 'solicitado') kycBadge = '<span class="badge badge-pending">KYC Solicitado</span>';
+        if (p.kycStatus === 'en_revision') kycBadge = '<span class="badge badge-info">KYC En Revisión</span>';
+
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${p.id}</strong></td>
+          <td>
+            <strong>${p.nombre}</strong>
+            <div style="font-size:11px; color:#64748B;">Tipo: ${p.tipo === 'natural' ? 'Persona Natural' : 'Persona Jurídica'}</div>
+          </td>
+          <td>${p.doc}</td>
+          <td><span class="badge badge-info">${p.especialidades}</span></td>
+          <td>${p.ubicacion}</td>
+          <td>${p.contacto}<br><span style="font-size:11px; color:#64748B;">${p.email}</span></td>
+          <td><span class="badge badge-neutral">${p.ambito}</span></td>
+          <td>${kycBadge}</td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="solicitarKYCDesdeM1('${p.id}')">⚡ KYC</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterM1(type) {
+      showModule('mod1');
+      if (type === 'proyectos') {
+        document.getElementById('m1FilterAmbito').value = 'Proyectos Gobierno';
+      } else if (type === 'operacion') {
+        document.getElementById('m1FilterAmbito').value = 'Operación GLF';
+      } else {
+        resetM1Filters();
+      }
+      renderM1Table();
+    }
+
+    function resetM1Filters() {
+      document.getElementById('m1SearchInput').value = '';
+      document.getElementById('m1FilterTipo').value = '';
+      document.getElementById('m1FilterAmbito').value = '';
+      document.getElementById('m1FilterUbicacion').value = '';
+      document.getElementById('m1FilterEstado').value = 'activo';
+      renderM1Table();
+    }
+
+    // RENDER M2 KYC TABLE
+    function renderKYCTable() {
+      const tbody = document.getElementById('kycTableBody');
+      tbody.innerHTML = '';
+
+      kycCasesData.forEach(c => {
+        let stBadge = '<span class="badge badge-pending">' + c.estado + '</span>';
+        if (c.estado === 'apto') stBadge = '<span class="badge badge-active">Apto (Cerrado)</span>';
+        if (c.estado === 'en_revision') stBadge = '<span class="badge badge-info">En Revisión</span>';
+        if (c.estado === 'invitacion_vigente') stBadge = '<span class="badge badge-pending">Invitación Vigente</span>';
+
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${c.code}</strong></td>
+          <td><strong>${c.provider}</strong></td>
+          <td>${c.ruta}</td>
+          <td>${c.fecha}</td>
+          <td>${stBadge}</td>
+          <td>${c.vencimiento}</td>
+          <td><span class="badge badge-neutral">${c.screening}</span></td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="openModal('modalPromptScreening')">🤖 Prompt</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterKYCCases(st) {
+      // Mock filter
+      alert('Filtrando expedientes KYC por estado: ' + st);
+    }
+
+    // MODAL OPEN / CLOSE
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('active');
+    }
+
+    // HIGH-FIDELITY ACTIONS
+    function checkDuplicateTrigger(val) {
+      if (val && val.length > 7) {
+        openModal('modalDuplicados');
+      }
+    }
+
+    function saveNewProvider() {
+      const nom = document.getElementById('newNombreLegal').value || 'Nuevo Proveedor S.A.';
+      const doc = document.getElementById('newDocNum').value || '2090019999001';
+      const spec = document.getElementById('newEspecialidades').value || 'General';
+      const ubi = document.getElementById('newUbicacion').value;
+      const email = document.getElementById('newEmail').value || 'contacto@nuevo.ec';
+
+      providersData.unshift({
+        id: 'PROV-00' + (providersData.length + 1),
+        nombre: nom,
+        doc: doc,
+        tipo: 'juridica',
+        especialidades: spec,
+        ubicacion: ubi,
+        contacto: 'Representante Legal',
+        email: email,
+        ambito: 'Proyectos Gobierno',
+        estado: 'activo',
+        kycStatus: 'sin_kyc'
+      });
+
+      closeModal('modalAltaProveedor');
+      renderM1Table();
+      alert('Ficha comercial guardada con éxito.');
+    }
+
+    function solicitarKYCDesdeM1(provId) {
+      const prov = providersData.find(p => p.id === provId);
+      if (prov) {
+        prov.kycStatus = 'solicitado';
+        renderM1Table();
+        showModule('mod2');
+        openModal('modalNuevaRevisionKYC');
+        document.getElementById('prepDestNombre').innerText = prov.nombre;
+        document.getElementById('prepDestEmail').value = prov.email;
+        document.getElementById('kycInvitationPrepBox').style.display = 'block';
+        document.getElementById('btnSimularEnviarKYC').style.display = 'inline-flex';
+      }
+    }
+
+    function searchKYCSharedBase() {
+      const val = document.getElementById('kycSearchInput').value;
+      const resContainer = document.getElementById('kycSearchResults');
+      const noRes = document.getElementById('kycNoResultsBox');
+
+      if (val.length > 2) {
+        resContainer.innerHTML = `
+          <div style="background:#FFF; border:1px solid var(--glf-border); padding:14px; border-radius:8px; display:flex; justify-space-between; align-items:center;">
+            <div>
+              <strong>Servimar Galápagos Cía. Ltda.</strong> (RUC 2090014859001)<br>
+              <span style="font-size:12px; color:#64748B;">Contacto: randrade@servimar.ec · Ámbito: Proyectos Gobierno</span>
+            </div>
+            <button class="btn btn-aqua btn-sm" onclick="selectProviderForKYC('Servimar Galápagos Cía. Ltda.', 'randrade@servimar.ec')">Seleccionar Ficha Existente</button>
+          </div>
+        `;
+        noRes.style.display = 'none';
+      } else {
+        resContainer.innerHTML = '';
+        noRes.style.display = 'flex';
+      }
+    }
+
+    function selectProviderForKYC(nombre, email) {
+      document.getElementById('prepDestNombre').innerText = nombre;
+      document.getElementById('prepDestEmail').value = email;
+      document.getElementById('kycInvitationPrepBox').style.display = 'block';
+      document.getElementById('btnSimularEnviarKYC').style.display = 'inline-flex';
+    }
+
+    function openAltaRapidaCarolina() {
+      alert('Alta rápida por Carolina: Registro provisional creado en la base compartida con estado "Datos comerciales pendientes".');
+      selectProviderForKYC('Nueva Contraparte Consultoría GLF', 'consultor@glf-op.org');
+    }
+
+    function sendSimulatedKYCInvite() {
+      closeModal('modalNuevaRevisionKYC');
+      kycCasesData.unshift({
+        code: 'KYC-2026-005',
+        provider: document.getElementById('prepDestNombre').innerText,
+        ruta: 'Consultor / Proveedor',
+        fecha: '01/10/2026',
+        estado: 'invitacion_vigente',
+        vencimiento: '7 días',
+        screening: 'Pendiente Recepción'
+      });
+      renderKYCTable();
+      alert('✅ Invitación KYC enviada exitosamente. Enlace privado de 7 días generado.');
+    }
+
+    function copyScreeningPrompt() {
+      const txt = document.getElementById('screeningPromptText');
+      navigator.clipboard.writeText(txt.value);
+      alert('Prompt copiado al portapapeles. Puede pegarlo en Antigravity.');
+    }
+
+    function addEspecialidadDirecta() {
+      const val = document.getElementById('newSpecInput').value;
+      if (val) {
+        const chip = document.createElement('span');
+        chip.className = 'badge badge-info';
+        chip.innerText = val;
+        document.getElementById('specChipsContainer').appendChild(chip);
+        document.getElementById('newSpecInput').value = '';
+      }
+    }
+
+    // EXTERNAL KYC FORM WIZARD LOGIC
+    function updateExternalFormRoute() {
+      const vinculo = document.getElementById('extVinculoSelect').value;
+      const isNatural = document.getElementById('tpNatural').checked;
+      const pais = document.getElementById('extPaisSelect').value;
+      const summary = document.getElementById('extRouteSummary');
+
+      let str = `Ruta actual: ${vinculo} · ${isNatural ? 'Persona Natural' : 'Persona Jurídica'} · ${pais}.`;
+      summary.innerHTML = `<strong>Ruta Dinámica Configurada:</strong> ${str}`;
+
+      // Toggle UI elements
+      document.getElementById('extRazonGroup').style.display = isNatural ? 'none' : 'block';
+      document.getElementById('extNameGroup').style.display = isNatural ? 'block' : 'none';
+      document.getElementById('extRepLegalGroup').style.display = isNatural ? 'none' : 'block';
+      document.getElementById('sociosNotice').style.display = isNatural ? 'none' : 'block';
+    }
+
+    function nextKYCStep(stepNum) {
+      for (let i = 1; i <= 6; i++) {
+        document.getElementById('kycFormStep' + i).style.display = (i === stepNum) ? 'block' : 'none';
+        const ind = document.getElementById('step-' + i + '-indicator');
+        if (i < stepNum) {
+          ind.className = 'step-item completed';
+        } else if (i === stepNum) {
+          ind.className = 'step-item active';
+        } else {
+          ind.className = 'step-item';
+        }
+      }
+    }
+
+    function toggleNaturalDocEc() {
+      const val = document.getElementById('extDocNaturalEc').value;
+      const lbl = document.getElementById('extNumIdLabel');
+      lbl.innerHTML = (val === 'cedula') ? 'Número de Cédula Ecuatoriana <span class="req">*</span>' : 'RUC de Persona Natural (13 dígitos) <span class="req">*</span>';
+    }
+
+    function togglePepDetails() {
+      const isPep = document.querySelector('input[name="pepRadio"]:checked').value === 'si';
+      document.getElementById('pepDetailsBox').style.display = isPep ? 'block' : 'none';
+    }
+
+    function generateSimulatedPDF() {
+      document.getElementById('pdfPreviewContainer').style.display = 'block';
+      const nom = document.getElementById('extNombre').value || 'Jaime Alberto Torres Ruiz';
+      document.getElementById('pdfDeclaranteName').innerText = nom;
+    }
+
+    function submitKYCExternalForm() {
+      alert('✅ Formulario KYC enviado con éxito. El expediente queda bloqueado para edición y notifica automáticamente a Oficial de Cumplimiento.');
+    }
+  </script>
+</body>
+</html>
