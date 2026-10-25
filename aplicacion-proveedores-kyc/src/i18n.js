@@ -8,3 +8,30 @@ Object.assign(messages.es,{app:'Operaciones, KYC y Archivo',previous:'Anterior',
 Object.assign(messages.en,{app:'Operations, KYC and Records',previous:'Previous',next:'Next',nationalId:'National ID',country_custom:'Country code (two letters)',trial:'PILOT VERSION · Use fictional data only during testing.',footer:'Operations, KYC and Records · First stage: Suppliers'});
 Object.assign(messages.es,{signinHelp:'Use el mismo correo y contraseña de su cuenta interna de Salvaguardas GLF.',credentials:'El correo o la contraseña no coinciden con su cuenta GLF.',noProfile:'Su cuenta GLF es válida, pero aún no tiene acceso asignado a Proveedores. Solicite su habilitación.',authConnection:'No se pudo conectar o validar el acceso de Proveedores. Esto no indica que su contraseña sea incorrecta. Inténtelo nuevamente; si continúa, comuníquelo a la administración.',accountInactive:'Su cuenta GLF o esta sesión está desactivada o ha caducado. Contacte a la administración.',emailUnconfirmed:'Confirme primero el correo de su cuenta GLF.',authRateLimit:'Se realizaron demasiados intentos. Espere unos minutos antes de volver a ingresar.',mfaTitle:'Verificación de seguridad',mfaHelp:'Ingrese el código de seis dígitos de la aplicación autenticadora que ya utiliza con su cuenta GLF.',mfaCode:'Código de verificación',mfaInvalid:'El código no es válido o ha caducado. Use el código actual de su autenticador.',mfaSetup:'Esta cuenta requiere segundo factor. Configure su autenticador desde Seguridad en Salvaguardas GLF y vuelva a ingresar aquí.'});
 Object.assign(messages.en,{signinHelp:'Use the same email and password as your internal GLF Safeguards account.',credentials:'The email or password does not match your GLF account.',noProfile:'Your GLF account is valid, but access to Suppliers has not been assigned. Ask the administrator to enable it.',authConnection:'Could not connect or validate access to Suppliers. This does not mean your password is incorrect. Retry; if it continues, contact the administrator.',accountInactive:'Your GLF account or this session is inactive or expired. Contact the administrator.',emailUnconfirmed:'Confirm your GLF account email first.',authRateLimit:'Too many attempts. Wait a few minutes before trying again.',mfaTitle:'Security verification',mfaHelp:'Enter the six-digit code from the authenticator app you already use with your GLF account.',mfaCode:'Verification code',mfaInvalid:'The code is invalid or expired. Use the current code from your authenticator.',mfaSetup:'This account requires a second factor. Set up your authenticator in GLF Safeguards Security, then sign in here again.'});
+
+Object.assign(messages.es,{
+ deactivate:'Desactivar proveedor',reactivate:'Reactivar proveedor',deactivated:'Proveedor desactivado',reactivated:'Proveedor reactivado',
+ deactivateConfirmTitle:'¿Desactivar este proveedor?',reactivateConfirmTitle:'¿Reactivar este proveedor?',
+ confirmDeactivate:'Sí, desactivar proveedor',confirmReactivate:'Sí, reactivar proveedor',statusEditReason:'Editar motivo',
+ statusReviewHelp:'Indique el motivo. Al pulsar Confirmar podrá revisar las consecuencias antes de aplicar el cambio.',
+ statusConsequences:'Qué ocurrirá al confirmar',statusReasonRequired:'Escriba un motivo de al menos tres caracteres.',
+ deactivateEffect:'El proveedor quedará Inactivo y dejará de aparecer en las búsquedas habituales de proveedores activos.',
+ statusRetainedEffect:'Su registro no se eliminará: se conservarán sus datos y su historial. Podrá consultarlo seleccionando Inactivos o Todos los estados.',
+ statusRecoverEffect:'Un usuario con permiso podrá reactivar al proveedor cuando corresponda.',
+ statusHistoryEffect:'El motivo, la persona que realiza el cambio y la fecha y hora quedarán registrados en el historial.',
+ statusKycEffect:'Este cambio solo afecta al estado en el directorio; no constituye una aprobación ni un rechazo KYC.',
+ reactivateEffect:'El proveedor quedará Activo y volverá a aparecer en las búsquedas habituales. Sus datos e historial se conservarán.'
+});
+Object.assign(messages.en,{
+ deactivate:'Deactivate supplier',reactivate:'Reactivate supplier',deactivated:'Supplier deactivated',reactivated:'Supplier reactivated',
+ deactivateConfirmTitle:'Deactivate this supplier?',reactivateConfirmTitle:'Reactivate this supplier?',
+ confirmDeactivate:'Yes, deactivate supplier',confirmReactivate:'Yes, reactivate supplier',statusEditReason:'Edit reason',
+ statusReviewHelp:'Enter a reason. Select Confirm to review the consequences before applying the change.',
+ statusConsequences:'What will happen when you confirm',statusReasonRequired:'Enter a reason with at least three characters.',
+ deactivateEffect:'The supplier will become Inactive and will no longer appear in default searches for active suppliers.',
+ statusRetainedEffect:'The record will not be deleted: its data and history will be retained. Find it by selecting Inactive or All statuses.',
+ statusRecoverEffect:'A user with permission can reactivate the supplier when appropriate.',
+ statusHistoryEffect:'The reason, the person making the change, and the date and time will be recorded in the history.',
+ statusKycEffect:'This only changes the directory status; it does not constitute KYC approval or rejection.',
+ reactivateEffect:'The supplier will become Active and appear in default searches again. Its data and history will be retained.'
+});

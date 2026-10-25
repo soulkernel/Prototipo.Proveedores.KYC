@@ -72,3 +72,5 @@ textarea{line-height:1.65}
 @media(max-width:640px){.module-heading{padding:16px;margin-bottom:20px}.module-heading h1{font-size:22px}.login.panel{padding:24px}.live-footer{font-size:12px;line-height:1.5}}
 @media(pointer:coarse){.live-header nav button,.language-switch,.header-account-controls .header-sign-out{min-height:44px;height:44px}}
 @media(prefers-reduced-motion:reduce){button,.language-switch button{transition:none}.action-spinner{animation:none}button.primary:hover:not(:disabled),button.secondary:hover:not(:disabled),button.primary:active:not(:disabled),button.secondary:active:not(:disabled),.header-sign-out:active{transform:none}}
+
+.status-warning{background:#fff8e8;border:1px solid #e6c77b;border-radius:8px;padding:14px 18px;margin:16px 0}.status-warning h3{margin:0 0 8px}.status-warning ul{padding-left:20px;margin:0}.status-warning li+li{margin-top:8px}#modal .actions{flex-wrap:wrap}
