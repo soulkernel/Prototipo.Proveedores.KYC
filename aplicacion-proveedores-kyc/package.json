@@ -7,13 +7,15 @@
     "build": "node scripts/build.mjs",
     "build:demo": "node scripts/build.mjs --demo",
     "start": "node scripts/serve.mjs",
-    "test": "node --test tests/domain.test.mjs tests/export.test.mjs",
-    "test:database": "node --test tests/database.test.mjs tests/shared-identity.test.mjs",
+    "test": "node --test tests/domain.test.mjs tests/export.test.mjs tests/pdf.test.mjs",
+    "test:database": "node --test tests/database.test.mjs tests/shared-identity.test.mjs tests/images.test.mjs",
     "test:export": "node --test tests/export.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",
-    "exceljs": "4.4.0"
+    "exceljs": "4.4.0",
+    "jspdf": "4.2.1",
+    "jspdf-autotable": "5.0.9"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",

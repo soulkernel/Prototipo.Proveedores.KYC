@@ -1,3 +1,4 @@
+import {exportCriteria} from './export-context.js';
 import ExcelJS from 'exceljs';
 import {messages} from './i18n.js';
 import {searchSuppliers} from './domain.js';
@@ -15,12 +16,7 @@ export async function supplierWorkbook(data, filters, lang='es', now=new Date())
  sheet.mergeCells('A1:H1');sheet.getCell('A1').value='GLF · '+t('directory');sheet.getCell('A1').font={name:'Arial',size:18,bold:true,color:{argb:'FF19335F'}};sheet.getRow(1).height=32;
  const timestamp=new Intl.DateTimeFormat(lang==='es'?'es-EC':'en-GB',{dateStyle:'medium',timeStyle:'medium',timeZone:'Pacific/Galapagos'}).format(now);
  sheet.mergeCells('A2:H2');sheet.getCell('A2').value=t('exportCreated')+': '+timestamp+' (Galápagos, UTC−06:00) · '+rows.length+' '+t('results');sheet.getRow(2).height=25;
- const criteria=[t('state')+': '+t(filters.status||'active')];
- if(filters.q)criteria.push(t('exportSearch')+': '+filters.q);
- if(filters.scope)criteria.push(t('scope')+': '+t(filters.scope));
- if(filters.specialty)criteria.push(t('specialty_ids')+': '+(data.specialties.find(s=>s.id===filters.specialty)?.name||''));
- if(filters.offer)criteria.push(t('offer_type')+': '+t(filters.offer));
- if(filters.city)criteria.push(t('location')+': '+filters.city);
+ const criteria=exportCriteria(filters,data.specialties,lang).map(([key,value])=>key+': '+value);
  sheet.mergeCells('A3:H3');sheet.getCell('A3').value=t('exportFilters')+': '+criteria.join(' · ');sheet.getRow(3).height=48;
  sheet.mergeCells('A4:H4');sheet.getCell('A4').value=t('exportNote');sheet.getCell('A4').font={name:'Arial',size:10,color:{argb:'FF58677C'}};sheet.getRow(4).height=30;
  const names=new Map(data.specialties.map(s=>[s.id,s.name]));
