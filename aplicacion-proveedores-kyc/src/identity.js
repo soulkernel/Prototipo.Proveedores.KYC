@@ -37,7 +37,7 @@ export function createIdentity(config,makeClient=createClient){
     if(!factors.totp?.some(f=>f.status==='verified'))throw Error('MFA_SETUP_REQUIRED');
     throw Error('MFA_REQUIRED');
    }
-   return p;
+   return {...p,email:data.user.email||''};
   },
   async verifyMfa(code){
    if(!/^\d{6}$/.test(code))throw Error('MFA_INVALID');
