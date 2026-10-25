@@ -8,7 +8,7 @@
     "build:demo": "node scripts/build.mjs --demo",
     "start": "node scripts/serve.mjs",
     "test": "node --test tests/domain.test.mjs",
-    "test:database": "node --test tests/database.test.mjs"
+    "test:database": "node --test tests/database.test.mjs tests/shared-identity.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2"
