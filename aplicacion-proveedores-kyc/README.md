@@ -11,18 +11,18 @@ La demostración guarda datos ficticios exclusivamente en el navegador. El selec
 ## Conexión real de pruebas
 
 1. Aplicar **una sola vez**, en un proyecto nuevo, `supabase/migrations/202610250001_supplier_directory.sql`. Crea tablas y funciones con prefijo `glf_`, reglas RLS y permisos de acceso. No crea usuarios ni carga proveedores ni modifica tablas de otros sistemas. Ejecutar con un administrador autorizado; se aplica en una transacción.
-2. Crear la cuenta de prueba desde Authentication, conservando su contraseña fuera del código. Añadir su UUID a `glf_profiles` mediante una operación administrativa. No hay registro público de perfiles ni creación de privilegios desde el navegador.
+2. Aplicar la migración `202610250002_shared_identity.sql` y configurar Custom OIDC según `ACCESO_COMPARTIDO.md`. Usar la cuenta interna existente de Salvaguardas; **no crear otra cuenta ni contraseña en el proyecto de datos**. Añadir su UUID verificado al perfil local mediante una operación administrativa autorizada. No hay registro público de perfiles ni creación de privilegios desde el navegador.
 3. Configurar `GLF_MODE=supabase`, `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` en el entorno del proceso. `.env.example` es referencia; los scripts no cargan `.env` automáticamente. Solo la clave **publishable** o anon puede entrar al build. Nunca usar service_role, clave secreta ni contraseña de PostgreSQL.
 4. Ejecutar `npm run build` y `npm start`. Sin configuración válida el build falla; no cambia silenciosamente al modo demo.
 
-El primer perfil se provisiona de forma administrativa hasta que exista la pantalla de administración. Ejemplo **para adaptar con el UUID real de una cuenta de prueba**, no ejecutar sin reemplazar:
+El primer perfil se provisiona de forma administrativa hasta que exista la pantalla de administración. Ejemplo **para adaptar con el UUID de la identidad central existente**, no ejecutar sin reemplazar. La migración 002 exige MFA por defecto:
 
 ```sql
 insert into public.glf_profiles
   (id, display_name, supplier_create_scopes, supplier_edit_scopes,
    supplier_archive_scopes, manage_specialties)
 values
-  ('REEMPLAZAR_UUID_DE_AUTH', 'Administrador de prueba',
+  ('REEMPLAZAR_UUID_DE_IDENTIDAD_CENTRAL', 'Administrador de prueba',
    array['government','glf'], array['government','glf'],
    array['government','glf'], true);
 ```
@@ -32,8 +32,8 @@ Para una cuenta de consulta usar los tres arrays vacíos y `manage_specialties=f
 ## Publicación en Vercel
 
 - Repositorio: `soulkernel/Prototipo.Proveedores.KYC`.
-- Carpeta raíz de Vercel: `aplicacion-proveedores-kyc`.
-- Framework: Other; instalación: `npm ci`; build: `npm run build`; salida: `dist`.
+- Carpeta raíz de Vercel: `./`. El `vercel.json` de la raíz ejecuta instalación y compilación dentro de `aplicacion-proveedores-kyc`.
+- Framework: Other; instalación: `npm --prefix aplicacion-proveedores-kyc ci`; build: `npm --prefix aplicacion-proveedores-kyc run build`; salida: `aplicacion-proveedores-kyc/dist`.
 - Variables: las tres indicadas arriba. Nombre del proyecto: `glf-operaciones-kyc-archivo`.
 - Para una demostración independiente, configurar explícitamente `GLF_MODE=demo`; no comparte información con Supabase.
 - No publicar la carpeta padre KYC: contiene formularios y documentación fuente que no forman parte del código.
@@ -61,4 +61,4 @@ La verificación local no confirma instalación en el proyecto remoto. `VALIDACI
 
 KYC unificado, enlaces temporales, anexos privados, PDF y firmas, screening y exportación; administración de usuarios y delegación temporal de Carolina; compras, contratos, recepción, entregas y archivo. Estos elementos están en el contexto y **no se presentan como funciones terminadas**.
 
-Portal GLF y el inicio de sesión institucional compartido con Salvaguardas requieren integración adicional. La autenticación inicial por correo/contraseña no es todavía SSO ni concede permisos en otra aplicación.
+La cuenta y contraseña ya se validan en el origen de identidad de Salvaguardas. Portal GLF y la reutilización de sesión entre dominios requieren integración adicional. La cuenta común no concede permisos automáticos en otras aplicaciones. Ver `ACCESO_COMPARTIDO.md` para límites de revocación y validación pendiente.
