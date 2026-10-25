@@ -31,3 +31,5 @@ Publicación confirmada: estado Vercel success para ese commit y botón Mostrar/
 - Commit 7383838f8aea2c6af3752e647fbf2179e7e10f65 publicado con estado Vercel success. La URL pública muestra «Use el mismo correo y contraseña de su cuenta interna de Salvaguardas GLF».
 - Compilación y 22 pruebas aprobadas (5 dominio; 17 incluyendo suites de base e identidad). No se usaron credenciales reales en pruebas automatizadas.
 - Pendiente: que el usuario complete el inicio de sesión con contraseña y autenticador para validar las operaciones remotas. La sesión compartida entre enlaces sigue pendiente; esta entrega reutiliza la cuenta, no la cookie de otro dominio.
+
+**Ingreso remoto confirmado:** el usuario ingresó con su cuenta existente y completó MFA. Chrome mostró su nombre y el directorio con las listas vacías cargadas, sin errores. Se confirma inicio de sesión, segundo factor y consulta remota; crear/editar registros remotos queda por probar. Evidencia: test-results/acceso-glf-confirmado.png.

@@ -22,3 +22,5 @@ La desactivación de permisos locales bloquea inmediatamente las operaciones. La
 Compilación correcta. Diecisiete pruebas de autenticación y PostgreSQL aprobadas, además de cinco pruebas de dominio: rutas separadas, ausencia de cuenta Auth duplicada, identidad no asignada, emisor/audiencia/rol/cliente incorrectos, MFA y prevención de autoasignación de privilegios. La UI local muestra la instrucción de usar la cuenta existente y conserva el ojo.
 
 Con autorización expresa del usuario se aplicaron la migración y su perfil interno de prueba; Supabase devolvió el perfil activo con MFA requerido. Se activó Custom OIDC y el panel confirmó ENABLED para el emisor GLF indicado. Falta comprobar el ingreso del usuario con su autenticador real; no se solicita su contraseña. No se afirma todavía que se haya completado una operación autenticada en la aplicación pública.
+
+**Resultado posterior:** el usuario confirmó ingreso satisfactorio y doble factor completado. Se verificó el directorio autenticado en Chrome, con su perfil y listas vacías sin errores. No se probaron todavía altas o ediciones remotas. Se mantiene pendiente el SSO de sesión entre dominios.
