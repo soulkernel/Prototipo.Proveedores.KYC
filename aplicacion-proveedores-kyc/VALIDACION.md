@@ -142,3 +142,28 @@ Alcance: directorio comercial de proveedores; registro, edición, identificació
 
 ### Límites de esta auditoría
 No constituye una certificación de seguridad ni una prueba de carga o penetración. Los roles se comprobaron mediante perfiles de demostración y pruebas SQL; no se inició sesión como Carolina o Mabel. La identificación valida formato y duplicados, no verifica existencia legal contra SRI. El manejo de fallo de recarga posterior al guardado fue revisado en código, sin inyección de fallos de red en el navegador. Invitaciones, anexos, firmas, screening y estados de habilitación KYC no forman parte del módulo actual.
+- Cierre publicado: commit f9a16399a53257db9da1919f7e936d1a1ffa6b38, Vercel Deployment has completed. Chrome confirmó paginación 1/2–2/2, búsqueda por nombre a un resultado, rechazo del teléfono inválido y guardado de FICTICIO 02 con sus valores originales (nuevo evento de auditoría, sin cambiar sus contactos). Inglés verificado y retorno a español. Captura: test-results/auditoria-final-publicada.png.
+- No se detectaron bloqueos en los flujos del directorio cubiertos por esta revisión. Puede iniciarse la construcción de KYC como siguiente fase; la versión continúa limitada a pruebas con datos ficticios.
+
+## 2026-10-25 · Piloto funcional KYC integrado
+
+### Alcance implementado
+- Bandeja KYC y expedientes reservados, independientes de la ficha comercial. Buscar proveedor por identificación/nombre antes de crear; aprovechar los datos existentes. Un registro nuevo con nombre y correo puede comenzar como expediente independiente; después se completa la ficha comercial y se vincula. Equipo y Directorio quedan fuera del directorio.
+- Formulario unificado ES/EN por vínculo, persona natural/jurídica y condición nacional/internacional. RUC adicional no convierte a la persona natural en sociedad. Campos condicionales de representante, socios con 10 % o más, cónyuge y PEP. Reglas compartidas y aplicadas también en servidor.
+- Enlace privado por siete días, renovable, con autoguardado y control de modificaciones simultáneas. Retoma el primer paso incompleto. Renovar invalida el enlace anterior; enviar revoca la edición y registra acuse con fecha y hora de Galápagos.
+- PDF con identidad del expediente, versión, logotipo y espacios para las dos firmas externas. Anexos por ruta; firma física escaneada solo por excepción habilitada. Envío exige el PDF actual y documentos requeridos. Conserva versiones y copia de recepción.
+- Revisión humana, subsanación, informe/evidencias y formulario contrafirmado. No se permite marcar conforme sin informe, formulario contrafirmado y confirmación humana. La presencia del archivo no valida criptográficamente su firma.
+- Prompt por expediente para Gemini/Antigravity, con estructura de informe y evidencias; no ejecuta consultas ni toma decisiones automáticamente. Respaldo ZIP con documentos, datos, historial y manifiesto SHA-256; no incluye token de invitación. La descarga no sincroniza automáticamente con Drive.
+- Acceso KYC explícito, MFA obligatorio, documentos privados y delegación temporal a una cuenta interna existente, con vencimiento y revocación. Proveedores no concede por sí mismo acceso a expedientes.
+
+### Verificación realizada
+- 41 pruebas automatizadas aprobadas: 30 del directorio y 11 de KYC (incluyendo subpruebas). Reglas de rutas, aislamiento, MFA, links, concurrencia, anexos, recepción, revisión y delegación. Compilación de demo correcta.
+- Chrome local: Equipo GLF con PDF, tres anexos, recepción y ZIP; los campos de compañía/banco no aparecen en esa ruta. Persona jurídica consultora internacional con representante, socio al 10 % y traducción al inglés. Declaración PEP familiar despliega los campos correspondientes.
+- PDF de Equipo renderizado y revisado visualmente: dos páginas, logotipo, campos aplicables y espacios de firmas. No se ha probado una firma digital real del GLF.
+- Supabase/Vercel: caso sintético KYC-00001 vinculado a proveedor ya existente, datos precargados, PDF, cuatro anexos, continuación en segunda pestaña y envío. Recibido el 25 de octubre de 2026 a las 20:37, Galápagos. El enlace anterior deja de permitir acceso después del envío.
+- Se incorporó un quinto PDF ficticio como informe para probar la carga interna. Expediente dejado En revisión, con nota expresa de prueba sin validez ni firmas. Los 20 proveedores sintéticos se mantienen.
+- Respaldo publicado descargado y reabierto: cinco documentos, hashes coincidentes, ZIP sin corrupción, sin token en expediente.json. Se corrigió la política de lectura de Storage para referenciar storage.objects.name; la prueba SQL verifica que Cumplimiento descarga y usuarios comunes/anon no pueden hacerlo.
+- Migraciones 008 y 009 aplicadas en Supabase y verificadas con resultado satisfactorio. Primer despliegue KYC: 3e0527eef81e228b41b8b4910bd9bc6748efe4e2. Ajustes finales de navegación, idioma y descarga documentados en la siguiente publicación.
+
+### Límites y pendientes del piloto
+Solo datos ficticios. No constituye una certificación de seguridad ni cumplimiento legal. El correo institucional indicado se muestra como contacto: las invitaciones se copian para envío manual; envío automático y aviso por correo aún no están conectados. La bandeja sí muestra la recepción. Pendiente autorizar el servicio de correo institucional, validar campos definitivos con Carolina (incluidos control sin participación y equivalentes extranjeros), probar firma/contrafirma con herramientas reales, y completar endurecimiento de producción (análisis antimalware, límites de abuso, retención y recuperación operativa). No se enviaron mensajes reales ni se realizó screening real. La aprobación conserva responsabilidad humana.
