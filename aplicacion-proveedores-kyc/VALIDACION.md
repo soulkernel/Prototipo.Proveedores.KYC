@@ -33,3 +33,112 @@ Publicación confirmada: estado Vercel success para ese commit y botón Mostrar/
 - Pendiente: que el usuario complete el inicio de sesión con contraseña y autenticador para validar las operaciones remotas. La sesión compartida entre enlaces sigue pendiente; esta entrega reutiliza la cuenta, no la cookie de otro dominio.
 
 **Ingreso remoto confirmado:** el usuario ingresó con su cuenta existente y completó MFA. Chrome mostró su nombre y el directorio con las listas vacías cargadas, sin errores. Se confirma inicio de sesión, segundo factor y consulta remota; crear/editar registros remotos queda por probar. Evidencia: test-results/acceso-glf-confirmado.png.
+
+## Línea gráfica igualada con Salvaguardas — 25/10/2026
+
+- Commit 71a4087f96e3ad896c1ec0790dc36fc5c89c8f10: Vercel success y nueva UI comprobada en producción con la cuenta autenticada.
+- Comparación DOM de estilos efectivos con glf-postulaciones.vercel.app/internal: mismos colores, fuente Arial/Helvetica, tamaño, peso, interlineado, padding y radios en cuerpo, cabecera, título, ES/EN, Cerrar sesión y contenedor principal. Altura de cabecera difiere 0,14 px por render de la imagen; no se afirma identidad de captura completa entre módulos distintos.
+- Correo validado de la sesión visible bajo el logo; nombre visible sobre el contenido. Identidad accesible con teclado y ayuda de nombre/correo.
+- ES/EN y navegación al formulario revisados localmente; vista móvil publicada verificada con correo y cierre visibles, ancho 375 px y scrollWidth 375 px. No se cerró la sesión del usuario para comprobar estilos.
+- Hash del logo coincide exactamente con el archivo de Salvaguardas. Estados hover/active/focus y movimiento reducido se derivan de sus estilos. Compilaciones demo y Supabase correctas.
+- Evidencia: test-results/linea-grafica-glf-publicada.png.
+
+## 2026-10-25 · Confirmación de estado del proveedor
+- Desactivar/Reactivar proveedor sustituye la etiqueta de ficha, en español e inglés.
+- Motivo obligatorio seguido de revisión de consecuencias; solo la confirmación final modifica el estado.
+- Comprobación en Chrome local: cancelar mantiene activo, editar conserva motivo, desactivar/reactivar registra historial; textos en ambos idiomas revisados.
+- Commit: 034826498944e82efa9b56015caf895210cd1a0b.
+
+
+## 2026-10-25 · Exportación Excel del directorio
+- Botón Descargar Excel / Download Excel; respeta los filtros y exporta todas las páginas.
+- Archivo XLSX con tabla filtrable, encabezados fijos, fecha Galápagos y criterios de búsqueda; identificaciones y teléfonos como texto.
+- Solo columnas comerciales explícitas: no UUID ni información KYC. Sin cambios de permisos.
+- 8 pruebas aprobadas; npm audit sin vulnerabilidades tras actualizar UUID indirecto.
+- Chrome local: descargas reales reabiertas y verificadas: inglés 4 proveedores y español filtrado por Guayaquil 1 proveedor; búsqueda vacía muestra aviso.
+- Commit 789c2e085ed565136ae5796aab16b84dbf0c5869.
+
+- Publicación verificada: descarga desde Vercel reabierta con 20 proveedores, 22 columnas y tabla filtrable.
+
+## 2026-10-25 · Descarga con confirmación y fotos privadas
+- Modal único Descargar: cantidad, criterios de búsqueda, Excel o PDF, confirmación explícita. Captura consistente de filtros y resultados al abrir el modal.
+- PDF probado con una selección y con los 20 proveedores; 3 páginas renderizadas e inspeccionadas sin recortes.
+- Imágenes: creación y edición comprobadas en Chrome local, compresión 1400x900 a 512x329, 3 KB; persistencia después de recargar e historial.
+- Migración 202610250003_supplier_images.sql aplicada en Supabase; bucket privado glf-supplier-images, límite 204800 bytes, solo WebP y permisos por proveedor.
+- 9 pruebas de aplicación/exportación y 18 de base/identidad/imágenes aprobadas.
+- Commit 2d5711c91316b232dac3ab7d1322f80c562cc7bb.
+
+- Verificación publicada: PDF con filtro aire acondicionado contiene exactamente Clima Azul Insular y Técnico Isla Brisa, sin proveedores ajenos al filtro; incluye criterios. Imagen sintética guardada en FICTICIO 01, visible tras recargar (512x329) y registrada en historial. Evidencia: test-results/descarga-excel-pdf-filtros-publicada.png e imagen-proveedor-publicada.png.
+
+## 2026-10-25 · Imagen integrada en identificación
+- Imagen o marcador en esquina superior derecha de la tarjeta de identificación, también en registro y edición. Sin tarjeta independiente ni indicaciones técnicas fuera del modal.
+- Chrome local: clic abre carga, edición conserva control integrado; perfil de consulta muestra marcador sin botón; vista 390 px sin desbordamiento horizontal. Compilación correcta.
+- Commit c45c03b059ca3407cf2d53bab02cbef938020d56.
+- Publicación Vercel confirmada. FICTICIO 01 mantiene imagen dentro de identificación; clic Cambiar imagen abre selector y muestra formatos solo en modal. Captura: test-results/imagen-integrada-publicada.png.
+
+## 2026-10-25 · Corrección de distribución según capturas
+- Imagen trasladada a la tarjeta superior del nombre y acciones, tanto en consulta como en edición y registro. Identificación recupera el ancho completo.
+- Historial debajo de contacto comercial, en la columna derecha. Móvil: encabezado con imagen, acciones debajo y contenido en una columna.
+- Compilación y revisión Chrome escritorio/390 px correctas; apertura de imagen y edición verificadas. Commit 284fbf38375b3f297fa55876b510e4003ef13086.
+- Vercel verificado: imagen en encabezado superior, historial dentro de columna derecha y ninguna imagen en Identificación. Captura: test-results/ficha-distribucion-mejorada.png.
+
+## 2026-10-25 · Lista de ciudades e islas
+- Filtro Ciudad o isla convertido a selector con ubicaciones registradas, orden alfabético, normalización de variantes y Todas las ubicaciones / All locations. Filtrado automático por coincidencia completa.
+- 10 pruebas aprobadas (incluye coincidencia exacta y exportaciones); compilación correcta. Commit 32ab0e66eab6bcb87608dd1377b5c91c0992760b.
+
+## 2026-10-25 · Especialidades e identificación comercial
+- Botón Agregar especialidad en directorio y editor; modal de creación/reutilización y selección inmediata sin perder especialidades anteriores.
+- Ámbito Ambos, documento con país emisor y detección temprana de duplicados, provincias/cantones y correos comerciales adicionales. Exportación incorpora país emisor y correos adicionales.
+- 10 pruebas de aplicación/exportación y 20 de base/identidad/imágenes aprobadas. Compilación de demo correcta. Chrome local: duplicado antes del nombre, abrir ficha existente, conservar actividades, guardar Ambos y correo de facturación, nueva especialidad seleccionada y botón Guardar habilitado, pasaporte con país extranjero.
+- Migración 202610250004_supplier_details.sql aplicada en Supabase: Success. No rows returned.
+- Commit d67515d04bb4deded5f97bcdce2d532770f1c20c; publicación pendiente de verificación final.
+- Vercel confirmó Deployment has completed. Chrome publicado: nueva especialidad DEMO · Mantenimiento especializado creada; FICTICIO 02 guardó esa actividad conservando las dos anteriores, ámbito Ambos y facturacion02@example.test. Recarga confirmó persistencia y volvió a abrir el modal de especialidades. Captura: test-results/agregar-especialidad-publicado.png. Se conservan 20 proveedores ficticios.
+
+## 2026-10-25 · Corrección de correos y buscador
+- Límite de tres correos adicionales en interfaz, validación y restricción de base de datos. Migración 005: Success. No rows returned.
+- Retirado Agregar especialidad del directorio; conservado en editor. Limpiar filtros usa botón secundario.
+- Compilación correcta y dos pruebas de dominio/base aprobadas, con rechazo del cuarto correo. Commit 23e14e031681c79e6a24a0de59f2d5331659b2db.
+
+## 2026-10-25 · Teléfonos adicionales
+- Dos teléfonos opcionales además del principal; añadir/quitar, detalle y exportaciones ES/EN.
+- Migración 006 aplicada: Success. No rows returned. Restricción y guardado auditado; conserva teléfonos en clientes anteriores que omitan el nuevo campo.
+- Compilación y seis pruebas de dominio/base/exportación aprobadas: persistencia, máximo dos adicionales y rechazo de duplicados normalizados.
+- Commit 96c2f988205822eb13c23197f1e0ff0c7a12077e.
+- Verificación publicada: Vercel completó despliegue; FICTICIO 02 guardó +593 000000001 y +593 000000002, conservando el teléfono principal. Al llegar a dos adicionales el botón queda deshabilitado. Historial registra la modificación.
+
+## 2026-10-25 · Resumen compacto
+- Tarjetas superiores retiradas; proveedores activos en verde y especialidades en azul junto a resultados. Sin contador de ubicaciones.
+- Compilación correcta. Chrome local: búsqueda cambia resultados de 4 a 1 y mantiene totales 4/7; sin tarjetas. Español/inglés verificados. Vista móvil solicitada 390 px, ancho disponible 375 px y scrollWidth 375 px, sin desbordamiento.
+- Commit b9c02e18e278446498626b1b5203d420bd332912.
+- Publicación Vercel verificada. Chrome muestra 20 resultados, 20 proveedores activos y 22 especialidades, sin tarjetas superiores. Captura: test-results/resumen-compacto-publicado.png.
+
+## 2026-10-25 · Sin botón Actualizar
+- Se elimina únicamente Actualizar del encabezado y su manejador. Compilación correcta. Commit 6a77299c9788d644f8c2892bd9d7695f82a2f703.
+
+## 2026-10-25 · Especialidades frecuentes junto al buscador
+- Menú desplegable en cabecera del buscador; eliminada franja entre filtros y resultados. Sin ranking se omite el control.
+- Compilación correcta. Chrome local EN: selección filtra a dos resultados y cierra menú; no existe #frequent. Móvil 390 px solicitado, ancho/scrollWidth 375 px, menú dentro de pantalla.
+- Commit d83d46710bd81320ecfe1ed7f1cfa0d28347d2c6.
+- Vercel publicado y Chrome confirmado: control en la misma fila del título del buscador, abre Agua y saneamiento; sin franja inferior. Captura: test-results/especialidades-junto-buscador.png.
+
+## 2026-10-25 · Auditoría previa a KYC
+
+Alcance: directorio comercial de proveedores; registro, edición, identificación y duplicados, ámbitos, contactos, especialidades, imagen, filtros, historial, baja/reactivación, exportación e identidad/permisos. KYC y sus futuras habilitaciones quedan para la siguiente fase.
+
+### Resultado y correcciones
+- 10 pruebas de aplicación/exportación y 20 de base/identidad/imágenes aprobadas; compilación correcta. La prueba de imágenes ejecuta ahora la cadena completa de migraciones 001–007.
+- Revisión de dependencias de producción: npm audit --omit=dev sin vulnerabilidades conocidas al momento de la revisión.
+- Guardado bloqueado desde antes de consultar duplicados: evita envíos simultáneos y modificaciones del formulario durante la operación. Funciona con botón y Enter.
+- Un fallo al recargar después de guardar informa que la ficha ya se guardó, evitando inducir un segundo registro.
+- Teléfono principal exige números y caracteres de formato admitidos, máximo 50 caracteres; validación tanto en interfaz como en Supabase (migración 007).
+- Errores de formulario identifican los campos a corregir. Procesamiento de imagen bloquea selecciones simultáneas y limpia la vista previa anterior. Singular de resultado corregido en pantalla y exportaciones.
+
+### Verificación funcional
+- Chrome local con datos sintéticos: perfiles de consulta y Mabel respetan sus acciones; duplicado detectado antes del nombre; documento extranjero/pasaporte; rechazo de teléfono sin dígitos; límites de tres correos y dos teléfonos adicionales.
+- Creación, modificación, desactivación con advertencia y motivo, filtrado de inactivos, reactivación e historial probados. Texto de prueba con etiquetas HTML se muestra literalmente, sin inyectar elementos.
+- Imagen sintética subida, reducida a 512 × 329 y aproximadamente 3 KB. Guardado y consulta correctos.
+- Excel y PDF descargados desde la interfaz con filtro de un solo proveedor. Excel reabierto: 25 columnas, identificadores como texto, todos los contactos y criterios de filtro; sin UUID técnico. PDF extraído y renderizado: una página legible con logo, contactos, filtro y pie. Evidencia local: test-results/auditoria-exportacion-filtrada.png.
+- Supabase publicado: siete tablas glf_* con RLS; cero permisos anónimos de tablas/RPC y cero permisos de escritura directa para authenticated. Imágenes privadas, límite 204800 bytes. Se conservan 20 proveedores; los registros nuevos de la auditoría se crearon solamente en la demo local.
+
+### Límites de esta auditoría
+No constituye una certificación de seguridad ni una prueba de carga o penetración. Los roles se comprobaron mediante perfiles de demostración y pruebas SQL; no se inició sesión como Carolina o Mabel. La identificación valida formato y duplicados, no verifica existencia legal contra SRI. El manejo de fallo de recarga posterior al guardado fue revisado en código, sin inyección de fallos de red en el navegador. Invitaciones, anexos, firmas, screening y estados de habilitación KYC no forman parte del módulo actual.

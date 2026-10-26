@@ -14,7 +14,7 @@ export function supplierPdf(data,filters,lang='es',now=new Date(),logo=null){
  doc.setTextColor(255);doc.setFont('helvetica','bold');doc.setFontSize(17);doc.text(t('directory'),logo?62:12,16);
  doc.setFont('helvetica','normal');doc.setFontSize(9);
  const time=new Intl.DateTimeFormat(lang==='es'?'es-EC':'en-GB',{dateStyle:'medium',timeStyle:'short',timeZone:'Pacific/Galapagos'}).format(now);
- doc.text(time+' (Galápagos, UTC-06:00) | '+rows.length+' '+t('results'),logo?62:12,23);
+ doc.text(time+' (Galápagos, UTC-06:00) | '+rows.length+' '+t(rows.length===1?'result':'results'),logo?62:12,23);
  autoTable(doc,{startY:34,margin:{left:margin,right:margin,bottom:18},theme:'plain',styles:{font:'helvetica',fontSize:9,cellPadding:1.5,textColor:[35,49,68]},columnStyles:{0:{cellWidth:38,fontStyle:'bold'},1:{cellWidth:235}},body:exportCriteria(filters,data.specialties,lang)});
  const specs=new Map(data.specialties.map(s=>[s.id,s.name]));
  autoTable(doc,{startY:doc.lastAutoTable.finalY+6,margin:{top:15,left:margin,right:margin,bottom:18},theme:'striped',styles:{font:'helvetica',fontSize:9,cellPadding:2.5,overflow:'linebreak',valign:'top',textColor:[35,49,68]},headStyles:{fillColor:navy,textColor:255,fontStyle:'bold'},alternateRowStyles:{fillColor:[245,248,251]},rowPageBreak:'avoid',showHead:'everyPage',

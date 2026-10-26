@@ -8,6 +8,7 @@ export function validateSupplier(s){
  if(!['goods','services','both'].includes(s.offer_type))errors.push('offer_type');
  for(const key of ['country_code','id_country_code'])if(!/^[A-Z]{2}$/.test(s[key]||''))errors.push(key);
  if(!emailPattern.test(s.email))errors.push('email');
+ if(!/[0-9]/.test(s.phone||'')||!/^[+0-9(). -]+$/.test(s.phone||'')||String(s.phone).length>50)errors.push('phone');
  if(!identityTypes(s.person_type,s.id_country_code).includes(s.id_type))errors.push('id_type');
  if(s.id_country_code==='EC'&&!(s.id_type==='ruc'?/^\d{13}$/:/^\d{10}$/).test(s.id_number))errors.push('id_number');
  if(s.tax_number&&s.id_country_code==='EC'&&!/^\d{13}$/.test(s.tax_number))errors.push('tax_number');

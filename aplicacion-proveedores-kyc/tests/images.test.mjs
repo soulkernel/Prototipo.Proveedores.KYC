@@ -14,7 +14,7 @@ test('Private supplier images enforce scope, MFA, ownership, immutable files and
    create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
    create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text,metadata jsonb);alter table storage.objects enable row level security;
    grant usage on schema storage to authenticated;grant select,insert,update,delete on storage.objects to authenticated;`);
-  for(const name of ['202610250001_supplier_directory.sql','202610250002_shared_identity.sql','202610250003_supplier_images.sql'])await db.exec(await fs.readFile(new URL('../supabase/migrations/'+name,import.meta.url),'utf8'));
+  for(const name of ['202610250001_supplier_directory.sql','202610250002_shared_identity.sql','202610250003_supplier_images.sql','202610250004_supplier_details.sql','202610250005_supplier_email_limit.sql','202610250006_supplier_phones.sql','202610250007_supplier_phone_format.sql'])await db.exec(await fs.readFile(new URL('../supabase/migrations/'+name,import.meta.url),'utf8'));
   await db.query('insert into glf_profiles(id,display_name,supplier_create_scopes,supplier_edit_scopes) values($1,$2,$3,$3)',[actor,'Ficticio',['government']]);
   await db.query("insert into glf_profiles(id,display_name) values($1,'Lector')",[viewer]);
   const sp=(await db.query("insert into glf_specialties(name) values('Prueba') returning id")).rows[0].id;

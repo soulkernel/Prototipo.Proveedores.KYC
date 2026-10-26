@@ -15,7 +15,7 @@ export async function supplierWorkbook(data, filters, lang='es', now=new Date())
  sheet.columns=columns.map(([key,width])=>({key,width,style:{numFmt:'@',font:{name:'Arial',size:11},alignment:{vertical:'top',wrapText:true}}}));
  sheet.mergeCells('A1:H1');sheet.getCell('A1').value='GLF · '+t('directory');sheet.getCell('A1').font={name:'Arial',size:18,bold:true,color:{argb:'FF19335F'}};sheet.getRow(1).height=32;
  const timestamp=new Intl.DateTimeFormat(lang==='es'?'es-EC':'en-GB',{dateStyle:'medium',timeStyle:'medium',timeZone:'Pacific/Galapagos'}).format(now);
- sheet.mergeCells('A2:H2');sheet.getCell('A2').value=t('exportCreated')+': '+timestamp+' (Galápagos, UTC−06:00) · '+rows.length+' '+t('results');sheet.getRow(2).height=25;
+ sheet.mergeCells('A2:H2');sheet.getCell('A2').value=t('exportCreated')+': '+timestamp+' (Galápagos, UTC−06:00) · '+rows.length+' '+t(rows.length===1?'result':'results');sheet.getRow(2).height=25;
  const criteria=exportCriteria(filters,data.specialties,lang).map(([key,value])=>key+': '+value);
  sheet.mergeCells('A3:H3');sheet.getCell('A3').value=t('exportFilters')+': '+criteria.join(' · ');sheet.getRow(3).height=48;
  sheet.mergeCells('A4:H4');sheet.getCell('A4').value=t('exportNote');sheet.getCell('A4').font={name:'Arial',size:10,color:{argb:'FF58677C'}};sheet.getRow(4).height=30;
