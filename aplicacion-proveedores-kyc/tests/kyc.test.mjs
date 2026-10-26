@@ -1,3 +1,5 @@
+const dateOnly=v=>v instanceof Date?v.toISOString().slice(0,10):v;
+import {dayAt,addMonths} from '../src/kyc-lifecycle.js';
 import {searchDemoCases} from '../src/kyc-search.js';
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {PGlite} from '@electric-sql/pglite';import {fields,project,validate,documents,entries} from '../src/kyc-model.js';
 const sample=(relation='staff',person='natural')=>project({relation,person,nationalityType:'national',country:'EC',residenceCountry:'EC',id:person==='legal'&&!['staff','board'].includes(relation)?'0000000001001':'0000000001',name:'PERSONA FICTICIA QA',birthDate:'1990-01-01',incorporationDate:'2000-01-01',nationality:'Ecuatoriana',email:'qa@example.test',phone:'0000000000',city:'Quito',address:'Dirección ficticia',role:'Prueba',spouse:'no',pepSelf:'no',pepFamily:'no',glfFamily:'no',truth:'yes',invoice:'yes',taxId:'0000000001001',activity:'Pruebas',services:'Pruebas',monthlyIncome:'0',monthlyExpenses:'0',bankName:'BANCO FICTICIO',bankHolder:'FICTICIO',bankAccount:'000',legalRep:'FICTICIO',legalRepId:'0000000002',legalRepCountry:'EC',ownershipExplanation:'Fundación sin socios',funds:'Actividad ficticia',owners:[]});
@@ -23,7 +25,18 @@ test('KYC database: private access, links, concurrency, attachments, human revie
  await t.test('PDF requires complete answers, document upload requires case ticket',async()=>{await as(null,()=>call('prepare_pdf',[token,2]));await as(null,()=>assert.rejects(call('submit',[token,2]),/MISSING_DOCUMENT/));await as(null,()=>assert.rejects(db.query("insert into storage.objects(bucket_id,name) values('glf-kyc-documents','guessed')"),/row-level security/));await as(null,()=>assert.rejects(call('upload_ticket',[token,id,2,'report']),/INVALID_SLOT/));});
  async function upload(slot,external=true){const path=await as(external?null:jwt,()=>call('upload_ticket',[external?token:null,id,row.version,slot]));await as(external?null:jwt,()=>db.query("insert into storage.objects(bucket_id,name,metadata) values('glf-kyc-documents',$1,$2)",[path,{size:1024,mimetype:'application/pdf'}]));await as(external?null:jwt,()=>call('attach',[external?token:null,path,'FICTICIO.pdf']));return path;}
  await t.test('Attachments isolated from ordinary users; submission closes link and freezes snapshot',async()=>{for(const slot of documents(row.answers))await upload(slot);await as(jwt,async()=>assert.equal((await db.query("select * from storage.objects where bucket_id='glf-kyc-documents'")).rows.length,3,'Compliance can download all referenced files'));await as({...jwt,sub:reader},async()=>{assert.equal((await db.query('select * from glf_kyc_files')).rows.length,0);assert.equal((await db.query('select * from storage.objects')).rows.length,0);});await as(null,async()=>assert.equal((await db.query('select * from storage.objects')).rows.length,0));const r=await as(null,()=>call('submit',[token,2]));assert.equal(r.version,2);await as(null,()=>assert.rejects(call('read',[token]),/LINK_INVALID/));await as(null,()=>assert.rejects(call('submit',[token,2]),/LINK_INVALID/));assert.equal((await db.query('select * from glf_kyc_private.submissions')).rows.length,1);});
- await t.test('Approval requires human confirmation, screening report and countersignature',async()=>{await as(jwt,()=>assert.rejects(call('review',[id,'approved','Prueba humana',true]),/REPORT_REQUIRED/));await upload('report',false);await as(jwt,()=>assert.rejects(call('review',[id,'approved','Prueba humana',false]),/REPORT_REQUIRED/));await as(jwt,()=>assert.rejects(call('review',[id,'approved','Prueba humana',true]),/COUNTERSIGN_REQUIRED/));await upload('countersigned',false);await as(jwt,()=>call('review',[id,'approved','Prueba humana',true]));await as(jwt,()=>assert.rejects(call('invite',[id,false]),/INVALID_STATE/));});
+ await t.test('Final review requires human confirmation, selected report, risk, date and countersignature',async()=>{
+ const opts={risk:'high',issued:dayAt(new Date()),expected:1};
+ await as(jwt,()=>assert.rejects(call('review',[id,'approved','Prueba humana',true]),/FINAL_REVIEW_REQUIRED/));
+ await as(jwt,()=>assert.rejects(call('finish',[id,'approved','Prueba humana',true,opts]),/REPORT_REQUIRED/));
+ const reportPath=await upload('report',false);opts.report=(await db.query('select id from glf_kyc_files where path=$1',[reportPath])).rows[0].id;
+ await as(jwt,()=>assert.rejects(call('finish',[id,'approved','Prueba humana',false,opts]),/INVALID_REVIEW/));
+ await as(jwt,()=>assert.rejects(call('finish',[id,'approved','Prueba humana',true,{...opts,risk:''}]),/RISK_REQUIRED/));
+ await as(jwt,()=>assert.rejects(call('finish',[id,'approved','Prueba humana',true,opts]),/COUNTERSIGN_REQUIRED/));
+ await upload('countersigned',false);await as(jwt,()=>call('finish',[id,'approved','Prueba humana',true,opts]));
+ const closed=(await db.query('select * from glf_kyc_cases where id=$1',[id])).rows[0];assert.equal(dateOnly(closed.review_due_on),addMonths(opts.issued,12));assert.equal(closed.final_report_id,opts.report);
+ await as(jwt,()=>assert.rejects(call('invite',[id,false]),/INVALID_STATE/));
+ });
  await t.test('Renewal invalidates prior link; expiry retains draft and prevents editing',async()=>{id=await as(jwt,()=>call('create',[null,'NUEVO','qa@example.test','board']));const old=(await as(jwt,()=>call('invite',[id,false]))).token;token=(await as(jwt,()=>call('invite',[id,false]))).token;await as(null,()=>assert.rejects(call('read',[old]),/LINK_INVALID/));await db.query("update glf_kyc_private.invitations set expires_at=now()-interval '1 minute' where case_id=$1",[id]);await as(null,()=>assert.rejects(call('read',[token]),/LINK_INVALID/));assert.equal((await db.query('select answers from glf_kyc_cases where id=$1',[id])).rows.length,1);});
  await t.test('Delegation is time-limited, cannot self-escalate, and revocation is immediate',async()=>{const until=new Date(Date.now()+86400000).toISOString();await as(jwt,()=>call('delegate',[assistant,until,'Vacaciones prueba']));await as({...jwt,sub:assistant},async()=>{assert.equal(await call('allowed'),true);await assert.rejects(call('delegate',[reader,until,'Escalar prueba']),/FORBIDDEN/);});await as(jwt,()=>call('delegate',[assistant,null,'Fin de delegación']));await as({...jwt,sub:assistant},async()=>assert.equal(await call('allowed'),false));assert.equal((await db.query('select * from glf_kyc_delegation_audit')).rows.length,2);});
  await t.test('Search covers old cases, identity variants, linked supplier, pages and private access',async()=>{
@@ -40,6 +53,36 @@ test('KYC database: private access, links, concurrency, attachments, human revie
  await as({...jwt,sub:reader},()=>assert.rejects(call('search',['',0]),/FORBIDDEN/));await as({...jwt,aal:'aal1'},()=>assert.rejects(call('search',['',0]),/FORBIDDEN/));await as(null,()=>assert.rejects(call('search',['',0]),/permission denied/));
  const raw=(await db.query('select * from glf_kyc_cases')).rows,commercial=(await db.query('select * from glf_suppliers')).rows;
  for(const q of ['perez maria','0000000012001','QA PASS 987','NUEVO','SIN COINCIDENCIA']){const live=await as(jwt,()=>call('search',[q,0]));assert.deepEqual(searchDemoCases(raw,commercial,q).items.map(c=>c.id).sort(),live.items.map(c=>c.id).sort());}
+ });
+ await t.test('Screening lifecycle: policy months, manual exceptions, unchanged baseline and history',async()=>{
+ async function fixture(risk,state='approved',options={}){
+ const cid=(await db.query("insert into glf_kyc_cases(name,email,relation,state,created_by) values($1,'cycle@example.test','staff','review',$2) returning id",['FICTICIO '+risk+Math.random(),manager])).rows[0].id;
+ const report=(await db.query("insert into glf_kyc_files(case_id,slot,path,name,bytes,mime,version,created_at) values($1,'report',$2,'INFORME_FICTICIO.pdf',100,'application/pdf',1,'2024-02-29T12:00:00Z') returning id",[cid,cid+'/report'])).rows[0].id;
+ await db.query("insert into glf_kyc_files(case_id,slot,path,name,bytes,mime,version) values($1,'countersigned',$2,'FICTICIO_SIN_FIRMA.pdf',100,'application/pdf',1)",[cid,cid+'/signed']);
+ const opts={risk,report,issued:'2024-02-28',expected:1,...options};
+ await as(jwt,()=>call('finish',[cid,state,'Resultado ficticio de prueba',true,opts]));return (await db.query('select * from glf_kyc_cases where id=$1',[cid])).rows[0];
+ }
+ for(const [risk,due] of [['high','2025-02-28'],['medium','2026-02-28'],['low','2027-02-28']]){const c=await fixture(risk);assert.equal(dateOnly(c.review_due_on),due);assert.equal(dateOnly(c.policy_due_on),due);assert.equal(dayAt(c.report_uploaded_at),'2024-02-29');assert.equal(dateOnly(c.report_issued_on),'2024-02-28');}
+ const rejected=await fixture('high','not_approved');assert.equal(rejected.review_due_on,null);assert.equal((await as(jwt,()=>call('preflight',[null,rejected.id]))).status,'not_cleared');
+ const c=await fixture('high','approved',{due:'2024-08-29',reason:'Adelantar por riesgo'});assert.equal(dateOnly(c.review_due_on),'2024-08-29');assert.equal(c.schedule_exception,false);
+ await as(jwt,()=>assert.rejects(call('reschedule',[c.id,'2026-01-01','Extender plazo',false,2]),/POLICY_EXCEPTION_REQUIRED/));
+ await as(jwt,()=>assert.rejects(call('reschedule',[c.id,'2024-08-01','',false,2]),/SCHEDULE_REASON_REQUIRED/));
+ await as(jwt,()=>call('reschedule',[c.id,'2030-01-01','Excepción explícita de prueba',true,2]));
+ await as(jwt,()=>assert.rejects(call('reschedule',[c.id,'2031-01-01','Otra prueba',true,2]),/STALE_VERSION/));
+ let changed=(await db.query('select * from glf_kyc_cases where id=$1',[c.id])).rows[0];assert.equal(dateOnly(changed.policy_due_on),dateOnly(c.policy_due_on));assert.equal(+changed.report_uploaded_at,+c.report_uploaded_at);assert.equal(changed.schedule_exception,true);
+ const ctx=await as(jwt,()=>call('preflight',[null,c.id]));assert.equal(ctx.status,'valid');
+ await as(jwt,()=>assert.rejects(call('start',[null,c.id,c.name,c.email,'staff','']),/REVIEW_REASON_REQUIRED/));
+ const next=await as(jwt,()=>call('start',[null,c.id,c.name,c.email,'staff','Revisión anticipada de prueba']));
+ const repeat=await as(jwt,()=>call('start',[null,c.id,c.name,c.email,'staff','Reintento']));assert.equal(repeat.id,next.id);assert.equal(repeat.continued,true);
+ const fresh=(await db.query('select * from glf_kyc_cases where id=$1',[next.id])).rows[0];assert.equal(fresh.subject_id,c.subject_id);assert.equal(fresh.previous_case_id,c.id);assert.equal(fresh.review_due_on,null);assert.equal(fresh.pdf_version,null);assert.notEqual(fresh.answers.truth,'yes');assert.equal((await db.query('select count(*) n from glf_kyc_files where case_id=$1',[next.id])).rows[0].n,0);
+ const progress=await as(jwt,()=>call('preflight',[null,c.id]));assert.equal(progress.status,'in_progress');assert.equal(progress.history.length,2);
+ await as(jwt,()=>assert.rejects(call('reschedule',[c.id,'2031-01-01','No modificar anterior',true,3]),/SUPERSEDED_REVIEW/));
+ const expired=await fixture('high');assert.equal((await as(jwt,()=>call('preflight',[null,expired.id]))).status,'expired');await as(jwt,()=>call('start',[null,expired.id,expired.name,expired.email,'staff','']));
+ await as(jwt,()=>assert.rejects(call('start',[null,rejected.id,rejected.name,rejected.email,'staff','']),/REVIEW_REASON_REQUIRED/));
+ const ev=(await db.query("select detail from glf_kyc_events where case_id=$1 and action='review_rescheduled'",[c.id])).rows;assert.equal(ev.length,1);assert.equal(JSON.parse(ev[0].detail).previous_due,'2024-08-29');
+ for(const [name,args] of [['preflight',[null,c.id]],['candidates',['FICTICIO',0]],['start',[null,null,'Nueva','n@example.test','staff','']],['reschedule',[c.id,'2032-01-01','Intento no autorizado',true,3]]])await as({...jwt,sub:reader},()=>assert.rejects(call(name,args),/FORBIDDEN/));
+ await as(null,()=>assert.rejects(call('preflight',[null,c.id]),/permission denied/));
+ const candidates=await as(jwt,()=>call('candidates',['0000000012001',0]));assert.equal(candidates.supplier_total,1);assert.ok(candidates.cases.total>=1);
  });
  }finally{await db.close();}
 });
