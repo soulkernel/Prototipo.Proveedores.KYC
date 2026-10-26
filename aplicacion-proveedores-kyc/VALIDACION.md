@@ -237,3 +237,10 @@ Validación: 50 pruebas aprobadas (13 dominio/importación/exportación/PDF, 21 
 Chrome local: importación de CSV sintético y guardado individual; filtros, ocho columnas, prompt copiado con código correcto, guía e inglés. Diseño a 390 px sin desbordamiento horizontal; las filas se reorganizan con etiquetas. Las decisiones históricas conservan su resultado; no se aprobó ningún expediente publicado. La publicación y su comprobación se registran en el contexto local al finalizar.
 
 Pendientes externos reales: autorización y servicio de correo Google Workspace; comprobación de firmas con herramientas GLF; aceptación por usuarios con datos ficticios antes de habilitar datos reales. El respaldo a Drive es manual mediante ZIP; no se presenta como sincronización automática. Migración masiva de un padrón real y automatización autónoma del screening no forman parte de esta entrega.
+
+
+### Menú principal uniforme (2026-10-26)
+
+Por instrucción del usuario, todas las cuentas internas ven Proveedores, KYC, Usuarios y Guía en el mismo orden. KYC/Usuarios sin permiso se muestran como botones deshabilitados, con texto explicativo al pasar el puntero. No se conceden permisos ni se descargan expedientes por mostrar el menú. Los controles de autorización y MFA del servidor siguen siendo obligatorios. Las acciones dentro de cada módulo conservan sus permisos específicos.
+
+Verificación publicada del cambio institucional: commit 84d2b31598190fc8b997dc042ff5be5432c1ddbb, Vercel Deployment has completed. La sesión existente conserva MFA/permisos y muestra los 20 proveedores y dos expedientes. Verificados fecha real de invitación, columnas y estados, Prompt de KYC-00001 copiado y panel de resultado con evidencia de la versión actual. ZIP descargado y reabierto: cinco documentos, tamaños/huellas SHA-256 correctos, campos de screening incluidos. No se cambió una calificación ni se envió correo. Menú uniforme probado localmente: Dani/Consulta ven KYC y Usuarios deshabilitados; Carolina tiene KYC habilitado; Mónica tiene ambos habilitados. Se prepara la publicación del ajuste final de menú.
