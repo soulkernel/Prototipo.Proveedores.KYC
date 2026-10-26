@@ -206,3 +206,34 @@ Se creó KYC-00002 para FICTICIO 03 · Papel y Oficina Coral desde su ficha: pre
 
 Verificación publicada de alineación: commit 57c0ef2b6154ab3eec75ca84a45b4037c103b5ea; Vercel confirmó Deployment has completed. Supabase confirmó migraciones 012–015 y activación autorizada de administración de usuarios con MFA. Chrome mostró Usuarios y accesos, cuenta conectada e historial de activación; la bandeja encontró los dos expedientes y filtró un borrador. Entrada desde FICTICIO 03 ofreció Continuar proceso sobre KYC-00002, sin duplicarlo. Los 20 proveedores se mantienen; ningún expediente fue aprobado ni se enviaron mensajes.
 Ajuste final: contraste del filtro seleccionado incluso con hover. Migración 016 aplicada con Success. No rows returned: versión 2026-10-25.2 para nuevos formularios; un borrador anterior adopta la versión nueva al guardarse y requiere regenerar PDF/anexos. No modifica retrospectivamente expedientes recibidos/cerrados. Prueba SQL confirma incremento de versión e invalidación del PDF previo. Se mantienen 46 pruebas aprobadas; compilación correcta.
+
+
+## 2026-10-26 · Incorporación del demostrativo institucional
+
+Revisión comparada del HTML institucional publicado, aplicación funcional y decisiones posteriores del usuario. Se mantiene intacto el demostrativo de GitHub Pages.
+
+| Elemento del demostrativo | Implementación o adaptación vigente |
+| --- | --- |
+| Iconos de módulos y acciones | Incorporados conservando colores, tipografía, logotipo embebido y navegación GLF; etiquetas accesibles en español/inglés. |
+| Directorio, búsqueda y filtros | Existentes; se conservan conteos en línea y especialidades frecuentes junto al buscador según correcciones posteriores. |
+| Alta, contactos, imágenes y duplicados | Existentes; identificación temprana y bloqueo de duplicados en servidor. Se agregan actividades a la ficha existente; no se reincorpora el bypass ilustrativo de duplicados. |
+| Especialidades | Alta directa desde el formulario comercial. Se mantiene fuera del motor de búsqueda por instrucción del usuario. |
+| Importación CSV/XLSX ilustrativa | Convertida en revisión asistida local: plantilla, 2 MB/100 filas, rechazo de fórmulas XLSX, campos pendientes y especialidades no reconocidas. Cada fila se abre en el editor; solo Guardar registra una ficha usando validaciones/permisos existentes. No se cargó una base real. |
+| Exportación comercial | Excel/PDF reales con criterios de los filtros confirmados; no exporta KYC. |
+| Nuevo screening y alta rápida | Existentes: buscar primero proveedor/antecedentes, continuar abierto o iniciar ciclo. Expediente mínimo con nombre/correo; ficha comercial posterior. Staff/Directorio fuera del directorio. |
+| Bandeja institucional | Código, contraparte con identificación, vínculo/ruta, fecha de invitación, estado, vencimiento del enlace, screening y acciones. Colores, fechas Galápagos, paginación y filtros en servidor. |
+| Filtros prioritarios | Todos, Invitación vigente, En revisión, Subsanación, Apto y Cerrado. Más filtros mantiene borradores, recibidos, vencidos, no conformes y vigencia no verificada. Cerrado incluye decisiones finalizadas; no equivale a aprobación. |
+| Prompt por fila | Disponible tras recepción; diálogo editable y copiable a Gemini/Antigravity, generado desde ese expediente. Antes de recepción está deshabilitado con explicación. No ejecuta consultas ni aprueba. |
+| Resultado de screening | Persistido separadamente: pendiente, posible homónimo, limpio/sin coincidencias relevantes o hallazgo confirmado. Requiere revisión humana, fundamento y evidencia de la versión actual salvo pendiente; registra actor, fecha y versiones. |
+| Decisión final | Apto exige screening resuelto de las respuestas actuales, además del informe, contrafirma, riesgo y confirmación existentes. Un cambio de respuestas marca screening para revisar; no se inventan resultados históricos. |
+| Formulario externo dinámico | Existente: rutas unificadas, persona natural con cédula/RUC sin convertirse en compañía, socios ≥10%, PEP, ayuda por pasos, guardado, PDF y anexos antes de Enviar. No requiere cuenta interna. |
+| Invitación y recepción | Enlace siete días, renovable conservando borrador, invalidado al enviar. Aviso de recepción en pantalla y bandeja. Correo automático sigue pendiente de autorización/configuración Google Workspace. |
+| Documentos y respaldo | Versiones privadas, informe/capturas adjuntables y contrafirma; ZIP con datos, archivos e integridad, ahora incluye screening. Se corrige lectura externa para excluir nombres/metadatos de informes internos durante subsanación. |
+| Usuarios y permisos | Existentes con identidad central GLF, MFA, permisos por ámbito, historial y delegación temporal. No se replican cuentas ficticias ni selector de rol en producción. |
+| Observaciones/ayuda | Guía interna bilingüe de uso y prueba del formulario, adaptada a decisiones vigentes. No se reintroducen preguntas ya resueltas del demostrativo. |
+
+Validación: 50 pruebas aprobadas (13 dominio/importación/exportación/PDF, 21 base de datos/identidad, 16 KYC). Migración 017 ejecutada en Supabase con Success. No rows returned. Pruebas de privacidad verifican exclusión de informes internos en el enlace, rechazo sin MFA/permisos, evidencia de otro expediente/versión, concurrencia, rollback de cierres incompletos y nuevo ciclo sin heredar screening. Compilación demo correcta.
+
+Chrome local: importación de CSV sintético y guardado individual; filtros, ocho columnas, prompt copiado con código correcto, guía e inglés. Diseño a 390 px sin desbordamiento horizontal; las filas se reorganizan con etiquetas. Las decisiones históricas conservan su resultado; no se aprobó ningún expediente publicado. La publicación y su comprobación se registran en el contexto local al finalizar.
+
+Pendientes externos reales: autorización y servicio de correo Google Workspace; comprobación de firmas con herramientas GLF; aceptación por usuarios con datos ficticios antes de habilitar datos reales. El respaldo a Drive es manual mediante ZIP; no se presenta como sincronización automática. Migración masiva de un padrón real y automatización autónoma del screening no forman parte de esta entrega.

@@ -1,3 +1,4 @@
+import {screeningLabels} from './institutional-kyc.js';
 import {routeChoices,routeKey} from './kyc-guidance.js';
 import {labels,text} from './kyc-model.js';
 import {dayAt,addMonths,riskMonths,validity,validityLabels} from './kyc-lifecycle.js';
@@ -7,9 +8,10 @@ const code=c=>'KYC-'+String(c.code).padStart(5,'0');
 export const statusLabel=(c,lang)=>validityLabels[c.validity||validity(c)][lang==='en'?1:0];
 const riskLabel=(risk,lang)=>({high:tr(lang,'Alto','High'),medium:tr(lang,'Medio','Medium'),low:tr(lang,'Bajo','Low')})[risk]||'—';
 export function historyDetail(event,lang){
- if(!['review_schedule_set','review_rescheduled','cycle_started'].includes(event.action))return event.detail;
+ if(!['screening_recorded','review_schedule_set','review_rescheduled','cycle_started'].includes(event.action))return event.detail;
  let d;try{d=JSON.parse(event.detail);}catch{return event.detail;}
  const t=(a,b)=>tr(lang,a,b),parts=[];
+ if(event.action==='screening_recorded')return [screeningLabels[d.result]?.[lang==='en'?1:0]||d.result,d.responsible,t('Versión','Version')+' '+d.answers_version,d.note].filter(Boolean).join(' · ');
  if(d.previous_case)parts.push(`${t('Evaluación anterior','Previous assessment')}: KYC-${String(d.previous_case).padStart(5,'0')}`);
  if(d.risk||d.risk_level)parts.push(`${t('Riesgo','Risk')}: ${riskLabel(d.risk||d.risk_level,lang)}`);
  if(d.base_upload||d.report_uploaded_at)parts.push(`${t('Carga del informe','Report uploaded')}: ${dayAt(d.base_upload||d.report_uploaded_at)}`);

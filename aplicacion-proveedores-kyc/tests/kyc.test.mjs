@@ -33,7 +33,8 @@ test('KYC database: private access, links, concurrency, attachments, human revie
  await as(jwt,()=>assert.rejects(call('finish',[id,'approved','Prueba humana',false,opts]),/INVALID_REVIEW/));
  await as(jwt,()=>assert.rejects(call('finish',[id,'approved','Prueba humana',true,{...opts,risk:''}]),/RISK_REQUIRED/));
  await as(jwt,()=>assert.rejects(call('finish',[id,'approved','Prueba humana',true,opts]),/COUNTERSIGN_REQUIRED/));
- await upload('countersigned',false);await as(jwt,()=>call('finish',[id,'approved','Prueba humana',true,opts]));
+ await upload('countersigned',false);await as(jwt,()=>assert.rejects(call('finish',[id,'approved','Prueba humana',true,opts]),/SCREENING_REVIEW_REQUIRED/));
+ await as(jwt,()=>call('screening',[id,1,row.version,'clear','Evidencias ficticias revisadas',opts.report,true]));opts.expected=2;await as(jwt,()=>call('finish',[id,'approved','Prueba humana',true,opts]));
  const closed=(await db.query('select * from glf_kyc_cases where id=$1',[id])).rows[0];assert.equal(dateOnly(closed.review_due_on),addMonths(opts.issued,12));assert.equal(closed.final_report_id,opts.report);
  await as(jwt,()=>assert.rejects(call('invite',[id,false]),/INVALID_STATE/));
  });
@@ -59,6 +60,7 @@ test('KYC database: private access, links, concurrency, attachments, human revie
  const cid=(await db.query("insert into glf_kyc_cases(name,email,relation,state,created_by) values($1,'cycle@example.test','staff','review',$2) returning id",['FICTICIO '+risk+Math.random(),manager])).rows[0].id;
  const report=(await db.query("insert into glf_kyc_files(case_id,slot,path,name,bytes,mime,version,created_at) values($1,'report',$2,'INFORME_FICTICIO.pdf',100,'application/pdf',1,'2024-02-29T12:00:00Z') returning id",[cid,cid+'/report'])).rows[0].id;
  await db.query("insert into glf_kyc_files(case_id,slot,path,name,bytes,mime,version) values($1,'countersigned',$2,'FICTICIO_SIN_FIRMA.pdf',100,'application/pdf',1)",[cid,cid+'/signed']);
+ await db.query("update glf_kyc_cases set screening_status='clear',screening_answers_version=version,screening_file_id=$2,screening_recorded_at=now(),screening_by=$3 where id=$1",[cid,report,manager]);
  const opts={risk,report,issued:'2024-02-28',expected:1,...options};
  await as(jwt,()=>call('finish',[cid,state,'Resultado ficticio de prueba',true,opts]));return (await db.query('select * from glf_kyc_cases where id=$1',[cid])).rows[0];
  }
@@ -92,6 +94,45 @@ test('KYC database: private access, links, concurrency, attachments, human revie
  const filtered=await as(jwt,()=>call('inbox',['Ruta internacional',0,'expired_link']));assert.equal(filtered.total,1);assert.equal(filtered.counts.all,1);assert.equal(filtered.counts.expired_link,1);assert.ok(filtered.items[0].invitation_expires_at);assert.ok(!JSON.stringify(filtered).includes(inv.token));assert.equal((await as(jwt,()=>call('inbox',['Ruta internacional',0,'draft']))).total,0);
  const many=await as(jwt,()=>call('inbox',['Relleno',50,'draft']));assert.equal(many.total,205);assert.equal(many.items.length,50);assert.equal(many.counts.draft,205);
  await as({...jwt,sub:reader},()=>assert.rejects(call('inbox',['',0,'all']),/FORBIDDEN/));
+ });
+ await t.test('Institutional screening: evidence, authorization, concurrent edits, corrections and closed inbox',async()=>{
+ const cid=await as(jwt,()=>call('create',[null,'SCREENING FICTICIO','screening@example.test','staff']));
+ const get=async()=> (await db.query('select * from glf_kyc_cases where id=$1',[cid])).rows[0];
+ const record=(status='clear',file=null,expected=1,version=1)=>call('screening',[cid,expected,version,status,'Verificación de evidencia ficticia',file,true]);
+ await as(jwt,()=>assert.rejects(record(),/INVALID_STATE/));
+ await db.query("update glf_kyc_cases set state='review',receipt_at=now(),answers=$2 where id=$1",[cid,sample()]);
+ const report=(await db.query("insert into glf_kyc_files(case_id,slot,path,name,bytes,mime,version) values($1,'report',$2,'RESERVADO_SCREENING.pdf',100,'application/pdf',1) returning id",[cid,cid+'/screening'])).rows[0].id;
+ await db.query("insert into glf_kyc_files(case_id,slot,path,name,bytes,mime,version) values($1,'countersigned',$2,'FICTICIO.pdf',100,'application/pdf',1)",[cid,cid+'/counter']);
+ for(const claims of [{...jwt,sub:reader},{...jwt,aal:'aal1'},{...jwt,iss:'wrong'}])await as(claims,()=>assert.rejects(record('clear',report),/FORBIDDEN/));
+ await as(null,()=>assert.rejects(record('clear',report),/permission denied/));
+ await as(jwt,()=>assert.rejects(record(),/SCREENING_EVIDENCE_REQUIRED/));
+ const foreign=(await db.query('select id from glf_kyc_files where case_id<>$1 limit 1',[cid])).rows[0].id;
+ await as(jwt,()=>assert.rejects(record('clear',foreign),/SCREENING_EVIDENCE_REQUIRED/));
+ await as(jwt,()=>assert.rejects(call('screening',[cid,1,1,'clear','Nota válida para la revisión',report,false]),/INVALID_SCREENING/));
+ await as(jwt,()=>record('possible_match',report));
+ assert.equal((await get()).screening_revision,2);assert.equal((await get()).review_version,2);
+ await as(jwt,()=>assert.rejects(record('clear',report),/STALE_VERSION/));
+ let opts={risk:'high',report,issued:dayAt(new Date()),expected:2};
+ await as(jwt,()=>assert.rejects(call('finish',[cid,'approved','Prueba de homónimo',true,opts]),/SCREENING_REVIEW_REQUIRED/));
+ assert.equal((await get()).state,'review','Rejected finish rolls back the entire decision');
+ const inbox=await as(jwt,()=>call('inbox',['SCREENING FICTICIO',0,'review']));assert.equal(inbox.items[0].screening_status,'possible_match');assert.equal(inbox.items[0].screening_by_name,'Responsable');assert.equal(inbox.items[0].screening_note,undefined);
+ await as(jwt,()=>record('clear',report,2));
+ await as(jwt,()=>call('review',[cid,'correction','Corregir dirección ficticia',false]));const inv=await as(jwt,()=>call('invite',[cid,false]));
+ const external=await as(null,()=>call('read',[inv.token]));assert.ok(!JSON.stringify(external).includes('RESERVADO_SCREENING'));assert.equal(external.screening_note,undefined);assert.equal(external.screening_status,undefined);
+ const next=await as(null,()=>call('save',[inv.token,1,{...sample(),city:'Otra ciudad ficticia'}]));assert.equal(next,2);
+ await db.query("update glf_kyc_cases set state='review' where id=$1",[cid]);
+ await as(jwt,()=>assert.rejects(record('clear',report,3,2),/SCREENING_EVIDENCE_REQUIRED/));
+ // An otherwise complete final decision must not reuse screening of earlier answers.
+ const report2=(await db.query("insert into glf_kyc_files(case_id,slot,path,name,bytes,mime,version) values($1,'report',$2,'FICTICIO_V2.pdf',100,'application/pdf',2) returning id",[cid,cid+'/screening2'])).rows[0].id;
+ await db.query("insert into glf_kyc_files(case_id,slot,path,name,bytes,mime,version) values($1,'countersigned',$2,'FICTICIO_V2.pdf',100,'application/pdf',2)",[cid,cid+'/counter2']);
+ opts={...opts,report:report2,expected:(await get()).review_version};
+ await as(jwt,()=>assert.rejects(call('finish',[cid,'approved','Prueba versión nueva',true,opts]),/SCREENING_REVIEW_REQUIRED/));
+ await as(jwt,()=>record('clear',report2,3,2));opts.expected=(await get()).review_version;
+ await as(jwt,()=>call('finish',[cid,'approved','Decisión ficticia revisada',true,opts]));
+ const closed=await as(jwt,()=>call('inbox',['SCREENING FICTICIO',0,'closed']));assert.equal(closed.total,1);assert.equal(closed.counts.closed,1);assert.equal(closed.counts.approved,1);assert.equal(closed.items[0].screening_status,'clear');assert.ok(closed.items[0].invitation_issued_at);
+ await as(jwt,()=>assert.rejects(record('pending',null,4,2),/INVALID_STATE/));
+ const events=(await db.query("select detail from glf_kyc_events where case_id=$1 and action='screening_recorded'",[cid])).rows;assert.equal(events.length,3);assert.equal(JSON.parse(events[0].detail).responsible,'Responsable');
+ const started=await as(jwt,()=>call('start',[null,cid,'SCREENING FICTICIO','screening@example.test','staff','Nuevo ciclo de prueba']));const nc=(await db.query('select screening_status,screening_file_id from glf_kyc_cases where id=$1',[started.id])).rows[0];assert.equal(nc.screening_status,'pending');assert.equal(nc.screening_file_id,null);
  });
  await t.test('User administration: explicit admin, exact email, MFA, revocation and audit',async()=>{
  const adm=(name,args=[])=>db.query('select glf_admin_'+name+'('+args.map((_,i)=>'$'+(i+1)).join(',')+') result',args).then(r=>r.rows[0].result);
