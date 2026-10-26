@@ -167,3 +167,13 @@ No constituye una certificación de seguridad ni una prueba de carga o penetraci
 
 ### Límites y pendientes del piloto
 Solo datos ficticios. No constituye una certificación de seguridad ni cumplimiento legal. El correo institucional indicado se muestra como contacto: las invitaciones se copian para envío manual; envío automático y aviso por correo aún no están conectados. La bandeja sí muestra la recepción. Pendiente autorizar el servicio de correo institucional, validar campos definitivos con Carolina (incluidos control sin participación y equivalentes extranjeros), probar firma/contrafirma con herramientas reales, y completar endurecimiento de producción (análisis antimalware, límites de abuso, retención y recuperación operativa). No se enviaron mensajes reales ni se realizó screening real. La aprobación conserva responsabilidad humana.
+
+Cierre de publicación: commit 87b87cc77a4ca3a85853cfed2825c323de8eb5d0; Vercel confirmó Deployment has completed. La migración 009 y la descarga del respaldo se verificaron contra Supabase publicado.
+
+## 2026-10-25 · Búsqueda de expedientes por identificación y nombre
+- Caja explícita Buscar expediente por cédula, RUC o nombre; botón Buscar y Enter, Limpiar y ayuda para pasaportes/identificación extranjera. Español e inglés.
+- La consulta se ejecuta en Supabase sobre todos los expedientes, sin el recorte previo de 200 recientes. Resultados en páginas de 50, total filtrado, orden estable y permisos KYC/MFA preservados. Solo devuelve los campos de listado; no descarga respuestas completas para filtrar.
+- Consulta identificación y RUC adicional del expediente y del proveedor vinculado; nombre declarado, nombre de invitación, razón social y nombre comercial. Ignora mayúsculas/tildes; admite palabras de nombre en distinto orden y separadores en identificaciones.
+- Resultados con tipo, país y número de identificación; los expedientes mínimos muestran Identificación pendiente. Sin coincidencias se orienta a revisar identificación o buscar por nombre, sin crear registros.
+- 12 pruebas KYC aprobadas, incluyendo búsqueda de expediente antiguo entre más de 200, paginación sin duplicados, RUC vinculado, pasaporte, nombres sin tildes, cero coincidencias y rechazo por falta de permisos/MFA. Demo y servidor coinciden. Compilación correcta.
+- Chrome local: cédula, nombre sin tildes y orden cambiado, Enter, cero coincidencias, Limpiar e inglés verificados. Migración 010 aplicada en Supabase.
