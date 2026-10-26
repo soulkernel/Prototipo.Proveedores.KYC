@@ -1,0 +1,15 @@
+import {validity} from './kyc-lifecycle.js';
+export const queueLabels={all:['Todos','All'],draft:['Borradores','Drafts'],invited:['Invitación vigente','Active invitation'],expired_link:['Enlace vencido','Expired link'],submitted:['Recibidos','Received'],review:['En revisión','Under review'],correction:['Subsanación','Correction'],approved:['KYC vigente','Current KYC'],expired_kyc:['KYC vencido','Expired KYC'],not_approved:['No conforme','Not cleared'],unverified:['Vigencia por verificar','Validity unverified']};
+export function queueState(c){if(c.state==='approved')return {valid:'approved',expired:'expired_kyc',unverified:'unverified'}[validity(c)];if(c.state==='invited'&&(!c.invitation_expires_at||Date.parse(c.invitation_expires_at)<=Date.now()))return 'expired_link';return c.state;}
+const help=[
+ ['Confirme su vínculo y seleccione si actúa a título personal o en nombre de una entidad. Tener RUC no convierte a una persona natural en compañía.','Confirm your relationship and select whether you act personally or on behalf of an entity. A tax ID does not make an individual a company.'],
+ ['Use los nombres y números que aparecen en sus documentos. Una persona natural ecuatoriana puede escoger cédula o RUC; si escoge RUC, no se solicitará otra vez el mismo número.','Use the names and numbers on your documents. An Ecuadorian individual can choose national ID or RUC; selecting RUC avoids entering that number again.'],
+ ['Describa su actividad con palabras sencillas. Los datos bancarios se reservan para Cumplimiento y no se publican en el directorio de proveedores.','Describe your activity in plain language. Bank details are restricted to Compliance and are not published in the supplier directory.'],
+ ['Las preguntas cambian según la persona o entidad. Declare socios con participación de 10 % o más únicamente cuando corresponda a una persona jurídica.','Questions depend on the individual or entity. Report ownership of 10% or more only for a legal entity.'],
+ ['Responda sobre vínculos y funciones públicas. Una respuesta afirmativa no supone rechazo; permite a Carolina revisar las circunstancias.','Answer the questions about relationships and public roles. A yes answer does not imply rejection; it allows Carolina to review the circumstances.'],
+ ['Revise sus respuestas, genere el PDF, fírmelo y adjúntelo junto con los documentos requeridos. El proceso termina únicamente al pulsar Enviar.','Review your answers, generate and sign the PDF, and upload it with the required documents. The process ends only when you press Submit.']
+];
+export const stepHelp=(step,lang)=>help[step][lang==='en'?1:0];
+
+export const routeChoices=[['supplier_national','Proveedor nacional','National supplier'],['supplier_international','Proveedor internacional','International supplier'],['consultant_national','Consultor nacional','National consultant'],['consultant_international','Consultor internacional','International consultant'],['staff','Equipo GLF','GLF staff'],['board','Miembro del Directorio','Board member']];
+export const routeKey=a=>['staff','board'].includes(a.relation)?a.relation:a.relation+'_'+(a.nationalityType||'national');

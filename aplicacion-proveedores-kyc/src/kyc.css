@@ -3,3 +3,5 @@
 .kyc-search-controls{display:flex;gap:10px;align-items:center;margin-top:8px}.kyc-search-controls input{flex:1;min-width:0}.kyc-search-controls button{flex-shrink:0}@media(max-width:600px){.kyc-search-controls{flex-wrap:wrap}.kyc-search-controls input{flex-basis:100%}}
 
 .kyc-candidate{display:block;text-align:left;width:100%;margin:10px 0}#kyc-final-review{border-top:1px solid var(--line);padding-top:16px;margin-top:16px}#kyc-reschedule{margin-top:16px}
+
+.kyc-route-summary{padding:16px 20px;margin:16px 0;border-left:4px solid var(--teal);background:#edf7f7;border-radius:8px}.kyc-route-summary p{margin:6px 0}.kyc-route-summary small{line-height:1.6}.kyc-state-filters{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.kyc-state-filters button[aria-pressed=true]{background:var(--teal);color:white}.kyc-state-filters button{padding:8px 12px}

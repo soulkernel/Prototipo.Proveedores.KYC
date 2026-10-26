@@ -17,6 +17,9 @@ Primero confirma los sujetos exactos y jurisdicciones. Busca por nombre y docume
 FUENTES GUÍA (Carolina confirma obligatoriedad por caso; verifica URL y vigencia antes de consultar):
 - OFAC: https://ofac.treasury.gov/sanctions-list-search-tool
 - ONU: https://main.un.org/securitycouncil/es/content/un-sc-consolidated-list
+- Banco Mundial: https://www.worldbank.org/en/Projects-operations/procurement/debarred-firms — consulta las fechas, notas y alcance de la inhabilitación; no atribuyas automáticamente efectos fuera de ese ámbito.
+- BID: https://data.iadb.org/es/dataset/dataset-of-sanctioned-firms-and-individuals — consulta el registro oficial vigente y documenta sujeto, período y alcance.
+- Contraloría General del Estado (Ecuador): https://www.contraloria.gob.ec/ — usa servicios y consultas oficiales aplicables; identifica exactamente el tipo de certificado o resolución. No confundas responsabilidades, impedimentos laborales e inhabilidades para contratar ni afirmes que existe un buscador universal. Si la consulta requerida no está disponible, marca pendiente de revisión humana.
 - Unión Europea: https://finance.ec.europa.eu/eu-and-world/sanctions-restrictive-measures/overview-sanctions-and-related-resources_en
 - Reino Unido: https://www.gov.uk/government/publications/the-uk-sanctions-list (verificar lista vigente, no usar copias históricas desactualizadas).
 - Suiza SECO: https://www.seco.admin.ch/en/sanctions-en

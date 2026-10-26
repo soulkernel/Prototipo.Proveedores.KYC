@@ -62,3 +62,21 @@ test('Federated database: explicit identity, MFA, local permissions and deny-by-
   }));
  }finally{await db.close();}
 });
+
+
+test('Access invitations: central account and MFA precede acceptance; inactive profiles are never upgraded',async()=>{
+ async function scenario({active=true,level='aal2',profile=null,accepted=true}){
+  const events=[];let current=profile;
+  const authClient={auth:{getUser:async()=>({data:{user:{id:'fictional',email:'fictional@example.test'}}}),mfa:{getAuthenticatorAssuranceLevel:async()=>({data:{currentLevel:level,nextLevel:'aal2'}}),listFactors:async()=>({data:{totp:[{status:'verified'}]}})}},rpc:async()=>({data:active})};
+  const query={select(){return this;},eq(){return this;},async maybeSingle(){return {data:current};}};
+  const dataClient={from:()=>query,rpc:async name=>{events.push(name);if(accepted)current={id:'fictional',active:true,require_mfa:true};return {data:accepted};}};
+  let n=0;const identity=createIdentity({url:'https://data.example',key:'public'},()=>++n===1?authClient:dataClient);
+  try{return {result:await identity.profile(),events};}catch(error){return {error:error.message,events};}
+ }
+ assert.deepEqual((await scenario({level:'aal1'})).events,[]);
+ assert.equal((await scenario({level:'aal1'})).error,'MFA_REQUIRED');
+ assert.equal((await scenario({active:false})).error,'ACCOUNT_INACTIVE');
+ const accepted=await scenario({});assert.equal(accepted.result.email,'fictional@example.test');assert.deepEqual(accepted.events,['glf_accept_internal_invitation']);
+ assert.equal((await scenario({accepted:false})).error,'NO_PROFILE');
+ const inactive=await scenario({profile:{active:false,require_mfa:true}});assert.equal(inactive.error,'NO_PROFILE');assert.deepEqual(inactive.events,[]);
+});

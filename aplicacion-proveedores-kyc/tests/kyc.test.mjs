@@ -6,7 +6,7 @@ const sample=(relation='staff',person='natural')=>project({relation,person,natio
 test('One model controls all routes, hidden answers, owners threshold, documents and PDF entries',()=>{
  for(const relation of ['staff','board','supplier','consultant'])for(const person of ['natural','legal'])assert.deepEqual(validate(sample(relation,person)),[]);
  const staff=project({...sample(),person:'legal',bankAccount:'hidden',legalRep:'hidden',owners:[{name:'hidden',pct:'10'}],pepName:'hidden'});assert.equal(staff.person,'natural');for(const k of ['bankAccount','legalRep','pepName'])assert.equal(staff[k],undefined);assert.deepEqual(documents(staff),['signed','identity','cv']);assert.ok(!JSON.stringify(entries(staff,'es')).includes('hidden'));
- const natural=sample('supplier');assert.equal(natural.person,'natural');assert.ok(!documents(natural).includes('tax'));assert.ok(!documents(natural).includes('appointment'));assert.ok(documents(natural).includes('bank'));
+ const natural=sample('supplier');assert.equal(natural.person,'natural');assert.ok(documents(natural).includes('tax'));assert.ok(!documents(natural).includes('appointment'));assert.ok(documents(natural).includes('bank'));
  const legal=sample('consultant','legal');legal.owners=[{name:'QA',pct:'10',country:'EC',id:'0000000002'}];assert.deepEqual(validate(legal),[]);assert.ok(documents(legal).includes('owner_0'));legal.owners[0].pct='9.99';assert.ok(validate(legal).includes('owners'));
 });
 test('KYC database: private access, links, concurrency, attachments, human review and expiry',async t=>{
@@ -83,6 +83,28 @@ test('KYC database: private access, links, concurrency, attachments, human revie
  for(const [name,args] of [['preflight',[null,c.id]],['candidates',['FICTICIO',0]],['start',[null,null,'Nueva','n@example.test','staff','']],['reschedule',[c.id,'2032-01-01','Intento no autorizado',true,3]]])await as({...jwt,sub:reader},()=>assert.rejects(call(name,args),/FORBIDDEN/));
  await as(null,()=>assert.rejects(call('preflight',[null,c.id]),/permission denied/));
  const candidates=await as(jwt,()=>call('candidates',['0000000012001',0]));assert.equal(candidates.supplier_total,1);assert.ok(candidates.cases.total>=1);
+ });
+ await t.test('Approved form: natural RUC, tax annex, inbox counts and routes',async()=>{
+ const a=project({...sample('consultant'),idType:'ruc',id:'0000000001001'});assert.equal(a.person,'natural');assert.equal(a.idType,'ruc');assert.equal(a.taxId,undefined);assert.deepEqual(validate(a),[]);assert.ok(documents(a).includes('tax'));assert.ok(!documents(a).includes('appointment'));
+ const server=(await db.query('select glf_kyc_private.project($1) p,glf_kyc_private.validate($1) v,glf_kyc_private.documents($1) d',[a])).rows[0];assert.deepEqual(server.p,a);assert.deepEqual(server.v,[]);assert.deepEqual(server.d,documents(a));
+ const x=await as(jwt,()=>call('start_route',[null,null,'Ruta internacional ficticia','ruta@example.test','consultant_international','']));const c=(await db.query('select * from glf_kyc_cases where id=$1',[x.id])).rows[0];assert.equal(c.relation,'consultant');assert.equal(c.answers.nationalityType,'international');
+ const inv=await as(jwt,()=>call('invite',[x.id,false]));await db.query("update glf_kyc_private.invitations set expires_at=now()-interval '1 day' where case_id=$1",[x.id]);
+ const filtered=await as(jwt,()=>call('inbox',['Ruta internacional',0,'expired_link']));assert.equal(filtered.total,1);assert.equal(filtered.counts.all,1);assert.equal(filtered.counts.expired_link,1);assert.ok(filtered.items[0].invitation_expires_at);assert.ok(!JSON.stringify(filtered).includes(inv.token));assert.equal((await as(jwt,()=>call('inbox',['Ruta internacional',0,'draft']))).total,0);
+ const many=await as(jwt,()=>call('inbox',['Relleno',50,'draft']));assert.equal(many.total,205);assert.equal(many.items.length,50);assert.equal(many.counts.draft,205);
+ await as({...jwt,sub:reader},()=>assert.rejects(call('inbox',['',0,'all']),/FORBIDDEN/));
+ });
+ await t.test('User administration: explicit admin, exact email, MFA, revocation and audit',async()=>{
+ const adm=(name,args=[])=>db.query('select glf_admin_'+name+'('+args.map((_,i)=>'$'+(i+1)).join(',')+') result',args).then(r=>r.rows[0].result);
+ await as(jwt,()=>assert.rejects(adm('users'),/FORBIDDEN/));await db.query('update glf_profiles set manage_users=true where id=$1',[manager]);
+ const perm={supplier_create_scopes:['government'],supplier_edit_scopes:['government'],supplier_archive_scopes:[],manage_specialties:true,manage_users:false,kyc_role:'none'};
+ const inviteId=await as(jwt,()=>adm('invite_user',['NEW@example.test','FICTICIO nuevo',perm,'Alta ficticia de prueba']));await as(jwt,()=>assert.rejects(adm('invite_user',['new@example.test','Otra',perm,'Otra prueba']),/INVITE_EXISTS/));
+ const target='00000000-0000-4000-8000-000000000009',claim=()=>db.query('select glf_accept_internal_invitation() result').then(r=>r.rows[0].result);
+ assert.equal(await as({...jwt,sub:target,email:'wrong@example.test'},claim),false);await as({...jwt,sub:target,email:'new@example.test',aal:'aal1'},()=>assert.rejects(claim(),/FORBIDDEN/));assert.equal(await as({...jwt,sub:target,email:'new@example.test'},claim),true);
+ let u=(await db.query('select * from glf_profiles where id=$1',[target])).rows[0];assert.equal(u.kyc_role,'none');assert.equal(u.manage_users,false);assert.equal(u.require_mfa,true);assert.equal(u.contact_email,'new@example.test');assert.deepEqual(u.supplier_edit_scopes,['government']);
+ await as({...jwt,sub:target,email:'new@example.test'},()=>assert.rejects(adm('users'),/FORBIDDEN/));await as(jwt,()=>assert.rejects(adm('save_user',[manager,1,{...perm,display_name:'Admin',active:false},'No self changes']),/SELF_CHANGE/));
+ await as(jwt,()=>adm('save_user',[target,u.user_version,{...perm,display_name:'FICTICIO editado',active:false},'Baja temporal ficticia']));await as(jwt,()=>assert.rejects(adm('save_user',[target,u.user_version,{...perm,display_name:'FICTICIO editado',active:true},'Cambio obsoleto']),/STALE_VERSION/));
+ const cancel=await as(jwt,()=>adm('invite_user',['cancel@example.test','FICTICIO cancelar',perm,'Alta para revocar']));await as(jwt,()=>adm('cancel_invite',[cancel,1,'Revocación ficticia']));assert.equal(await as({...jwt,sub:'00000000-0000-4000-8000-000000000008',email:'cancel@example.test'},claim),false);
+ const audit=await as(jwt,()=>adm('users'));assert.ok(audit.events.some(e=>e.action==='invitation_accepted'));assert.ok(audit.events.some(e=>e.action==='permissions_changed'));await as(null,()=>assert.rejects(adm('users'),/permission denied/));
  });
  }finally{await db.close();}
 });

@@ -29,14 +29,15 @@ export function createIdentity(config,makeClient=createClient){
    if(!data.user)return null;
    const valid=await unwrapAuth(authClient.rpc('access_session_valid'));
    if(!valid)throw Error('ACCOUNT_INACTIVE');
-   const p=await unwrapAuth(dataClient.from('glf_profiles').select('*').eq('id',data.user.id).maybeSingle());
-   if(!p?.active)throw Error('NO_PROFILE');
+   let p=await unwrapAuth(dataClient.from('glf_profiles').select('*').eq('id',data.user.id).maybeSingle());
    const assurance=await unwrapAuth(authClient.auth.mfa.getAuthenticatorAssuranceLevel());
-   if((p.require_mfa||assurance.nextLevel==='aal2')&&assurance.currentLevel!=='aal2'){
+   if((!p||p.require_mfa||assurance.nextLevel==='aal2')&&assurance.currentLevel!=='aal2'){
     const factors=await unwrapAuth(authClient.auth.mfa.listFactors());
     if(!factors.totp?.some(f=>f.status==='verified'))throw Error('MFA_SETUP_REQUIRED');
     throw Error('MFA_REQUIRED');
    }
+   if(!p){await unwrapAuth(dataClient.rpc('glf_accept_internal_invitation'));p=await unwrapAuth(dataClient.from('glf_profiles').select('*').eq('id',data.user.id).maybeSingle());}
+   if(!p?.active)throw Error('NO_PROFILE');
    return {...p,email:data.user.email||''};
   },
   async verifyMfa(code){
