@@ -11,7 +11,7 @@ export async function supplierWorkbook(data, filters, lang='es', now=new Date())
  const workbook=new ExcelJS.Workbook();
  workbook.creator='Galápagos Life Fund';workbook.created=now;
  const sheet=workbook.addWorksheet(t('suppliers'),{views:[{state:'frozen',xSplit:2,ySplit:6,showGridLines:false}]});
- const columns=[['code',15],['legal_name',42],['trade_name',32],['person_type',22],['exportIdType',24],['id_number',24],['tax_number',24],['scope',30],['state',16],['specialty_ids',48],['offer_type',25],['country_name',22],['city',24],['province',24],['address',48],['contact_name',32],['contact_role',28],['email',40],['phone',24],['legal_rep_name',36],['description',60],['keywords',45],['id_country_code',24],['additional_emails',50]];
+ const columns=[['code',15],['legal_name',42],['trade_name',32],['person_type',22],['exportIdType',24],['id_number',24],['tax_number',24],['scope',30],['state',16],['specialty_ids',48],['offer_type',25],['country_name',22],['city',24],['province',24],['address',48],['contact_name',32],['contact_role',28],['email',40],['phone',24],['legal_rep_name',36],['description',60],['keywords',45],['id_country_code',24],['additional_emails',50],['additional_phones',36]];
  sheet.columns=columns.map(([key,width])=>({key,width,style:{numFmt:'@',font:{name:'Arial',size:11},alignment:{vertical:'top',wrapText:true}}}));
  sheet.mergeCells('A1:H1');sheet.getCell('A1').value='GLF · '+t('directory');sheet.getCell('A1').font={name:'Arial',size:18,bold:true,color:{argb:'FF19335F'}};sheet.getRow(1).height=32;
  const timestamp=new Intl.DateTimeFormat(lang==='es'?'es-EC':'en-GB',{dateStyle:'medium',timeStyle:'medium',timeZone:'Pacific/Galapagos'}).format(now);
@@ -21,7 +21,7 @@ export async function supplierWorkbook(data, filters, lang='es', now=new Date())
  sheet.mergeCells('A4:H4');sheet.getCell('A4').value=t('exportNote');sheet.getCell('A4').font={name:'Arial',size:10,color:{argb:'FF58677C'}};sheet.getRow(4).height=30;
  const names=new Map(data.specialties.map(s=>[s.id,s.name]));
  const values=rows.map(s=>{
-  const mapped={...s,code:'PRV-'+String(s.code).padStart(5,'0'),person_type:t(s.person_type),exportIdType:t(s.id_type),id_country_code:new Intl.DisplayNames([lang],{type:'region'}).of(s.id_country_code||s.country_code),additional_emails:(s.additional_emails||[]).map(item=>t(item.label)+': '+item.email).join('; '),scope:t(s.scope),state:t(s.active?'statusActive':'statusInactive'),specialty_ids:s.specialty_ids.map(id=>names.get(id)||'').filter(Boolean).join('; '),offer_type:t(s.offer_type)};
+  const mapped={...s,additional_phones:(s.additional_phones||[]).join('; '),code:'PRV-'+String(s.code).padStart(5,'0'),person_type:t(s.person_type),exportIdType:t(s.id_type),id_country_code:new Intl.DisplayNames([lang],{type:'region'}).of(s.id_country_code||s.country_code),additional_emails:(s.additional_emails||[]).map(item=>t(item.label)+': '+item.email).join('; '),scope:t(s.scope),state:t(s.active?'statusActive':'statusInactive'),specialty_ids:s.specialty_ids.map(id=>names.get(id)||'').filter(Boolean).join('; '),offer_type:t(s.offer_type)};
   // Strings remain strings: preserve leading zeroes and prevent formula execution.
   return columns.map(([key])=>String(mapped[key]??''));
  });
