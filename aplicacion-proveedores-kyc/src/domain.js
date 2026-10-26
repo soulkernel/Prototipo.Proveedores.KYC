@@ -13,7 +13,7 @@ export function validateSupplier(s){
  if(s.tax_number&&s.id_country_code==='EC'&&!/^\d{13}$/.test(s.tax_number))errors.push('tax_number');
  for(const [key,value] of Object.entries(s))if(typeof value==='string'&&value.length>(['description','keywords'].includes(key)?2000:250))errors.push(key);
  const emails=s.additional_emails||[];
- if(!Array.isArray(emails)||emails.length>10||emails.some(x=>!emailLabels.includes(x.label)||String(x.email).length>250||!emailPattern.test(x.email)))errors.push('additional_emails');
+ if(!Array.isArray(emails)||emails.length>3||emails.some(x=>!emailLabels.includes(x.label)||String(x.email).length>250||!emailPattern.test(x.email)))errors.push('additional_emails');
  else {const all=[s.email,...emails.map(x=>x.email)].map(x=>String(x).toLowerCase());if(new Set(all).size!==all.length)errors.push('additional_emails');}
  return [...new Set(errors)];
 }
