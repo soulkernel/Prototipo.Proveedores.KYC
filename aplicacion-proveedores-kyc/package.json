@@ -9,13 +9,15 @@
     "start": "node scripts/serve.mjs",
     "test": "node --test tests/domain.test.mjs tests/export.test.mjs tests/pdf.test.mjs",
     "test:database": "node --test tests/database.test.mjs tests/shared-identity.test.mjs tests/images.test.mjs tests/supplier-details.test.mjs",
-    "test:export": "node --test tests/export.test.mjs"
+    "test:export": "node --test tests/export.test.mjs",
+    "test:kyc": "node --test tests/kyc.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",
     "exceljs": "4.4.0",
     "jspdf": "4.2.1",
-    "jspdf-autotable": "5.0.9"
+    "jspdf-autotable": "5.0.9",
+    "jszip": "3.10.2"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
