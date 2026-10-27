@@ -1,4 +1,4 @@
-import JSZip from 'jszip';
+import {buildCaseArchive} from './kyc-case-export.js';
 import {downloadBlob} from './kyc-pdf.js';
 export function screeningPrompt(c,lang='es'){
  const a=c.answers,subjects=[{role:'Applicant',name:a.name,id:a.id,country:a.country}];if(a.legalRep)subjects.push({role:'Legal representative',name:a.legalRep,id:a.legalRepId,country:a.legalRepCountry});for(const o of a.owners||[])subjects.push({role:'Owner >=10%',name:o.name,id:o.id,country:o.country,percentage:o.pct});
@@ -44,9 +44,7 @@ Portada: BORRADOR PARA REVISIÓN HUMANA, código, versión, objeto, fecha de cor
 
 Produce el informe editable y, si las herramientas permiten, PDF con el mismo contenido y capturas. Si no puedes generar archivos, entrega el texto completo y la lista explícita de archivos pendientes. Incluye tabla de control de completitud. No declares cumplimiento total si faltan consultas, identidad o evidencia. Carolina revisará, corregirá y firmará el documento antes de incorporarlo al expediente.`;
 }
-export async function backupCase(c,store,lang){
- const zip=new JSZip(),manifest={case:'KYC-'+String(c.code).padStart(5,'0'),exported_at:new Date().toISOString(),version:c.version,files:[]};
- zip.file('expediente.json',JSON.stringify({code:c.code,name:c.name,relation:c.relation,state:c.state,version:c.version,previous_case_id:c.previous_case_id,risk_level:c.risk_level,final_report_id:c.final_report_id,report_issued_on:c.report_issued_on,report_uploaded_at:c.report_uploaded_at,closed_at:c.closed_at,decision_by:c.decision_by,policy_due_on:c.policy_due_on,review_due_on:c.review_due_on,schedule_reason:c.schedule_reason,schedule_exception:c.schedule_exception,answers:c.answers,review_note:c.review_note,screening_status:c.screening_status,screening_note:c.screening_note,screening_file_id:c.screening_file_id,screening_answers_version:c.screening_answers_version,screening_recorded_at:c.screening_recorded_at,screening_by:c.screening_by,received_at:c.receipt_at,events:c.events},null,2));
- for(const [i,f] of c.files.entries()){const blob=await store.download(f),bytes=await blob.arrayBuffer(),sha=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(x=>x.toString(16).padStart(2,'0')).join('');const name='documentos/'+String(i+1).padStart(3,'0')+'_v'+f.version+'_'+f.name.replace(/[^\p{L}\p{N}._-]/gu,'_').slice(0,160);zip.file(name,bytes);manifest.files.push({file:name,slot:f.slot,version:f.version,bytes:blob.size,sha256:sha});}
- zip.file('manifiesto.json',JSON.stringify(manifest,null,2));zip.file('LEAME.txt',lang==='en'?'CONFIDENTIAL. Store in a private folder or encrypted drive. Hashes verify file integrity, not signature validity. This download does not automatically synchronize with Google Drive.':'CONFIDENCIAL. Almacene en una carpeta privada o disco cifrado. Las huellas verifican integridad de archivos, no validez de firmas. Esta descarga no sincroniza automáticamente con Google Drive.');downloadBlob(await zip.generateAsync({type:'blob',compression:'DEFLATE'}),manifest.case+'_expediente.zip');
+export async function backupCase(c,store,lang,logo){
+ const archive=await buildCaseArchive(c,store,lang,logo);
+ downloadBlob(archive.blob,archive.filename);
 }

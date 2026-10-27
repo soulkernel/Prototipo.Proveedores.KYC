@@ -302,3 +302,11 @@ Los anexos proceden de las reglas del formulario: persona natural, jurídica, Eq
 
 Validación: cinco pruebas automatizadas aprobadas para rutas nacionales/internacionales, umbral del 10 %, persona natural con RUC, clasificación desconocida, proveedor vinculado, ambos idiomas, fecha/hora, excepción de firma y exclusión de respuestas sensibles. Compilación demo correcta. Chrome local con expediente ficticio: botón de copia devuelve confirmación en español e inglés, sin errores de consola. El contenido se verificó mediante pruebas de la plantilla; la lectura del portapapeles de la herramienta del navegador retornó vacío. Sin migraciones, cambios de permisos ni envío de correos.
 
+## Descarga documental de expedientes KYC — 2026-10-27
+
+Acuerdo implementado: Descargar expediente conserva el ZIP como contenedor, pero elimina expediente.json, manifiesto.json y LEAME.txt. Incluye un resumen e índice en PDF con logotipo GLF, identidad, estado, vigencia, screening, fechas, observaciones, información consignada e historial. Funciona en español e inglés.
+
+Los archivos disponibles se organizan en Formularios, Anexos, Informes y screening y Documentos adicionales. Se conservan los originales byte por byte, todas sus versiones, nombres originales en el índice y referencias al informe/evidencia seleccionados. No se fusionan ni regeneran los PDF firmados. Un documento de una versión anterior no satisface un pendiente de la versión actual; disponible no equivale a validado. Si falta clasificar a la persona se indica que la lista documental es provisional. Un expediente sin archivos entrega únicamente el resumen PDF con sus pendientes. Si falla la recuperación de un archivo, se interrumpe la descarga, sin producir un ZIP incompleto. La información se vuelve a consultar al descargar; no cambian permisos ni almacenamiento.
+
+Validación: 33 pruebas KYC aprobadas, incluidas integridad de originales, versiones, nombres repetidos, rutas seguras, ausencia de JSON/TXT y fallos de descarga. Compilación demo correcta. PDF ES/EN de cinco páginas y expediente inicial de dos páginas reabiertos y revisados visualmente con Poppler. Chrome local: Descargar expediente generó un ZIP, se reabrió y se comprobó el resumen y sus pendientes, sin errores de consola. No se modificaron expedientes reales ni se enviaron correos.
+
