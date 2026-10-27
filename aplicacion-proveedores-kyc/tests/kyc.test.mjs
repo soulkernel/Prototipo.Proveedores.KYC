@@ -18,6 +18,21 @@ test('KYC database: private access, links, concurrency, attachments, human revie
  async function as(claims,fn){await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify(claims||{})]);await db.exec('set role '+(claims?'authenticated':'anon'));try{return await fn();}finally{await db.exec('reset role');}}
  const call=(name,args=[],casts=[])=>db.query('select glf_kyc_'+name+'('+args.map((_,i)=>'$'+(i+1)+(casts[i]?'::'+casts[i]:'')).join(',')+') result',args).then(r=>r.rows[0].result);
  let id,token,row;
+ await t.test('Supplier association is optional, private and preserves the seven-day invitation and answers',async()=>{
+ const cid=await as(jwt,()=>call('create',[null,'FICTICIO SIN FICHA','nuevo@example.test','supplier']));
+ const invitation=await as(jwt,()=>call('invite',[cid,false]));
+ assert.ok(Math.abs(Date.parse(invitation.expires_at)-Date.now()-7*86400000)<10000);
+ const before=await as(null,()=>call('read',[invitation.token]));
+ const sid=(await db.query("insert into glf_suppliers(scope,person_type,country_code,country_name,id_country_code,id_type,id_number,legal_name,offer_type,city,email,phone,created_by,updated_by) values('glf','natural','EC','Ecuador','EC','cedula','0000077777','PROVEEDOR FICTICIO','services','Quito','nuevo@example.test','0000000000',$1,$1) returning id",[manager])).rows[0].id;
+ await as({...jwt,sub:reader},()=>assert.rejects(call('link_supplier',[cid,sid]),/FORBIDDEN/));
+ await as({...jwt,aal:'aal1'},()=>assert.rejects(call('link_supplier',[cid,sid]),/FORBIDDEN/));
+ await as(jwt,()=>call('link_supplier',[cid,sid]));
+ const after=await as(null,()=>call('read',[invitation.token]));assert.deepEqual(after.answers,before.answers);assert.equal(after.expires_at,before.expires_at);
+ assert.equal((await db.query('select supplier_id from glf_kyc_cases where id=$1',[cid])).rows[0].supplier_id,sid);
+ await as(jwt,()=>assert.rejects(call('link_supplier',[cid,sid]),/INVALID_STATE/));
+ const staff=await as(jwt,()=>call('create',[null,'STAFF SIN PROVEEDOR','staff-sin@example.test','staff']));
+ await as(jwt,()=>assert.rejects(call('link_supplier',[staff,sid]),/INVALID_STATE/));
+ });
  await t.test('Explicit manager creates; directory reader and weak MFA cannot access',async()=>{id=await as(jwt,()=>call('create',[null,'FICTICIO','qa@example.test','staff']));await as({...jwt,sub:reader},async()=>{assert.equal((await db.query('select * from glf_kyc_cases')).rows.length,0);await assert.rejects(call('create',[null,'FICTICIO','qa@example.test','staff']),/FORBIDDEN/);});await as({...jwt,aal:'aal1'},()=>assert.rejects(call('invite',[id,false]),/FORBIDDEN/));await as({...jwt,iss:'https://wrong'},()=>assert.rejects(call('invite',[id,false]),/FORBIDDEN/));});
  await t.test('Private tables and token hashes have no anonymous access',async()=>{await as(null,()=>assert.rejects(db.query('select * from glf_kyc_cases'),/permission denied/));await as(jwt,()=>assert.rejects(db.query('select * from glf_kyc_private.invitations'),/permission denied/));const x=await as(jwt,()=>call('invite',[id,false]));token=x.token;assert.equal(token.length,64);assert.equal((await db.query('select octet_length(token_hash) n from glf_kyc_private.invitations')).rows[0].n,32);await as(null,()=>assert.rejects(call('read',['a'.repeat(64)]),/LINK_INVALID/));});
  await t.test('Server and browser rules agree for all form routes',async()=>{for(const relation of ['staff','board','supplier','consultant'])for(const person of ['natural','legal']){const a=sample(relation,person);assert.deepEqual((await db.query('select glf_kyc_private.validate($1::jsonb) errors',[JSON.stringify(a)])).rows[0].errors,validate(a));assert.deepEqual((await db.query('select glf_kyc_private.documents($1::jsonb) docs',[JSON.stringify(a)])).rows[0].docs,documents(a));}});
