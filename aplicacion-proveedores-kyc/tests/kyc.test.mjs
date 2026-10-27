@@ -162,6 +162,64 @@ test('KYC database: private access, links, concurrency, attachments, human revie
  const cancel=await as(jwt,()=>adm('invite_user',['cancel@example.test','FICTICIO cancelar',perm,'Alta para revocar']));await as(jwt,()=>adm('cancel_invite',[cancel,1,'Revocación ficticia']));assert.equal(await as({...jwt,sub:'00000000-0000-4000-8000-000000000008',email:'cancel@example.test'},claim),false);
  const audit=await as(jwt,()=>adm('users'));assert.ok(audit.events.some(e=>e.action==='invitation_accepted'));assert.ok(audit.events.some(e=>e.action==='permissions_changed'));await as(null,()=>assert.rejects(adm('users'),/permission denied/));
  });
+
+ await t.test('Assisted entry preserves drafts, revokes external writers, audits fields and requires signed receipt',async()=>{
+  const cid=await as(jwt,()=>call('create',[null,'ASSISTED FICTICIO','assisted@example.test','staff']));
+  let r=(await db.query('select * from glf_kyc_cases where id=$1',[cid])).rows[0];
+  const get=async()=>r=(await db.query('select * from glf_kyc_cases where id=$1',[cid])).rows[0];
+  const assist=(action,opts={})=>call('assist',[cid,opts.version??r.version,opts.epoch??r.edit_epoch,action,opts.answers??null,opts.reason??'Recibido por correo de prueba',opts.scan??false,opts.confirm??true]);
+  const inv=await as(jwt,()=>call('invite',[cid,false]));await get();
+  await as(null,()=>call('save',[inv.token,r.version,sample()]));await get();
+  const previous=structuredClone(r.answers),oldVersion=r.version;
+  const oldTicket=await as(null,()=>call('upload_ticket',[inv.token,cid,r.version,'identity']));
+  await as(null,()=>assert.rejects(assist('start'),/permission denied/));
+  for(const claims of [{...jwt,sub:reader},{...jwt,aal:'aal1'},{...jwt,sub:assistant}])await as(claims,()=>assert.rejects(assist('start'),/FORBIDDEN/));
+  await as(jwt,()=>assert.rejects(assist('start',{confirm:false}),/ASSIST_REASON_REQUIRED/));
+  await as(jwt,()=>assert.rejects(assist('start',{reason:''}),/ASSIST_REASON_REQUIRED/));
+  await as(jwt,()=>assist('start'));await get();assert.equal(r.assisted,true);assert.equal(r.state,'draft');assert.deepEqual(r.answers,previous);assert.equal(r.version,oldVersion);
+  await as(null,()=>assert.rejects(call('read',[inv.token]),/LINK_INVALID/));
+  await as(null,()=>assert.rejects(call('save',[inv.token,r.version,sample()]),/LINK_INVALID/));
+  assert.equal(await as(null,()=>call('upload_allowed',[oldTicket])),false);
+  const renewed=await as(jwt,()=>call('invite',[cid,false]));const suspendedEpoch=r.edit_epoch;await get();assert.equal(r.assisted,false);
+  await as(jwt,()=>assert.rejects(assist('save',{epoch:suspendedEpoch,answers:sample()}),/STALE_VERSION/));
+  assert.equal(await as(null,()=>call('upload_allowed',[oldTicket])),false);
+  await as(jwt,()=>assist('start'));await get();
+  await as(null,()=>assert.rejects(call('read',[renewed.token]),/LINK_INVALID/));
+  await as(jwt,()=>assert.rejects(assist('save',{answers:sample('supplier')}),/ROUTE_MISMATCH/));
+  const v=r.version;await as(jwt,()=>assist('save',{answers:{...sample(),city:'Ciudad asistida',bankAccount:'HIDDEN'}}));await get();
+  assert.equal(r.version,v+1);assert.equal(r.answers.bankAccount,undefined);
+  await as(jwt,()=>assert.rejects(assist('save',{version:v,answers:sample()}),/STALE_VERSION/));
+  const audit=(await db.query("select detail,actor_id from glf_kyc_events where case_id=$1 and action='answers_saved' order by created_at desc",[cid])).rows;
+  assert.equal(audit[0].actor_id,manager);assert.equal(JSON.parse(audit[0].detail).source,'assisted');assert.ok(JSON.parse(audit[0].detail).fields.includes('city'));assert.equal(JSON.parse(audit.at(-1).detail).source,'applicant');
+  assert.ok((await db.query('select * from glf_kyc_private.answer_revisions where case_id=$1',[cid])).rows.length>=2);
+  await as(jwt,()=>assert.rejects(db.query('select * from glf_kyc_private.answer_revisions'),/permission denied/));
+  await as(jwt,()=>assert.rejects(call('upload_ticket',[null,cid,r.version,'signed']),/PDF_REQUIRED/));
+  await as(jwt,()=>assist('pdf'));await get();
+  await as(jwt,()=>assert.rejects(assist('submit'),/MISSING_DOCUMENT/));
+  await as(jwt,()=>assert.rejects(call('upload_ticket',[null,cid,r.version,'report']),/INVALID_SLOT/));
+  const filePaths=[];
+  for(const slot of documents(r.answers)){
+   const path=await as(jwt,()=>call('upload_ticket',[null,cid,r.version,slot]));filePaths.push(path);
+   await as(jwt,()=>db.query("insert into storage.objects(bucket_id,name,metadata) values('glf-kyc-documents',$1,$2)",[path,{size:1024,mimetype:'application/pdf'}]));
+   await as(jwt,()=>call('attach',[null,path,'FICTICIO.pdf']));
+  }
+  await as(jwt,()=>assert.rejects(assist('submit',{confirm:false}),/ASSIST_SIGNATURE_REQUIRED/));
+  await as(jwt,()=>call('delegate',[assistant,new Date(Date.now()+86400000).toISOString(),'Asistencia temporal prueba']));
+  const ticket=await as({...jwt,sub:assistant},()=>call('upload_ticket',[null,cid,r.version,'other']));
+  assert.equal(await as(jwt,()=>call('upload_allowed',[ticket])),false,'ticket belongs to its issuing actor');
+  await as(jwt,()=>call('delegate',[assistant,null,'Fin de asistencia prueba']));
+  await as({...jwt,sub:assistant},()=>assert.rejects(assist('save',{answers:sample()}),/FORBIDDEN/));
+  assert.equal(await as({...jwt,sub:assistant},()=>call('upload_allowed',[ticket])),false);
+  await as(jwt,()=>assist('submit'));await get();assert.equal(r.state,'submitted');assert.equal(r.assisted,false);
+  assert.equal((await db.query('select * from glf_kyc_private.submissions where case_id=$1',[cid])).rows.length,1);
+  await as(jwt,()=>assert.rejects(assist('start'),/INVALID_STATE/));
+  assert.equal(await as(jwt,()=>call('upload_allowed',[ticket])),false);
+  await as(jwt,()=>call('review',[cid,'correction','Corregir ciudad de prueba',false]));await get();
+  await as(jwt,()=>assist('start'));await get();await as(jwt,()=>assert.rejects(call('review',[cid,'review','No bypass assisted receipt',false]),/ASSISTANCE_ACTIVE/));await as(jwt,()=>assist('save',{answers:{...r.answers,city:'Ciudad corregida'}}));await get();
+  await as(jwt,()=>assist('pdf'));await as(jwt,()=>assert.rejects(assist('submit'),/MISSING_DOCUMENT/));
+  assert.equal((await db.query('select * from glf_kyc_files where case_id=$1',[cid])).rows.length,3,'Old attachments retained, not reused for changed answers');
+  const snapshot=(await db.query('select answers from glf_kyc_private.submissions where case_id=$1',[cid])).rows[0].answers;assert.equal(snapshot.city,'Ciudad asistida');
+ });
  }finally{await db.close();}
 });
 

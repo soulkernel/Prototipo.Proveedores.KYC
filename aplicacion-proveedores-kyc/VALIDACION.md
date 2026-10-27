@@ -255,6 +255,7 @@ El alta muestra la búsqueda realizada solo como referencia, sin inferir persona
 Validación: compilación demo correcta y 16 pruebas KYC aprobadas. Chrome local: cero resultados, cambio de consulta (sin botón/formulario obsoleto), foco en nombre, referencia consultada, creación ficticia y generación de enlace, continuidad del expediente y precarga de proveedor existente. ES/EN comprobados; viewport 390 px sin desbordamiento horizontal. No se crean registros publicados durante estas pruebas ni se cambian permisos/base de datos.
 
 
+
 ### Invitación independiente y ficha comercial opcional — 2026-10-26
 
 Para una contraparte nueva, Invitación y seguimiento aclara que puede enviarse la invitación con los datos básicos; no exige crear un proveedor. El enlace conserva siete días. La asociación manual queda cerrada bajo “Asociar a un proveedor existente — opcional”. Los expedientes iniciados desde un proveedor muestran su nombre y código vinculados.
@@ -264,3 +265,16 @@ Tras recibir el formulario, proveedores y consultores en recepción/revisión o 
 La identificación se comprueba antes de guardar. Si existe, se puede asociar explícitamente esa ficha sin duplicarla. Al guardar una ficha nueva se asocia al expediente y se vuelve a KYC. Si la asociación falla después del guardado, el aviso indica que la ficha ya existe y permite reintentar mediante asociación, evitando otra alta. Crear/asociar una ficha no modifica las respuestas ni aprueba KYC; se mantienen las restricciones del servidor.
 
 Validación: 20 pruebas KYC/privacidad aprobadas, incluidas exclusión de campos reservados y perfiles/rutas, y conservación del enlace de siete días y respuestas después de asociar. También pasaron las 13 pruebas generales existentes. Chrome local con datos ficticios: generación de enlace sin ficha, asociación cerrada inicialmente, alta desde respuestas con elección de especialidad, retorno a KYC con nombre/código, duplicado asociado sin alta y ausencia de controles comerciales en Staff. Textos ES/EN comprobados y compilación demo correcta. No se modifica Supabase ni se generan registros públicos durante esta entrega.
+
+
+## Llenado asistido de KYC — 2026-10-26
+
+Carolina, Mónica y las delegaciones KYC vigentes pueden completar el mismo formulario desde su sesión interna. En Invitación y seguimiento se ofrece Llenar formulario por el proveedor / Continuar llenado asistido. Iniciar requiere motivo y confirmación de que se deshabilita el enlace anterior, conservando las respuestas. No crea otro expediente ni exige ficha comercial.
+
+El formulario conserva campos condicionales, español/inglés, guardado parcial y PDF. Guardar y volver permite retomar desde la cuenta interna. Generar un nuevo enlace termina la asistencia y devuelve el avance al destinatario durante siete días. Versiones de respuesta y de sesión impiden escrituras obsoletas; los tickets de archivo se vinculan al estado y al usuario interno emisor, con comprobación de delegación/MFA en el servidor.
+
+El asistente transcribe información recibida, sin sustituir al declarante: genera el PDF para su revisión y firma, carga la copia firmada y anexos, confirma su correspondencia y pulsa Completar recepción y pasar a revisión. El botón permanece deshabilitado sin PDF vigente, anexos y confirmación. La recepción conserva una instantánea y no aprueba KYC. Los expedientes recibidos solo se editan tras subsanación; no se puede saltar a revisión durante asistencia. Los archivos anteriores y las instantáneas recibidas se conservan.
+
+La migración 018 agrega control de asistencia y revisiones de respuestas en esquema privado. El historial visible a Cumplimiento registra actor, origen, versión y campos cambiados, sin duplicar sus valores sensibles en mensajes. El correo/documento de respaldo de asistencia es opcional. No se ampliaron roles ni se modificaron cuentas.
+
+Validación: 55 pruebas aprobadas (21 KYC/privacidad, 13 generales y 21 directorio/base de datos/identidad). Se verificaron bloqueo de anónimos/lectores/MFA débil, caducidad de delegación, revocación de enlaces y tickets, concurrencia, proyección de campos, firma/anexos, recepción, prohibición de eludir la recepción y conservación de versiones en subsanación. Chrome local: inicio, selección de persona natural, guardado incompleto, historial con actor/campos, recarga y continuidad, formulario de Equipo sin datos societarios, PDF descargado, carga de PDF ficticio y botón final deshabilitado con anexos pendientes. La prueba de recepción completa se ejecutó en PostgreSQL local con archivos ficticios; no se emitió firma real. Supabase confirmó la instalación de la migración 018 y su RPC mediante consulta de metadatos.

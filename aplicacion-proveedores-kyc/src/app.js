@@ -128,7 +128,7 @@ function bindEditor(){
  for(const key of ['id_number','tax_number']){const el=root.querySelector('#f-'+key);el?.addEventListener('input',()=>{duplicateSequence++;clearTimeout(duplicateTimer);duplicateTimer=setTimeout(checkDuplicate,400);});el?.addEventListener('blur',()=>{clearTimeout(duplicateTimer);checkDuplicate();});}
  form.addEventListener('submit',save);emailWarning();
 }
-function leave(){if(busy)return false;if(dirty&&!confirm(t('unsaved')))return false;dirty=false;kycSupplierOrigin=null;clearPendingImage();return true;}
+function leave(){if(busy||view==='kyc'&&!kyc.canLeave())return false;if(dirty&&!confirm(t('unsaved')))return false;dirty=false;kycSupplierOrigin=null;clearPendingImage();return true;}
 async function save(ev){
  ev.preventDefault();if(busy)return;collect();clearTimeout(duplicateTimer);
  const candidate=normalizeSupplier({...draft}),errors=validateSupplier(candidate),form=ev.target;

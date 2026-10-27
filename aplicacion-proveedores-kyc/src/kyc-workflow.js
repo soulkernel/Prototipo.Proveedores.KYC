@@ -1,3 +1,4 @@
+import {fields} from './kyc-model.js';
 import {screeningLabels} from './institutional-kyc.js';
 import {routeChoices,routeKey} from './kyc-guidance.js';
 import {labels,text} from './kyc-model.js';
@@ -8,6 +9,8 @@ const code=c=>'KYC-'+String(c.code).padStart(5,'0');
 export const statusLabel=(c,lang)=>validityLabels[c.validity||validity(c)][lang==='en'?1:0];
 const riskLabel=(risk,lang)=>({high:tr(lang,'Alto','High'),medium:tr(lang,'Medio','Medium'),low:tr(lang,'Bajo','Low')})[risk]||'—';
 export function historyDetail(event,lang){
+ if(['assistance_started','answers_saved','assisted_submitted'].includes(event.action)){let d;try{d=JSON.parse(event.detail);}catch{return event.detail;}const t=(a,b)=>tr(lang,a,b);return [d.responsible||(d.source==='applicant'?t('Declarante mediante enlace','Applicant via link'):t('Usuario interno','Internal user')),d.version?t('Versión ','Version ')+d.version:'',d.reason,(d.fields||[]).map(k=>text(fields.find(f=>f.key===k)?.label||[k,k],lang)).join(', ')].filter(Boolean).join(' · ');}
+
  if(!['screening_recorded','review_schedule_set','review_rescheduled','cycle_started'].includes(event.action))return event.detail;
  let d;try{d=JSON.parse(event.detail);}catch{return event.detail;}
  const t=(a,b)=>tr(lang,a,b),parts=[];
