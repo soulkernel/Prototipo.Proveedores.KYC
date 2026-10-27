@@ -294,3 +294,11 @@ Validaciones: resumen con enlaces, borde e indicación junto al campo, foco en p
 
 Validación: 59 pruebas automatizadas aprobadas, incluidas reglas compartidas servidor/navegador, monedas, catálogo, privacidad y recepción asistida. Chrome local: cambio libre de sección, guardado, formato ES/EN, búsqueda JEP, Otra, entidad extranjera, documentos de representante y socios, resumen/foco/limpieza de errores y anexos pendientes. PDF de prueba descargado y reabierto: conserva 5.000,00 / 1.250,50, número de cuenta con ceros y dos áreas de firma. Supabase confirmó la ejecución de la migración 019.
 
+## Mensaje de invitación KYC — 2026-10-27
+
+El botón Copiar mensaje de invitación usa una plantilla ES/EN con saludo, propósito, confidencialidad afirmativa, enlace personal y vencimiento real en hora de Galápagos. Explica guardado, PDF, firma, anexos y envío final; conserva el aviso de datos ficticios del piloto. La firma física aparece solo con la excepción habilitada.
+
+Los anexos proceden de las reglas del formulario: persona natural, jurídica, Equipo GLF o Directorio. Un RUC personal no activa requisitos societarios. Si la clasificación aún no se conoce, los requisitos exclusivos de personas jurídicas se presentan como condicionales. La lista no copia respuestas financieras ni identificaciones de socios. Se usa la clasificación de la ficha comercial únicamente si corresponde al proveedor vinculado.
+
+Validación: cinco pruebas automatizadas aprobadas para rutas nacionales/internacionales, umbral del 10 %, persona natural con RUC, clasificación desconocida, proveedor vinculado, ambos idiomas, fecha/hora, excepción de firma y exclusión de respuestas sensibles. Compilación demo correcta. Chrome local con expediente ficticio: botón de copia devuelve confirmación en español e inglés, sin errores de consola. El contenido se verificó mediante pruebas de la plantilla; la lectura del portapapeles de la herramienta del navegador retornó vacío. Sin migraciones, cambios de permisos ni envío de correos.
+

@@ -1,3 +1,4 @@
+import {invitationMessage} from './kyc-invitation.js';
 import {parseMoney,formatMoney,moneyKeys,documentNumberLabel,validRelatedId} from './kyc-inputs.js';
 import {bankCatalog,filterBanks} from './financial-institutions.js';
 import {can} from './domain.js';
@@ -150,7 +151,7 @@ export function createKycModule(config,directory,logo,options={}){
    if(id==='new'){workflow.reset();screen='new';invite=null;notice='';}if(id==='delegation'){users=await store.users();screen='delegation';}
    if(id==='invite'){invite=await store.invite(current.id,scan);invite.url=location.origin+location.pathname+'#kyc='+invite.token;current=await store.detail(current.id);notice=tr('Enlace creado. Todavía no se ha enviado ningún correo.','Link created. No email has been sent.');}
    if(id==='copy-link'){await navigator.clipboard.writeText(invite.url);notice=tr('Enlace copiado.','Link copied.');}
-   if(id==='copy-email'){await navigator.clipboard.writeText(tr(`Estimado/a ${current.name}:\nGLF le solicita completar el formulario KYC de prueba ${code(current)}. Use únicamente datos ficticios. Puede guardar y retomar desde cualquier dispositivo hasta ${date(invite.expires_at)} (Galápagos).\n${invite.url}\nDescargue el PDF, fírmelo y adjúntelo con los documentos antes de pulsar Enviar. No reenvíe este enlace. Para asistencia: carolina.astudillo@glf.org.ec.\nCarolina Astudillo · GLF`,`Dear ${current.name},\nGLF requests completion of test KYC form ${code(current)}. Use fictional data only. Save and resume on any device until ${date(invite.expires_at)} (Galápagos).\n${invite.url}\nDownload and sign the PDF, then upload it and the required documents before submitting. Do not forward this link. For assistance: carolina.astudillo@glf.org.ec.\nCarolina Astudillo · GLF`));notice=tr('Mensaje copiado; envíelo desde su correo institucional.','Message copied; send it from your institutional mailbox.');}
+   if(id==='copy-email'){await navigator.clipboard.writeText(invitationMessage(current,invite,lang,suppliers.find(s=>s.id===current.supplier_id)));notice=tr('Mensaje copiado; envíelo desde su correo institucional.','Message copied; send it from your institutional mailbox.');}
    if(id==='next'||id==='pdf'||id==='submit'){readFields();const errs=validate(current.answers,id==='next'?step:null);invalidKeys=errs;if(errs.length){focusError=true;return;}await flush();if(id==='submit'){fileErrors={};if(current.pdf_version!==current.version)fileErrors.pdf=tr('Genere el PDF actualizado antes de enviar.','Generate the current PDF before submitting.');for(const slot of documents(current.answers))if(!current.files?.some(f=>f.slot===slot&&f.version===current.version))fileErrors['file:'+slot]=tr('Adjunte este documento de la versión actual.','Attach this document for the current version.');if(Object.keys(fileErrors).length){focusError=true;return;}}}
    if(id==='next'){step++;notice='';}
    if(id==='pdf'){signatureChecked=false;await store.pdf(current);current.pdf_version=current.version;delete fileErrors.pdf;const {makeKycPdf}=await import('./kyc-pdf.js');makeKycPdf(current,lang,logo).save(code(current)+'_v'+current.version+'.pdf');notice=screen==='assisted'?tr('PDF generado. Remítalo al declarante para revisión y firma; luego adjunte el documento firmado.','PDF generated. Send it to the applicant for review and signature, then attach the signed document.'):tr('PDF generado. Fírmelo y adjúntelo debajo.','PDF generated. Sign and attach it below.');}
@@ -166,4 +167,5 @@ export function createKycModule(config,directory,logo,options={}){
   reset(){clearTimeout(timer);pending=false;receipt=null;caseEntry=null;promptPreview=null;supplierEntry=null;caseStatus='all';caseCounts={};workflow.reset();caseQuery='';caseDraft='';caseOffset=0;caseTotal=0;loaded=false;cases=[];current=null;invite=null;screen='list';root=null;}
  };
 }
+
 
