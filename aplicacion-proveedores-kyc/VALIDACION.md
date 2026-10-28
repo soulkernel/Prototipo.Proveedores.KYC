@@ -352,3 +352,13 @@ Entidad financiera elimina la caja de búsqueda permanente y usa el selector com
 
 Validación: 42 pruebas KYC aprobadas y compilación demo correcta. Chrome local: selección de dos actividades, retirada de una, selección independiente de paneles solares, Otro con texto libre, guardado y recarga, resumen ES/EN sin perder detalles anteriores, búsqueda JEP, selección de cooperativa, banco no listado, país bancario extranjero y vuelta a Ecuador/Banco Pichincha. Revisión visual y consola sin errores. No se modificaron expedientes reales, permisos o documentos históricos.
 
+## Secuencia de Actividad y explicación de datos — 2026-10-27
+
+El título del formulario externo y asistido queda Formulario KYC / KYC form, sin unificado. Para proveedores y consultores, Actividad se distribuye en tres bloques: 1) actividad y relación con GLF, con actividad económica, bienes/servicios, datos tributarios condicionales y sitio web a todo el ancho; 2) información económica, con ingresos y egresos mensuales en la misma fila; 3) información bancaria, con entidad y país en la primera fila y titular/número de cuenta en la siguiente. Equipo y Directorio conservan los campos correspondientes a sus rutas.
+
+Las ayudas indican que ingresos y egresos son totales mensuales del declarante, no solo de la relación con GLF; para personas jurídicas se refieren explícitamente a la entidad. Se explica qué entidad financiera seleccionar, el país donde se mantiene la cuenta, el nombre del titular conforme al certificado y el número de cuenta o IBAN. Se conservan USD y formato monetario ES/EN.
+
+Seleccionar una entidad del catálogo ecuatoriano completa Ecuador y muestra ese país como valor calculado. Otra entidad / Entidad extranjera habilita nombre y país; si se cambia desde una entidad ecuatoriana conocida, ambos se limpian para solicitar la información nueva. Cambiar el país de una entidad escrita manualmente conserva su nombre. Entidades y países anteriores se mantienen al abrir el expediente; no se realiza actualización masiva.
+
+Validación: 42 pruebas KYC aprobadas, compilación demo correcta y navegador Chrome local sin errores de consola. Comprobados título, tres bloques, filas y ancho del sitio web, ayudas persona natural/jurídica ES/EN, Ecuador automático, cambio a entidad extranjera, persistencia de nombre/país tras recarga y vuelta al catálogo ecuatoriano. Revisión visual de información económica y bancaria. Sin migraciones, ampliación de permisos ni cambios en expedientes reales.
+
