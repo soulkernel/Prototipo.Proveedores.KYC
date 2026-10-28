@@ -1,3 +1,4 @@
+import {nationalityLabel} from './nationalities.js';
 import {formatMoney,moneyKeys,documentNumberLabel,validRelatedId} from './kyc-inputs.js';
 // Versioned, shared capture/validation/PDF/document rules. No compliance decisions.
 export const KYC_VERSION='2026-10-26.3';
@@ -60,6 +61,6 @@ export function fieldLabel(f,s,lang='es'){
  for(const prefix of ['legalRep','spouse'])if(f.key===prefix+'Id')return documentNumberLabel(s[prefix+'IdType'],lang)+' · '+(prefix==='legalRep'?(lang==='en'?'Legal representative':'Representante legal'):(lang==='en'?'Spouse / partner':'Cónyuge o conviviente'));
  return text(f.label,lang);
 }
-export function entries(s,lang){s=project(s);const out=fields.filter(f=>applies(f,s)&&s[f.key]).map(f=>[fieldLabel(f,s,lang),moneyKeys.has(f.key)?formatMoney(s[f.key],lang):text(s[f.key],lang)]);s.owners.forEach((o,i)=>out.push([(lang==='en'?'Owner / shareholder ':'Socio / accionista ')+(i+1),`${o.name} · ${o.pct}% · ${o.country} · ${text(o.idType,lang)}: ${o.id}`]));return out;}
+export function entries(s,lang){s=project(s);const out=fields.filter(f=>applies(f,s)&&s[f.key]).map(f=>[fieldLabel(f,s,lang),moneyKeys.has(f.key)?formatMoney(s[f.key],lang):f.key==='nationality'?nationalityLabel(s[f.key],lang):text(s[f.key],lang)]);s.owners.forEach((o,i)=>out.push([(lang==='en'?'Owner / shareholder ':'Socio / accionista ')+(i+1),`${o.name} · ${o.pct}% · ${o.country} · ${text(o.idType,lang)}: ${o.id}`]));return out;}
 export async function validFile(file,pdfOnly=false){if(!file||!file.size||file.size>10*1024*1024)return false;const b=new Uint8Array(await file.slice(0,8).arrayBuffer());const pdf=b[0]===37&&b[1]===80&&b[2]===68&&b[3]===70&&b[4]===45;return pdf&&file.type==='application/pdf'||!pdfOnly&&(file.type==='image/png'&&[137,80,78,71,13,10,26,10].every((x,i)=>b[i]===x)||file.type==='image/jpeg'&&b[0]===255&&b[1]===216&&b[2]===255);}
 

@@ -2,6 +2,19 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {parseMoney,formatMoney,validRelatedId} from '../src/kyc-inputs.js';
 import {project,validate,entries,fields,fieldLabel} from '../src/kyc-model.js';
 import {bankCatalog,filterBanks} from '../src/financial-institutions.js';
+import {nationalities,nationalityOptions,resolveNationality,nationalityLabel} from '../src/nationalities.js';
+import {nationalitySelectOptions} from '../src/nationality-field.js';
+test('Nationality catalog has unique canonical values, priority ordering, accent-free search and bilingual display',()=>{
+ assert.equal(nationalities.length,196);assert.equal(new Set(nationalities.map(n=>n.code)).size,196);assert.equal(new Set(nationalities.map(n=>n.es)).size,196);
+ for(const lang of ['es','en'])assert.deepEqual(nationalityOptions('',lang).slice(0,4).map(n=>n.code),['EC','US','CO','PE']);
+ for(const value of ['ecu','EC','Ecuador','ecuatoriano','ECUATORIANA','Ecuadorian'])assert.equal(resolveNationality(value).es,'Ecuatoriana');
+ assert.equal(nationalityLabel('Ecuatoriana','en'),'Ecuadorian');assert.equal(resolveNationality('USA').es,'Estadounidense');
+ assert(nationalityOptions('espana').some(n=>n.code==='ES'));assert(nationalityOptions('aleman').some(n=>n.code==='DE'));assert(nationalityOptions('japon').some(n=>n.code==='JP'));
+ assert.equal(resolveNationality('valor antiguo no identificado'),null);
+ const s=nationalitySelectOptions('Ecuatoriana','japon','en');assert(s.html.includes('value="Ecuatoriana" selected'));assert(s.html.includes('value="Japonesa"'));assert.equal(s.count,1);
+ assert(nationalitySelectOptions('Texto antiguo','','es').html.includes('selected disabled value="Texto antiguo"'));
+ assert(entries({relation:'staff',person:'natural',nationality:'Ecuatoriana'},'en').some(([k,v])=>k==='Nationality'&&v==='Ecuadorian'));
+});
 test('Money: localized input, canonical precision, empty values and ambiguous/invalid separators',()=>{
  for(const [input,lang,expected] of [['5.000,50','es','5000.50'],['5000','es','5000'],['5,000.50','en','5000.50'],['0','es','0'],['','es',''],['5.000','es','5000']])assert.equal(parseMoney(input,lang),expected);
  for(const s of ['5.00','1,234.56','-2','1e4','5,123','5..000','5,','1000000000000'])assert.equal(parseMoney(s,'es'),null,s);

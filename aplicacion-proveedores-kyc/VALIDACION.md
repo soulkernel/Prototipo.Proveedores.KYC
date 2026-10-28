@@ -316,3 +316,11 @@ Por solicitud expresa del usuario se retiran los avisos de piloto/datos ficticio
 
 Validación: ocho pruebas existentes de invitación/exportación aprobadas, compilación demo correcta, formulario externo ES/EN sin banner y declaración sin referencia a prueba verificados en Chrome. PDF del formulario ES/EN y resumen del expediente reabiertos; revisión visual de los textos modificados y sus firmas/encabezados. Sin migraciones ni borrados.
 
+## Nacionalidades normalizadas — 2026-10-27
+
+Nacionalidad pasa de texto libre a un catálogo buscable de 196 opciones en el formulario externo y asistido. Prioriza Ecuador, Estados Unidos, Colombia y Perú, seguidos de países americanos frecuentes, resto de América, Europa, Oceanía, Asia y África. Las opciones muestran gentilicio y país, se buscan sin tildes por gentilicio, país o alias y se guardan con una única forma canónica en español femenino. La presentación inglesa usa gentilicios ingleses sin cambiar el valor guardado. No se selecciona una nacionalidad por defecto.
+
+Fuente lingüística: https://www.rae.es/dpd/ayuda/paises-y-capitales-con-sus-gentilicios . La nacionalidad permanece independiente de residencia y país del documento. Se conservan los valores anteriores no reconocidos con una indicación para seleccionar la forma normalizada; no hay actualización masiva de respuestas históricas. Resumen y PDF muestran el nombre según el idioma solicitado.
+
+Validación: 34 pruebas KYC aprobadas y compilación demo correcta. Chrome local: catálogo y orden, búsqueda japon sin tilde, selección Japonesa, cambio de sección, guardado y persistencia tras recarga; traducción Japanese con valor canónico Japonesa; búsqueda sin resultados conserva la selección. Revisión visual del campo. Sin migraciones, cambios de permisos ni modificaciones de expedientes reales.
+

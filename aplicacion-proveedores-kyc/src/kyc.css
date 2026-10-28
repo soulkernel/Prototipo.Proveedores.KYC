@@ -13,3 +13,5 @@
 .kyc-steps button{display:block!important;min-width:0!important;line-height:1.4;font-size:14px}.kyc-steps button small{display:block!important;white-space:normal}
 .kyc-steps.kyc-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}@media(min-width:1280px){.kyc-steps.kyc-steps{grid-template-columns:repeat(6,minmax(0,1fr))}}@media(max-width:580px){.kyc-steps.kyc-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
+.kyc-nationality{display:flex;flex-direction:column;gap:7px;min-width:0}.kyc-nationality label{margin:0}.kyc-nationality small{line-height:1.5;color:var(--muted)}.kyc-nationality #kyc-nationality-results:empty{display:none}
+
