@@ -29,10 +29,10 @@ test('Minimal new cases do not mistake default natural for confirmation; linked 
  r.supplier_id='supplier-1';const supplier={id:'supplier-1',person_type:'natural'};assert.equal(invitationPerson(r,supplier),'natural');assert.ok(!invitationDocuments(r,'es',supplier).some(d=>d.key==='appointment'));
  assert.equal(invitationPerson(r,{id:'other',person_type:'legal'}),null);
 });
-test('Invitation uses agreed confidentiality, Galapagos expiry, pilot, workflow and scan exception in both languages',()=>{
+test('Invitation uses agreed confidentiality, Galapagos expiry, workflow and scan exception in both languages',()=>{
  const r=row('supplier','natural'),es=invitationMessage(r,invitation),en=invitationMessage(r,invitation,'en');
- assert.ok(es.startsWith('Asunto: GLF'));assert.match(es,/se tratarán en forma confidencial/);assert.match(es,/El acceso al enlace para consignar la información estará disponible hasta el 3 de noviembre de 2026/);assert.match(es,/4:48/);assert.match(es,/hora de Galápagos/);assert.match(es,/VERSIÓN PILOTO/);assert.match(es,/Pulse «Enviar»/);assert.match(es,/confirmación de guardado/);assert.ok(es.includes(invitation.url));assert.ok(!es.includes('&#x20;'));assert.ok(!es.includes('firma física'));
- assert.match(en,/3 November 2026/);assert.match(en,/4:48/);assert.match(en,/Galápagos time/);assert.match(en,/PILOT/);assert.match(en,/treated confidentially/);
+ assert.ok(es.startsWith('Asunto: GLF'));assert.match(es,/se tratarán en forma confidencial/);assert.match(es,/El acceso al enlace para consignar la información estará disponible hasta el 3 de noviembre de 2026/);assert.match(es,/4:48/);assert.match(es,/hora de Galápagos/);assert.doesNotMatch(es,/PILOTO|datos ficticios/);assert.match(es,/Pulse «Enviar»/);assert.match(es,/confirmación de guardado/);assert.ok(es.includes(invitation.url));assert.ok(!es.includes('&#x20;'));assert.ok(!es.includes('firma física'));
+ assert.match(en,/3 November 2026/);assert.match(en,/4:48/);assert.match(en,/Galápagos time/);assert.doesNotMatch(en,/PILOT|fictional data/);assert.match(en,/treated confidentially/);
  r.allow_scan=true;assert.match(invitationMessage(r,invitation),/firma física/);assert.match(invitationMessage(r,invitation,'en'),/handwritten signature/);
  assert.throws(()=>invitationMessage(r,{...invitation,expires_at:'invalid'}),/INVALID_INVITATION/);
 });

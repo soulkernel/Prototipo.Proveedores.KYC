@@ -55,7 +55,7 @@ export function caseSummaryPdf(c,index,lang='es',logo=null,now=new Date()){
   [t('Recepción del formulario','Form received'),stamp(c.receipt_at,lang)],
   [t('Exportado (hora de Galápagos)','Exported (Galápagos time)'),stamp(now.toISOString(),lang)]
  ],{0:{cellWidth:65}});
- note(t('CONFIDENCIAL. Este resumen organiza la información registrada; no sustituye al formulario firmado, al informe de Cumplimiento ni a la verificación de firmas. Piloto: solo datos ficticios.','CONFIDENTIAL. This summary organizes recorded information; it does not replace the signed form, the Compliance report or signature verification. Pilot: fictional data only.'));
+ note(t('CONFIDENCIAL. Este resumen organiza la información registrada; no sustituye al formulario firmado, al informe de Cumplimiento ni a la verificación de firmas.','CONFIDENTIAL. This summary organizes recorded information; it does not replace the signed form, the Compliance report or signature verification.'));
  heading(t('Resultado y seguimiento','Outcome and follow-up'));
  table([t('Dato','Item'),t('Registro','Record')],[
   ['Screening',screening],[t('Fecha del screening','Screening recorded'),stamp(c.screening_recorded_at,lang)],

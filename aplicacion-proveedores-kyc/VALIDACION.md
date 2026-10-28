@@ -310,3 +310,9 @@ Los archivos disponibles se organizan en Formularios, Anexos, Informes y screeni
 
 Validación: 33 pruebas KYC aprobadas, incluidas integridad de originales, versiones, nombres repetidos, rutas seguras, ausencia de JSON/TXT y fallos de descarga. Compilación demo correcta. PDF ES/EN de cinco páginas y expediente inicial de dos páginas reabiertos y revisados visualmente con Poppler. Chrome local: Descargar expediente generó un ZIP, se reabrió y se comprobó el resumen y sus pendientes, sin errores de consola. No se modificaron expedientes reales ni se enviaron correos.
 
+## Presentación sin avisos de piloto — 2026-10-27
+
+Por solicitud expresa del usuario se retiran los avisos de piloto/datos ficticios de la aplicación, formulario externo/asistido, declaración de veracidad, PDF del formulario, resumen del expediente, invitación y guía. Se mantienen confidencialidad, ayuda, guardado, vigencia y controles de acceso. La demostración local conserva su selector de perfiles y la indicación de almacenamiento local. No se cambia el modo de ejecución ni se modifican datos, anexos, firmas o permisos. Los documentos históricos se conservan; el nuevo texto aplica a las próximas generaciones. El usuario avisará cuándo pasar a producción y solicitará el vaciado de la base en ese momento; no se ejecuta ahora.
+
+Validación: ocho pruebas existentes de invitación/exportación aprobadas, compilación demo correcta, formulario externo ES/EN sin banner y declaración sin referencia a prueba verificados en Chrome. PDF del formulario ES/EN y resumen del expediente reabiertos; revisión visual de los textos modificados y sus firmas/encabezados. Sin migraciones ni borrados.
+

@@ -46,8 +46,6 @@ Dear ${name},
 
 Greetings from Galápagos Life Fund (GLF).
 
-PILOT: Please use fictional information and documents only. Do not submit real personal information for this test.
-
 As part of our due diligence and compliance process, please complete the KYC form. This process allows us to verify the identity and information of the individuals and entities with which GLF has a relationship.
 
 The information and documents you provide will be treated confidentially and will be available only to authorized personnel.
@@ -82,8 +80,6 @@ Galápagos Life Fund · GLF`;
 Estimado/a ${name}:
 
 Reciba un cordial saludo de Galápagos Life Fund (GLF).
-
-VERSIÓN PILOTO: Utilice únicamente información y documentos ficticios. No remita datos personales reales en esta prueba.
 
 Como parte de nuestro proceso de debida diligencia y cumplimiento, le solicitamos completar el formulario KYC. Este proceso permite verificar la identidad y la información de las personas y entidades con las que GLF mantiene una relación.
 
