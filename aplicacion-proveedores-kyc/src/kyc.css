@@ -15,3 +15,5 @@
 
 .kyc-nationality{display:flex;flex-direction:column;gap:7px;min-width:0}.kyc-nationality label{margin:0}.kyc-nationality small{line-height:1.5;color:var(--muted)}.kyc-nationality #kyc-nationality-results:empty{display:none}
 
+.kyc-phone,.kyc-city{display:flex;flex-direction:column;gap:7px;min-width:0}.kyc-phone label,.kyc-city label{margin:0}.kyc-phone-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.kyc-phone small{line-height:1.5;color:var(--muted)}#kyc-phone-results:empty{display:none}@media(max-width:480px){.kyc-phone-row{grid-template-columns:1fr}}
+
