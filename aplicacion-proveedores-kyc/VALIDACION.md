@@ -332,3 +332,13 @@ Ciudad de domicilio pasa a un listado con Puerto Ayora, Puerto Baquerizo Moreno,
 
 Validación: 37 pruebas KYC aprobadas y compilación demo correcta. Pruebas de prefijos, búsqueda, número vacío, números internacionales pegados, prefijo nacional ecuatoriano, cero significativo italiano, extensiones, conservación de datos anteriores, ciudad libre y escape HTML. Chrome local: Ecuador por defecto tras vaciar teléfono, búsqueda Colombia, pegado +1 sin duplicación, selección de ciudades de Galápagos, Otra ciudad/New York, persistencia tras recarga y ES/EN; revisión visual sin errores de consola. Se mantienen las validaciones obligatorias y el foco del error se dirige al número o a la ciudad. Sin migraciones ni cambios de permisos.
 
+## Identidad compacta y sugerencias de correo — 2026-10-27
+
+Se reemplazan las cajas de búsqueda permanentes de nacionalidad y teléfono por selectores únicos con búsqueda dentro de su desplegable. Cerrados muestran la nacionalidad o solo el prefijo; al abrir el código telefónico se ve país y código completos. Código de país sustituye País y código, con 110 px en escritorio y 104 px en pantallas pequeñas; el número usa el espacio restante. Se conservan los catálogos, el orden prioritario y los valores almacenados.
+
+Las ayudas pasan a un botón i accesible y se muestran superpuestas, sin añadir altura a la fila. Identidad alinea fecha de nacimiento/nacionalidad, correo/teléfono y país/ciudad; Dirección de domicilio ocupa todo el ancho. Los desplegables se cierran con Escape o al salir y permiten búsqueda sin tildes, selección por clic o flechas y Enter. Filtrar o cerrar sin elegir no modifica el dato.
+
+Correo electrónico muestra sugerencias locales tras @: gmail.com, outlook.com, hotmail.com, yahoo.com, icloud.com, live.com y glf.org.ec. Se filtran por el dominio escrito; la parte anterior a @ se conserva. Solo un clic o selección explícita con flechas y Enter aplica una sugerencia. Se aceptan dominios institucionales o extranjeros libres; no hay consultas ni transmisiones externas por las sugerencias.
+
+Validación: 39 pruebas KYC aprobadas y compilación demo correcta. Chrome local: búsqueda y selección por teclado/clic, cancelación, ausencia de resultados, prefijo compacto, ayuda i, elección de Gmail/Outlook, correo institucional libre, persistencia en el resumen tras guardado/recarga, ES/EN y consola sin errores. Medidas DOM de escritorio: selector de código 110 px, teléfono 292,5 px, dirección y cuadrícula 845 px. Revisión visual de filas compactas. Sin cambios de base de datos, permisos ni documentos históricos.
+

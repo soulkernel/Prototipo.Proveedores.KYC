@@ -1,3 +1,4 @@
+import {helpIcon,searchableSelect} from './kyc-compact-controls.js';
 import {nationalityOptions,nationalityGroups,resolveNationality} from './nationalities.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const tr=(lang,es,en)=>lang==='en'?en:es;
@@ -14,7 +15,8 @@ export function nationalitySelectOptions(value='',query='',lang='es'){
  return {html,count:rows.length};
 }
 export function nationalityField(value='',lang='es'){
- const t=(es,en)=>tr(lang,es,en),legacy=value&&!resolveNationality(value);
- return '<div class="kyc-nationality" data-error-key="nationality"><label for="kyc-nationality-search">'+t('Buscar nacionalidad','Search nationalities')+'</label><input id="kyc-nationality-search" type="search" placeholder="'+t('Nacionalidad o país, por ejemplo: Ecuador','Nationality or country, e.g. Ecuador')+'" aria-controls="kyc-nationality-select"><label for="kyc-nationality-select">'+t('Nacionalidad','Nationality')+' *</label><select id="kyc-nationality-select" data-field="nationality">'+nationalitySelectOptions(value,'',lang).html+'</select><small>'+t('Seleccione una opción del listado. La nacionalidad es independiente del país de residencia.','Select a listed option. Nationality is independent of your country of residence.')+'</small>'+(legacy?'<small>'+t('Se conserva el valor anterior. Seleccione una opción del catálogo para uniformarlo.','The previous value is preserved. Select a catalog option to standardize it.')+'</small>':'')+'<small id="kyc-nationality-results" role="status"></small></div>';
+ const t=(es,en)=>tr(lang,es,en),selected=resolveNationality(value),display=selected?selected[lang==='en'?'en':'es']:value||t('Seleccione nacionalidad','Select nationality');
+ const help=t('Seleccione una opción del listado. La nacionalidad es independiente del país de residencia.','Select a listed option. Nationality is independent of your country of residence.')+(value&&!selected?t(' Se conserva el valor anterior; seleccione una opción para uniformarlo.',' The previous value is preserved; select a listed option to standardize it.'):'');
+ return '<div class="kyc-nationality" data-error-key="nationality"><div class="kyc-field-title"><label for="kyc-nationality-select-trigger">'+t('Nacionalidad','Nationality')+' *</label>'+helpIcon('kyc-nationality-help',t('Ayuda sobre nacionalidad','Nationality help'),help)+'</div>'+searchableSelect('kyc-nationality-select',t('Nacionalidad','Nationality'),nationalitySelectOptions(value,'',lang).html,display,lang).replace('<select id="kyc-nationality-select"','<select data-field="nationality" id="kyc-nationality-select"')+'</div>';
 }
 
