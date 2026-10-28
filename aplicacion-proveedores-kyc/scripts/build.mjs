@@ -10,7 +10,7 @@ if(!demo){
 }
 const logo=await fs.readFile(new URL('../public/glf-logo.png',import.meta.url));
 await fs.mkdir('dist',{recursive:true});
-await build({entryPoints:['src/app.js'],bundle:true,external:['./supplier-import.js','./supplier-export.js','./supplier-pdf.js','./kyc-pdf.js','./kyc-screening.js'],format:'esm',outfile:'dist/app.js',target:['es2022'],minify:true,define:{__CONFIG__:JSON.stringify({mode:demo?'demo':'supabase',url:demo?'':url,key:demo?'':key}),__LOGO__:JSON.stringify('data:image/png;base64,'+logo.toString('base64'))}});
+await build({entryPoints:['src/app.js'],bundle:true,external:['./supplier-import.js','./supplier-export.js','./supplier-pdf.js','./kyc-pdf.js','./kyc-screening.js'],format:'esm',outfile:'dist/app.js',target:['es2022'],minify:true,define:{__CONFIG__:JSON.stringify({mode:demo?'demo':'supabase',kycSupportEmail:process.env.KYC_SUPPORT_EMAIL||'',url:demo?'':url,key:demo?'':key}),__LOGO__:JSON.stringify('data:image/png;base64,'+logo.toString('base64'))}});
 await build({entryPoints:['src/supplier-import.js'],bundle:true,format:'esm',outfile:'dist/supplier-import.js',target:['es2022'],minify:true});
 await build({entryPoints:['src/supplier-export.js'],bundle:true,format:'esm',outfile:'dist/supplier-export.js',target:['es2022'],minify:true});
 await build({entryPoints:['src/supplier-pdf.js'],bundle:true,format:'esm',outfile:'dist/supplier-pdf.js',target:['es2022'],minify:true});

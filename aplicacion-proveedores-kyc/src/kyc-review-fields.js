@@ -1,12 +1,13 @@
+import {sourcesField} from './kyc-sources.js';
 import {declarations,kinships,incomeSources,parseList} from './kyc-declarations.js';
 import {callingCountries,splitPhone,phoneValue} from './kyc-contact-fields.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function reviewField(f,s,lang,assisted=false){
  const en=lang==='en',t=(es,english)=>en?english:es,v=s[f.key]||'',label=f.label[en?1:0];
  if(f.type==='consent')return `<label class="kyc-check kyc-declaration" data-error-key="${f.key}"><input type="checkbox" data-field="${f.key}" ${v==='yes'?'checked':''}><span><strong>${esc(label)} *</strong>${assisted?'<br><em>'+t('Transcribo esta declaración recibida para revisión y firma del declarante; no firmo en su nombre.','I transcribe this received declaration for the applicant to review and sign; I do not sign on their behalf.')+'</em>':''}<br>${esc(declarations[f.key][en?1:0])}</span></label>`;
- if(f.type==='sources')return `<fieldset class="kyc-wide" data-error-key="${f.key}"><legend>${esc(label)} *</legend><small>${t('Seleccione una o varias fuentes y explíquelas brevemente debajo.','Select one or more sources and briefly explain them below.')}</small><div class="kyc-source-options">${incomeSources.map(([key,es,english])=>`<label class="kyc-check"><input type="checkbox" data-source="${key}" ${parseList(v).includes(key)?'checked':''}>${esc(t(es,english))}</label>`).join('')}</div></fieldset>`;
+ if(f.type==='sources')return sourcesField(s,lang);
  if(f.key==='phoneAdditional'){
-  const p=splitPhone(v,'EC');return `<details class="kyc-wide" ${v?'open':''}><summary>${t('Agregar teléfono adicional (opcional)','Add another phone (optional)')}</summary><div class="kyc-phone-row" data-error-key="phoneAdditional"><label>${t('Código de país','Country code')}<select id="kyc-extra-phone-country">${callingCountries('',lang).map(o=>`<option value="${o.country}" ${o.country===p.country?'selected':''}>${esc(o.name)} (${o.code})</option>`).join('')}</select></label><label>${t('Teléfono adicional','Additional phone')}<input id="kyc-extra-phone-number" type="tel" maxlength="50" value="${esc(p.number)}"></label></div></details>`;
+  const p=splitPhone(v,'EC');return `<details class="kyc-extra-phone" ${v?'open':''}><summary>${t('Agregar teléfono adicional (opcional)','Add another phone (optional)')}</summary><div class="kyc-phone-row" data-error-key="phoneAdditional"><label>${t('Código de país','Country code')}<select id="kyc-extra-phone-country">${callingCountries('',lang).map(o=>`<option value="${o.country}" ${o.country===p.country?'selected':''}>${esc(o.name)} (${o.code})</option>`).join('')}</select></label><label>${t('Teléfono adicional','Additional phone')}<input id="kyc-extra-phone-number" type="tel" maxlength="50" value="${esc(p.number)}"></label></div></details>`;
  }
  if(['pepRelatives','glfRelatives'].includes(f.type)){
   const rows=parseList(v),pep=f.type==='pepRelatives';

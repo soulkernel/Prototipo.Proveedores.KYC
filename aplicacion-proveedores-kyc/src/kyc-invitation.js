@@ -1,3 +1,4 @@
+import {supportText} from './kyc-contact-config.js';
 import {documents,documentLabel} from './kyc-model.js';
 
 // New minimal cases may carry the database's default `natural`. Do not treat
@@ -32,14 +33,14 @@ export function invitationDocuments(row,lang='es',supplier=null){
  return result;
 }
 
-export function invitationMessage(row,invitation,lang='es',supplier=null){
+function rawInvitationMessage(row,invitation,lang='es',supplier=null){
  const en=lang==='en',locale=en?'en-GB':'es-EC',expiry=new Date(invitation.expires_at);
  if(Number.isNaN(expiry.getTime())||!invitation.url)throw Error('INVALID_INVITATION');
  const date=new Intl.DateTimeFormat(locale,{dateStyle:'long',timeZone:'Pacific/Galapagos'}).format(expiry);
  const time=new Intl.DateTimeFormat(locale,{timeStyle:'short',hour12:true,timeZone:'Pacific/Galapagos'}).format(expiry);
  const code='KYC-'+String(row.code).padStart(5,'0'),name=String(row.name||'').replace(/[\r\n]+/g,' ').trim();
  const attachments=invitationDocuments(row,lang,supplier).map(d=>'- '+d.text).join('\n');
- const signature=en?row.allow_scan?'Review it and sign electronically. GLF has also authorized a handwritten signature for this case: you may print, sign and upload a legible scanned PDF. Keep the original and provide it only if Carolina requests it.':'Review it and sign electronically.':row.allow_scan?'Revíselo y fírmelo electrónicamente. GLF también ha autorizado la firma física para este expediente: puede imprimirlo, firmarlo a mano y subir un PDF escaneado legible. Conserve el original y entréguelo solo si Carolina lo solicita.':'Revíselo y fírmelo electrónicamente.';
+ const signature=en?row.allow_scan?'Review it and sign electronically. GLF has also authorized a handwritten signature for this case: you may print, sign and upload a legible scanned PDF. Keep the original and provide it only if the GLF Compliance officer requests it.':'Review it and sign electronically.':row.allow_scan?'Revíselo y fírmelo electrónicamente. GLF también ha autorizado la firma física para este expediente: puede imprimirlo, firmarlo a mano y subir un PDF escaneado legible. Conserve el original y entréguelo solo si el responsable de Cumplimiento del GLF lo solicita.':'Revíselo y fírmelo electrónicamente.';
  if(en)return `Subject: GLF | KYC information and documentation request — ${code}
 
 Dear ${name},
@@ -73,7 +74,7 @@ If you need assistance completing the form or the link has expired, contact caro
 
 Thank you for your cooperation.
 
-Carolina Astudillo
+${en?'GLF Compliance officer':'Responsable de Cumplimiento del GLF'}
 Galápagos Life Fund · GLF`;
  return `Asunto: GLF | Solicitud de información y documentación KYC — ${code}
 
@@ -108,7 +109,8 @@ Si necesita ayuda para completar el formulario o si el enlace ha vencido, comun�
 
 Gracias por su colaboración.
 
-Carolina Astudillo
+${en?'GLF Compliance officer':'Responsable de Cumplimiento del GLF'}
 Galápagos Life Fund · GLF`;
 }
 
+export function invitationMessage(...args){return supportText(rawInvitationMessage(...args));}
