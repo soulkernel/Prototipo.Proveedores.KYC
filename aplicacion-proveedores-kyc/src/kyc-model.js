@@ -3,7 +3,7 @@ import {activityLabel} from './kyc-activity-fields.js';
 import {nationalityLabel} from './nationalities.js';
 import {formatMoney,moneyKeys,documentNumberLabel,validRelatedId} from './kyc-inputs.js';
 // Versioned, shared capture/validation/PDF/document rules. No compliance decisions.
-export const KYC_VERSION='2026-10-27.4';
+export const KYC_VERSION='2026-10-27.5';
 export const labels={
  supplier:['Proveedor externo','External supplier'],consultant:['Consultor','Consultant'],staff:['Equipo GLF','GLF staff'],board:['Miembro del Directorio','Board member'],natural:['Persona natural','Individual'],legal:['Persona jurídica','Legal entity'],national:['Nacional','National'],international:['Internacional','International'],unsure:['No estoy seguro/a','I am not sure'],yes:['Sí','Yes'],no:['No','No'],cedula:['Cédula','Ecuadorian ID'],passport:['Pasaporte','Passport'],foreign_id:['Identificación extranjera','Foreign ID'],ruc:['RUC','Ecuadorian tax ID'],tax_id:['Registro tributario extranjero','Foreign tax registration'],
  draft:['Borrador','Draft'],invited:['Invitación vigente','Invitation active'],submitted:['Recibido para revisión','Received for review'],review:['En revisión','Under review'],correction:['Subsanación solicitada','Correction requested'],approved:['Conforme — decisión humana','Cleared — human decision'],not_approved:['No conforme — decisión humana','Not cleared — human decision'],
@@ -11,6 +11,20 @@ export const labels={
 };
 export const text=(v,lang='es')=>Array.isArray(v)?v[lang==='en'?1:0]:labels[v]?.[lang==='en'?1:0]||v;
 const ext={relation:['supplier','consultant']},legal={person:['legal']},natural={person:['natural']};
+export const commercialRoute=s=>ext.relation.includes(s.relation);
+export const identificationTypes=s=>commercialRoute(s)?[s.country==='EC'?'ruc':'tax_id']:s.country==='EC'?['cedula']:['passport','foreign_id'];
+// Preserve a legacy personal identifier until the applicant explicitly replaces it.
+// An already supplied tax registration can be reused, never derived from an ID.
+export function normalizeIdentification(s){
+ if(commercialRoute(s)){
+  const expected=s.country==='EC'?'ruc':'tax_id';
+  if(['cedula','passport','foreign_id'].includes(s.idType)&&String(s.id||'').trim()){
+   if(String(s.taxId||'').trim()){s.id=String(s.taxId).trim();s.idType=expected;}
+  }else s.idType=expected;
+ }else if(s.country==='EC')s.idType='cedula';
+ else if(!['passport','foreign_id'].includes(s.idType))s.idType='passport';
+ return s;
+}
 const f=(key,es,en,step,options={})=>({key,label:[es,en],step,required:true,type:'text',...options});
 export const fields=[
  f('relation','¿Cuál es su vínculo con GLF?','What is your relationship with GLF?',0,{type:'select',options:['supplier','consultant','staff','board'],help:['Primero confirme el vínculo indicado por Carolina. Equipo y Directorio no se incorporan al directorio de proveedores.','Confirm the relationship selected by Carolina. Staff and board members are not added to the supplier directory.']}),
@@ -29,8 +43,6 @@ export const fields=[
  f('phoneAdditional','Teléfono adicional','Additional phone',1,{required:false,type:'tel',max:50,help:['Incluya el código de país, por ejemplo +593 991234567.','Include the country calling code, e.g. +593 991234567.']}),
  f('email','Correo electrónico','Email',1,{type:'email'}),f('phone','Teléfono principal','Primary phone',1,{type:'tel',max:50}),
  f('residenceCountry','País de domicilio','Country of residence',1,{type:'country'}),f('city','Ciudad de domicilio','City of residence',1),f('address','Dirección de domicilio','Residential / registered address',1,{max:1000}),
- f('invoice','¿Facturará al GLF?','Will you invoice GLF?',2,{when:{...ext,...natural,idType:['cedula','passport','foreign_id']},type:'select',options:['yes','no']}),
- f('taxId','RUC / identificación tributaria adicional','Additional RUC / tax ID',2,{when:{...ext,...natural,idType:['cedula','passport','foreign_id'],invoice:['yes']},max:60,help:['Se registra para facturación; no activa preguntas sobre una compañía.','Recorded for invoicing; it does not activate company questions.']}),
  f('activity','Actividad económica o profesional','Economic or professional activity',2,{when:ext,type:'textarea',max:2000}),
  f('services','Bienes o servicios que prestará al GLF','Goods or services you will provide to GLF',2,{when:ext,type:'textarea',max:2000}),
  f('website','Sitio web (opcional)','Website (optional)',2,{when:ext,required:false}),
@@ -59,10 +71,9 @@ export const fields=[
  f('truth','Confirmo que la información es completa y veraz','I confirm that the information is complete and accurate',4,{type:'consent',options:['yes']})
 ];
 export const applies=(field,s)=>!field.when||Object.entries(field.when).every(([k,v])=>v.includes(s[k]));
-export function project(input){const s={...input};if(['staff','board'].includes(s.relation))s.person='natural';if(s.person==='legal')s.idType=s.country==='EC'?'ruc':'tax_id';else if(s.country==='EC'){if(['staff','board'].includes(s.relation)||!['cedula','ruc'].includes(s.idType))s.idType='cedula';}else if(!['passport','foreign_id'].includes(s.idType))s.idType='passport';if(s.person==='legal'&&s.billingEmailSame==='yes')s.billingEmail=s.email;const out={};for(const f of fields)if(applies(f,s))out[f.key]=String(s[f.key]??'').trim();out.person=s.person||'';out.owners=s.person==='legal'&&Array.isArray(s.owners)?s.owners.slice(0,30).map(o=>({name:String(o.name||'').trim(),pct:String(o.pct??''),country:String(o.country||'').trim(),id:String(o.id||'').trim(),idType:String(o.idType||'').trim()})):[];return out;}
+export function project(input){const s={...input};if(['staff','board'].includes(s.relation))s.person='natural';normalizeIdentification(s);if(s.person==='legal'&&s.billingEmailSame==='yes')s.billingEmail=s.email;const out={};for(const f of fields)if(applies(f,s))out[f.key]=String(s[f.key]??'').trim();out.person=s.person||'';out.owners=s.person==='legal'&&Array.isArray(s.owners)?s.owners.slice(0,30).map(o=>({name:String(o.name||'').trim(),pct:String(o.pct??''),country:String(o.country||'').trim(),id:String(o.id||'').trim(),idType:String(o.idType||'').trim()})):[];return out;}
 export function validate(input,step=null){const s=project(input),errors=[];for(const f of fields){if(!applies(f,s)||(step!==null&&f.step!==step))continue;const v=s[f.key];if(f.required&&!v||v.length>(f.max||250)||v&&f.options&&!f.options.includes(v)||v&&f.type==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)||v&&f.type==='tel'&&(!/[0-9]/.test(v)||!/^[+0-9(). -]+$/.test(v))||v&&f.type==='country'&&!/^[A-Z]{2}$/.test(v)||v&&f.type==='number'&&(!/^\d+(\.\d{1,2})?$/.test(v)||Number(v)<0||Number(v)>999999999999.99)||v&&f.type==='date'&&(!/^\d{4}-\d{2}-\d{2}$/.test(v)||v>new Date().toISOString().slice(0,10)))errors.push(f.key);}
- if(step===null||step===1){if(s.person==='natural'&&s.country==='EC'&&s.idType!=='cedula')errors.push('idType');if(s.country==='EC'&&!new RegExp(s.idType==='ruc'?'^\\d{13}$':'^\\d{10}$').test(s.id||''))errors.push('id');if(s.person==='natural'&&s.country!=='EC'&&!['passport','foreign_id'].includes(s.idType))errors.push('idType');}
- if((step===null||step===2)&&s.invoice==='yes'&&s.country==='EC'&&!/^\d{13}$/.test(s.taxId||''))errors.push('taxId');
+ if(step===null||step===1){if(!identificationTypes(s).includes(s.idType))errors.push('idType');if(s.country==='EC'&&!new RegExp(s.idType==='ruc'?'^\\d{13}$':'^\\d{10}$').test(s.id||''))errors.push('id');}
  if((step===null||step===3)&&s.person==='legal'){if(!s.owners.length&&!s.ownershipExplanation)errors.push('ownershipExplanation');if(s.owners.some(o=>!o.name||!/^[A-Z]{2}$/.test(o.country)||!validRelatedId(o.idType,o.id,o.country)||o.name.length>250||!/^\d+(\.\d{1,2})?$/.test(o.pct)||Number(o.pct)<10||Number(o.pct)>100)||s.owners.reduce((a,o)=>a+Number(o.pct),0)>100.001)errors.push('owners');}
  if(step===null||step===3){for(const prefix of ['legalRep','spouse']){if(prefix==='legalRep'?s.person==='legal':s.person==='natural'&&s.spouse==='yes'){if(!validRelatedId(s[prefix+'IdType'],s[prefix+'Id'],s[prefix+'Country']))errors.push(prefix+'Id');}}}
  for(const f of fields){if(applies(f,s)&&(step===null||step===f.step)){if(['sources','pepRelatives','glfRelatives'].includes(f.type)&&!validList(s[f.key],f.type))errors.push(f.key);if(f.type==='kinship'&&s[f.key]&&!kinships.some(k=>k[0]===s[f.key])&&!/^[^<>]{1,100}$/.test(s[f.key]))errors.push(f.key);}}
@@ -71,6 +82,7 @@ export function documents(s){s=project(s);const result=['signed','identity'];if(
 export const documentLabel=(key,s,lang)=>key.startsWith('owner_')?(lang==='en'?'Owner ID: ':'Identificación del socio: ')+(s.owners[Number(key.slice(6))]?.name||''):text(key,lang);
 export function prefill(s){if(!s)return project({country:'EC',residenceCountry:'EC'});return project({relation:'supplier',nationalityType:s.country_code==='EC'?'national':'international',person:s.person_type,country:s.id_country_code||s.country_code,residenceCountry:s.country_code,idType:s.id_type,id:s.id_number,name:s.legal_name,email:s.email,phone:s.phone,city:s.city,address:s.address,legalRep:s.legal_representative,activity:s.description,services:s.description,taxId:s.tax_number||(s.id_type==='ruc'?s.id_number:''),invoice:s.person_type==='natural'&&!!(s.tax_number||s.id_type==='ruc')?'yes':'',owners:[]});}
 export function fieldLabel(f,s,lang='es'){
+ if(f.key==='country'&&commercialRoute(s))return lang==='en'?'Country of tax registration':'País de registro tributario';
  if(f.key==='country')return s.person==='legal'?(lang==='en'?'Country of incorporation':'País de constitución de la entidad'):(lang==='en'?'Document issuing country':'País de emisión del documento');
  if(f.key==='name')return s.person==='legal'?(lang==='en'?'Registered entity name':'Razón social de la entidad'):(lang==='en'?'Full name':'Nombres y apellidos completos');
  if(f.key==='pepSelf'&&s.person==='legal')return lang==='en'?'Is the legal representative a politically exposed person (PEP)?':'¿El representante legal es una persona expuesta políticamente (PEP)?';

@@ -1,5 +1,5 @@
 export const activitySections=[
- {title:['Actividad y relación con el GLF','Activity and relationship with GLF'],help:['Indique a qué se dedica y, por separado, qué bienes o servicios proporcionará al GLF.','Describe what you do and, separately, the goods or services you will provide to GLF.'],keys:['activity','services','invoice','taxId','website']},
+ {title:['Actividad y relación con el GLF','Activity and relationship with GLF'],help:['Indique a qué se dedica y, por separado, qué bienes o servicios proporcionará al GLF.','Describe what you do and, separately, the goods or services you will provide to GLF.'],keys:['activity','services','website']},
  {title:['Información económica','Financial information'],keys:['monthlyIncome','monthlyExpenses']},
  {title:['Información bancaria','Bank account information'],keys:['bankName','bankCountry','bankHolder','bankAccount']}
 ];
@@ -12,4 +12,3 @@ export function activityFieldHelp(key,person,lang='es'){
  if(key==='bankHolder')return t('Escriba el nombre del titular tal como aparece en el certificado bancario.','Enter the account holder’s name exactly as it appears on the bank certificate.');
  return '';
 }
-
