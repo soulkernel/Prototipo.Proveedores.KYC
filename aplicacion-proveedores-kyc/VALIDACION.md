@@ -362,3 +362,14 @@ Seleccionar una entidad del catálogo ecuatoriano completa Ecuador y muestra ese
 
 Validación: 42 pruebas KYC aprobadas, compilación demo correcta y navegador Chrome local sin errores de consola. Comprobados título, tres bloques, filas y ancho del sitio web, ayudas persona natural/jurídica ES/EN, Ecuador automático, cambio a entidad extranjera, persistencia de nombre/país tras recarga y vuelta al catálogo ecuatoriano. Revisión visual de información económica y bancaria. Sin migraciones, ampliación de permisos ni cambios en expedientes reales.
 
+## Revisión del Excel optimizado: identidad y declaraciones — 2026-10-27
+
+Versión de formulario 2026-10-27.4. PEP distingue funciones públicas destacadas de empleo público y admite Sí/No/No estoy seguro/a. Cargo actual/anterior, institución, país y fecha de finalización cuando procede. Fila PEP/cargo alineada; parentescos del catálogo optimizado, con conservación de textos anteriores, y familiares adicionales PEP/GLF. Fuentes de ingresos múltiples y explicación separada de las declaraciones. Aceptaciones explícitas de licitud y autorización KYC, incluidas íntegramente en resumen/PDF; en asistencia se transcriben para revisión y firma del declarante. Un nuevo ciclo no hereda las aceptaciones.
+
+Identidad distingue país emisor y constitución, añade país de nacimiento, correo opcional de facturación para entidades (mismo contacto u otro) y teléfono adicional con prefijo internacional. La persona natural ecuatoriana debe completar cédula y, si factura, RUC adicional. Los RUC antiguos se conservan hasta corrección explícita: al cambiar a cédula, el RUC se conserva para facturación y se pide el número personal, sin inferirlo.
+
+La justificación de datos/documentos faltantes está disponible en todos los pasos y se guarda para revisión de Cumplimiento. No exime requisitos, no envía avisos automáticos y no permite presentar un formulario incompleto. Siguen pendientes las decisiones sobre activos/pasivos, economía de Staff/Directorio, datos adicionales del cónyuge, personas de control, pasaportes y pagador. No se reintroducen campos rojos.
+
+Migración 020 aplicada en Supabase: Success. No rows returned. Lectura posterior confirma 66 campos, autorización expresa y fecha de cargo anterior, aceptación del catálogo de fuentes y rechazo de familiares incompletos. Sin modificación masiva de respuestas, documentos, permisos o RLS.
+
+Validación: 42 pruebas KYC aprobadas, incluida paridad de proyección/validación JS-SQL, campos ocultos, permisos, enlaces, concurrencia y nuevos consentimientos. Compilación demo correcta. Chrome local: PEP/cargo misma coordenada vertical, cargo anterior, parentesco y familiar adicional, fuentes múltiples, segundo teléfono internacional, correo de facturación, resumen ES/EN y persistencia entre pasos. PDF sintético de tres páginas renderizado e inspeccionado: declaraciones legibles y espacios de ambas firmas conservados.

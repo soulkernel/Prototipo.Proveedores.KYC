@@ -25,7 +25,7 @@ test('International numbers are not duplicated, Ecuador trunk zero is removed, I
  const box={dataset:{original:'0991234567',initialCountry:'EC',initialNumber:'0991234567'},querySelector:s=>({value:s.includes('country')?'EC':'0991234567'})};
  assert.equal(readPhoneField({querySelector:()=>box}),'0991234567');
  const s=project({person:'natural',country:'EC',phone:phoneValue('EC','0991234567')});
- assert.equal(s.phone,'+593 991234567');assert.ok(entries(s,'es').some(([k,v])=>k==='Teléfono'&&v==='+593 991234567'));
+ assert.equal(s.phone,'+593 991234567');assert.ok(entries(s,'es').some(([k,v])=>k==='Teléfono principal'&&v==='+593 991234567'));
 });
 test('Galapagos populations come first, Other supports foreign and legacy cities without changing values',()=>{
  assert.deepEqual(residenceCities.slice(0,4),['Puerto Ayora','Puerto Baquerizo Moreno','Puerto Villamil','Puerto Velasco Ibarra']);
@@ -38,4 +38,3 @@ test('Galapagos populations come first, Other supports foreign and legacy cities
  assert.doesNotMatch(cityField(''),/id="kyc-city-other"/);
  assert.match(cityField('<script>'),/&lt;script&gt;/);
 });
-

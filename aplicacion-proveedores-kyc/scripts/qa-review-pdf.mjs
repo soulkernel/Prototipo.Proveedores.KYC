@@ -1,0 +1,8 @@
+import fs from 'node:fs/promises';
+import {makeKycPdf} from '../src/kyc-pdf.js';
+const answers={relation:'supplier',person:'natural',country:'EC',idType:'cedula',id:'0000000001',name:'PERSONA FICTICIA QA',birthCountry:'EC',birthDate:'1990-01-01',nationality:'Ecuatoriana',email:'qa@example.test',phone:'+593 991234567',residenceCountry:'EC',city:'Puerto Ayora',address:'Dirección ficticia',activity:'Consultoría ambiental',services:'Consultoría ambiental',monthlyIncome:'5000',monthlyExpenses:'3000',invoice:'yes',taxId:'0000000001001',bankCountry:'EC',bankName:'BANCO FICTICIO',bankHolder:'PERSONA FICTICIA QA',bankAccount:'0000000001',spouse:'no',pepSelf:'unsure',pepSelfPosition:'Cargo ficticio anterior',pepSelfInstitution:'Institución ficticia',pepSelfCountry:'EC',pepCurrent:'no',pepEndDate:'2020-01-01',pepFamily:'yes',pepName:'FAMILIAR FICTICIO',pepRelation:'mother',pepPosition:'Cargo ficticio',pepInstitution:'Institución ficticia',pepCountry:'EC',pepRelatives:JSON.stringify([{name:'OTRO FAMILIAR FICTICIO',relationship:'uncle',position:'Cargo ficticio',institution:'Entidad ficticia',country:'EC'}]),glfFamily:'no',incomeSources:'["professional","rent"]',funds:'Ingresos por consultorías ambientales y arrendamiento de un inmueble.',truth:'yes',lawfulFunds:'yes',verificationConsent:'yes'};
+await fs.mkdir('../tmp/pdfs/review',{recursive:true});
+const logo='data:image/png;base64,'+(await fs.readFile('public/glf-logo.png')).toString('base64');
+const pdf=makeKycPdf({code:99999,version:1,answers},'es',logo);
+await fs.writeFile('../tmp/pdfs/review/qa.pdf',Buffer.from(pdf.output('arraybuffer')));
+console.log('PDF pages:',pdf.getNumberOfPages());

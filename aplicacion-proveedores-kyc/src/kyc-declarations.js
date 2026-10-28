@@ -1,0 +1,22 @@
+// Explicit declarations shared by capture and the signed PDF.
+export const declarations={
+ truth:['Declaro que la información proporcionada es verdadera, completa y actualizada. Me comprometo a comunicar y documentar los cambios y a proporcionar la información que GLF solicite durante nuestra relación.','I declare that the information supplied is true, complete and current. I undertake to report and document changes and provide information requested by GLF during our relationship.'],
+ lawfulFunds:['Declaro que mis recursos, o los de la entidad que represento, provienen de actividades lícitas. Los recursos derivados de la relación con GLF no serán destinados al lavado de activos, financiamiento del terrorismo ni otras actividades ilícitas.','I declare that my resources, or those of the entity I represent, come from lawful activities. Resources arising from the relationship with GLF will not be used for money laundering, terrorist financing or other unlawful activities.'],
+ verificationConsent:['Autorizo a Galapagos Life Fund y a las personas que designe para realizar las consultas y verificaciones necesarias para el proceso KYC, sobre la información y documentación proporcionadas. La información se tratará en forma confidencial.','I authorize Galapagos Life Fund and its designated persons to conduct the inquiries and checks necessary for the KYC process regarding the information and documents provided. Information will be treated confidentially.']
+};
+// Optimized workbook Parámetros!I3:I20, with grandparents added and legacy categories retained.
+export const kinships=[['spouse','Cónyuge','Spouse'],['partner','Conviviente / pareja','Partner'],['mother','Madre','Mother'],['father','Padre','Father'],['child','Hija / hijo','Child'],['sibling','Hermana / hermano','Sibling'],['grandparent','Abuela / abuelo','Grandparent'],['grandchild','Nieta / nieto','Grandchild'],['stepchild','Hijastro/a','Stepchild'],['stepmother','Madrastra','Stepmother'],['stepfather','Padrastro','Stepfather'],['sibling_inlaw','Cuñado/a','Sibling-in-law'],['daughter_inlaw','Nuera','Daughter-in-law'],['son_inlaw','Yerno','Son-in-law'],['parent_inlaw','Suegro/a','Parent-in-law'],['cousin','Primo/a','Cousin'],['nephew','Sobrino/a','Niece / nephew'],['uncle','Tío/a','Aunt / uncle'],['parent','Madre / padre','Parent'],['inlaw','Familiar por afinidad','Relative by marriage'],['other','Otro parentesco','Other relationship']];
+export const incomeSources=[['salary','Sueldo','Salary'],['professional','Servicios profesionales','Professional services'],['sales','Venta de bienes o servicios','Sale of goods or services'],['rent','Arriendos','Rental income'],['investment','Inversiones','Investments'],['pension','Pensión','Pension'],['other','Otros','Other']];
+export function parseList(value){try{const a=JSON.parse(value||'[]');return Array.isArray(a)?a:[];}catch{return [];}}
+export function readableList(value,type,lang='es'){
+ const idx=lang==='en'?2:1;
+ if(type==='sources')return parseList(value).map(k=>incomeSources.find(o=>o[0]===k)?.[idx]||k).join(', ');
+ return parseList(value).map((r,i)=>`${i+1}. ${r.name||''} · ${kinships.find(k=>k[0]===r.relationship)?.[idx]||r.relationship||''}${r.other?' ('+r.other+')':''} · ${r.position||''}${r.institution?' · '+r.institution:''}${r.country?' · '+r.country:''}`).join('\n');
+}
+export function validList(value,type){
+ if(!value)return true;
+ let a;try{a=JSON.parse(value);}catch{return false;}
+ if(!Array.isArray(a)||a.length>20)return false;
+ if(type==='sources')return a.length>0&&new Set(a).size===a.length&&a.every(k=>incomeSources.some(o=>o[0]===k));
+ return a.every(r=>r&&typeof r==='object'&&!Array.isArray(r)&&['name','position'].every(k=>typeof r[k]==='string'&&r[k].trim()&&r[k].length<=250)&&kinships.some(k=>k[0]===r.relationship)&&(r.relationship!=='other'||typeof r.other==='string'&&r.other.trim()&&r.other.length<=250)&&(type!=='pepRelatives'||typeof r.institution==='string'&&r.institution.trim()&&r.institution.length<=250&&/^[A-Z]{2}$/.test(r.country)));
+}
