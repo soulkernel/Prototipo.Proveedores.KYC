@@ -28,5 +28,16 @@ try{
  const cached=await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>r.name.includes('/assets/')&&r.transferSize===0).length);assert.ok(cached>0,'repeat visit should use asset cache');
  await page.goto(origin+'/#kyc=invalid-local-example');await page.locator('#kyc-external').waitFor();assert.equal(await page.locator('#login-form').count(),0);
  assert.deepEqual(errors,[]);
+ const failureContext=await browser.newContext(),failurePage=await failureContext.newPage();
+ await failurePage.goto(origin);await failurePage.locator('#actor').selectOption('monica');
+ await failurePage.locator('[data-action=new]').click();await failurePage.locator('#f-legal_name').fill('Conservar borrador');
+ await failurePage.route('**/internal-manual-*.js',route=>route.abort());
+ let dialogs=0;failurePage.on('dialog',async dialog=>{dialogs++;await dialog.dismiss();});
+ await failurePage.locator('[data-action=guide]').click();
+ await failurePage.getByText('No se pudo cargar el módulo.',{exact:false}).waitFor();
+ assert.equal(dialogs,0);assert.equal(await failurePage.locator('#f-legal_name').inputValue(),'Conservar borrador');
+ await failurePage.locator('[data-action=directory]').click();
+ assert.equal(dialogs,1);assert.equal(await failurePage.locator('#f-legal_name').inputValue(),'Conservar borrador');
+ await failureContext.close();
  console.log(JSON.stringify({initialJavaScriptBytes:bytes,cachedResources:cached,modules:'manual/users/kyc',unsavedGuard:true,externalRoute:true,errors},null,2));
 }finally{await browser.close();}

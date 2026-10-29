@@ -24,3 +24,9 @@ JavaScript inicial: 421.614 bytes en el build de demostración, aproximadamente 
 Para reproducir: `npm run build:demo`, iniciar `scripts/serve.mjs` con `PORT=8778`, ejecutar `node scripts/qa-loading.mjs`. Comprobar además el build autenticado y los encabezados del despliegue real. Los tiempos dependen de red, dispositivo y estado de sesión; no confundir reducción de bytes con el mismo porcentaje de reducción de tiempo.
 
 Referencias técnicas: [división de código de esbuild](https://esbuild.github.io/api/#splitting) y [encabezados de caché en Vercel](https://vercel.com/docs/caching/cache-control-headers).
+
+## Comprobación publicada
+
+El despliegue inicial de la optimización (`fb8020c`) entregó 421.709 bytes de JavaScript inicial (124.131 bytes transferidos con compresión y encabezados). En tres aperturas nuevas la pantalla estuvo disponible en 1.531, 712 y 716 ms; las reaperturas utilizaron la caché sin transferir nuevamente los scripts. Las muestras muestran variación de red: la reducción del peso y la reutilización de archivos son el resultado comprobado, no una promesa de tiempo fijo.
+
+Se añadió una comprobación de desconexión al cargar el manual desde una ficha con cambios: el borrador permanece en pantalla y se mantiene la advertencia al intentar salir. La confirmación de abandonar cambios se ejecuta después de descargar correctamente el módulo solicitado.
