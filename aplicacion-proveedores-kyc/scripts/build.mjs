@@ -10,14 +10,21 @@ if(!demo){
 }
 const logo=await fs.readFile(new URL('../public/glf-logo.png',import.meta.url));
 await fs.mkdir('dist',{recursive:true});
-await build({entryPoints:['src/app.js'],bundle:true,external:['./supplier-import.js','./supplier-export.js','./supplier-pdf.js','./kyc-pdf.js','./kyc-screening.js','./manual-export.js'],format:'esm',outfile:'dist/app.js',target:['es2022'],minify:true,define:{__CONFIG__:JSON.stringify({mode:demo?'demo':'supabase',kycSupportEmail:process.env.KYC_SUPPORT_EMAIL||'',url:demo?'':url,key:demo?'':key}),__LOGO__:JSON.stringify('data:image/png;base64,'+logo.toString('base64'))}});
-await build({entryPoints:['src/supplier-import.js'],bundle:true,format:'esm',outfile:'dist/supplier-import.js',target:['es2022'],minify:true});
-await build({entryPoints:['src/supplier-export.js'],bundle:true,format:'esm',outfile:'dist/supplier-export.js',target:['es2022'],minify:true});
-await build({entryPoints:['src/supplier-pdf.js'],bundle:true,format:'esm',outfile:'dist/supplier-pdf.js',target:['es2022'],minify:true});
-await build({entryPoints:['src/kyc-pdf.js','src/kyc-screening.js'],bundle:true,format:'esm',outdir:'dist',target:['es2022'],minify:true});
-await build({entryPoints:['src/manual-external.js'],bundle:true,external:['./manual-export.js'],format:'esm',outfile:'dist/manual-external.js',target:['es2022'],minify:true,define:{__LOGO__:JSON.stringify('data:image/png;base64,'+logo.toString('base64'))}});
-await build({entryPoints:['src/manual-export.js'],bundle:true,format:'esm',outfile:'dist/manual-export.js',target:['es2022'],minify:true});
-await fs.copyFile('manual-externo.html','dist/manual-externo.html');
+// Content-hashed public assets can be cached without retaining stale application versions.
+// Dynamic imports keep KYC, administration, manuals and export libraries out of startup.
+const result=await build({entryPoints:{app:'src/app.js','manual-external':'src/manual-external.js'},bundle:true,splitting:true,format:'esm',outdir:'dist',entryNames:'assets/[name]-[hash]',chunkNames:'assets/[name]-[hash]',assetNames:'assets/[name]-[hash]',metafile:true,target:['es2022'],minify:true,define:{__CONFIG__:JSON.stringify({mode:demo?'demo':'supabase',kycSupportEmail:process.env.KYC_SUPPORT_EMAIL||'',url:demo?'':url,key:demo?'':key}),__LOGO__:JSON.stringify('data:image/png;base64,'+logo.toString('base64'))}});
+const outputs=result.metafile.outputs;
+const publicPath=p=>'/'+p.replaceAll('\\','/').replace(/^dist\//,'');
+for(const [entry,template,script,css] of [['src/app.js','index.html','/app.js','/app.css'],['src/manual-external.js','manual-externo.html','/manual-external.js','/manual-external.css']]){
+ const output=Object.keys(outputs).find(p=>outputs[p].entryPoint===entry&&p.endsWith('.js'));
+ const dependencies=new Set();
+ const visit=p=>{for(const dep of outputs[p]?.imports||[])if(dep.kind==='import-statement'&&!dep.external&&!dependencies.has(dep.path)){dependencies.add(dep.path);visit(dep.path);}};
+ visit(output);
+ const preloads=[...dependencies].map(p=>`<link rel="modulepreload" href="${publicPath(p)}">`).join('');
+ const html=(await fs.readFile(template,'utf8')).replace(`src="${script}"`,`src="${publicPath(output)}"`).replace(`href="${css}"`,`href="${publicPath(outputs[output].cssBundle)}"`).replace('</head>',preloads+'</head>');
+ await fs.writeFile('dist/'+template,html);
+}
 await fs.cp('public/manual-assets','dist/manual-assets',{recursive:true});
-await fs.copyFile('index.html','dist/index.html');
+// Diagnostic metadata stays outside the deployed output directory.
+await fs.mkdir('tmp',{recursive:true});await fs.writeFile('tmp/build-meta.json',JSON.stringify(result.metafile));
 console.log('Build completed: '+(demo?'fictional-data demo':'Supabase authenticated application'));
