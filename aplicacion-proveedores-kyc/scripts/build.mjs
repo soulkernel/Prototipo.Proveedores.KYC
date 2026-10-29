@@ -10,10 +10,14 @@ if(!demo){
 }
 const logo=await fs.readFile(new URL('../public/glf-logo.png',import.meta.url));
 await fs.mkdir('dist',{recursive:true});
-await build({entryPoints:['src/app.js'],bundle:true,external:['./supplier-import.js','./supplier-export.js','./supplier-pdf.js','./kyc-pdf.js','./kyc-screening.js'],format:'esm',outfile:'dist/app.js',target:['es2022'],minify:true,define:{__CONFIG__:JSON.stringify({mode:demo?'demo':'supabase',kycSupportEmail:process.env.KYC_SUPPORT_EMAIL||'',url:demo?'':url,key:demo?'':key}),__LOGO__:JSON.stringify('data:image/png;base64,'+logo.toString('base64'))}});
+await build({entryPoints:['src/app.js'],bundle:true,external:['./supplier-import.js','./supplier-export.js','./supplier-pdf.js','./kyc-pdf.js','./kyc-screening.js','./manual-export.js'],format:'esm',outfile:'dist/app.js',target:['es2022'],minify:true,define:{__CONFIG__:JSON.stringify({mode:demo?'demo':'supabase',kycSupportEmail:process.env.KYC_SUPPORT_EMAIL||'',url:demo?'':url,key:demo?'':key}),__LOGO__:JSON.stringify('data:image/png;base64,'+logo.toString('base64'))}});
 await build({entryPoints:['src/supplier-import.js'],bundle:true,format:'esm',outfile:'dist/supplier-import.js',target:['es2022'],minify:true});
 await build({entryPoints:['src/supplier-export.js'],bundle:true,format:'esm',outfile:'dist/supplier-export.js',target:['es2022'],minify:true});
 await build({entryPoints:['src/supplier-pdf.js'],bundle:true,format:'esm',outfile:'dist/supplier-pdf.js',target:['es2022'],minify:true});
 await build({entryPoints:['src/kyc-pdf.js','src/kyc-screening.js'],bundle:true,format:'esm',outdir:'dist',target:['es2022'],minify:true});
+await build({entryPoints:['src/manual-external.js'],bundle:true,external:['./manual-export.js'],format:'esm',outfile:'dist/manual-external.js',target:['es2022'],minify:true,define:{__LOGO__:JSON.stringify('data:image/png;base64,'+logo.toString('base64'))}});
+await build({entryPoints:['src/manual-export.js'],bundle:true,format:'esm',outfile:'dist/manual-export.js',target:['es2022'],minify:true});
+await fs.copyFile('manual-externo.html','dist/manual-externo.html');
+await fs.cp('public/manual-assets','dist/manual-assets',{recursive:true});
 await fs.copyFile('index.html','dist/index.html');
 console.log('Build completed: '+(demo?'fictional-data demo':'Supabase authenticated application'));

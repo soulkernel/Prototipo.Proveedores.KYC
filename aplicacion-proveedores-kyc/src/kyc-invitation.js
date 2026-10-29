@@ -40,6 +40,7 @@ function rawInvitationMessage(row,invitation,lang='es',supplier=null){
  const time=new Intl.DateTimeFormat(locale,{timeStyle:'short',hour12:true,timeZone:'Pacific/Galapagos'}).format(expiry);
  const code='KYC-'+String(row.code).padStart(5,'0'),name=String(row.name||'').replace(/[\r\n]+/g,' ').trim();
  const attachments=invitationDocuments(row,lang,supplier).map(d=>'- '+d.text).join('\n');
+ const manualUrl=new URL('/manual-externo.html',invitation.url);manualUrl.searchParams.set('lang',en?'en':'es');
  const signature=en?row.allow_scan?'Review it and sign electronically. GLF has also authorized a handwritten signature for this case: you may print, sign and upload a legible scanned PDF. Keep the original and provide it only if the GLF Compliance officer requests it.':'Review it and sign electronically.':row.allow_scan?'Revíselo y fírmelo electrónicamente. GLF también ha autorizado la firma física para este expediente: puede imprimirlo, firmarlo a mano y subir un PDF escaneado legible. Conserve el original y entréguelo solo si el responsable de Cumplimiento del GLF lo solicita.':'Revíselo y fírmelo electrónicamente.';
  if(en)return `Subject: GLF | KYC information and documentation request — ${code}
 
@@ -69,6 +70,9 @@ Additional required documents:
 ${attachments}
 
 The form will show the documents applicable to your answers. Documents can be PDF, JPG or PNG, up to 10 MB each. The signed form must be a PDF.
+
+Form user manual:
+${manualUrl.href}
 
 If you need assistance completing the form or the link has expired, contact carolina.astudillo@glf.org.ec.
 
@@ -104,6 +108,9 @@ Documentos adicionales requeridos:
 ${attachments}
 
 El formulario mostrará los documentos que correspondan a sus respuestas. Puede adjuntar documentos en PDF, JPG o PNG, de hasta 10 MB cada uno. El formulario firmado debe ser PDF.
+
+Manual de uso del formulario:
+${manualUrl.href}
 
 Si necesita ayuda para completar el formulario o si el enlace ha vencido, comuníquese con carolina.astudillo@glf.org.ec.
 
