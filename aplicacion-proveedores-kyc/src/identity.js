@@ -1,4 +1,5 @@
 import {createClient} from '@supabase/supabase-js';
+import {readSignal,boundedAuthFetch} from './read-deadline.js';
 
 // Public connection metadata only. Passwords and signing keys are not copied.
 export const glfIdentity={
@@ -14,7 +15,7 @@ export async function unwrapAuth(request){
 
 export function createIdentity(config,makeClient=createClient){
  const identity=config.identity||glfIdentity;
- const authClient=makeClient(identity.url,identity.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'glf-operations-identity-v1'}});
+ const authClient=makeClient(identity.url,identity.key,{global:{fetch:boundedAuthFetch},auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'glf-operations-identity-v1'}});
  const dataClient=makeClient(config.url,config.key,{accessToken:async()=>{
   const {session}=await unwrapAuth(authClient.auth.getSession());
   return session?.access_token||null;
@@ -23,20 +24,30 @@ export function createIdentity(config,makeClient=createClient){
   authClient,dataClient,
   async signIn(email,password){return unwrapAuth(authClient.auth.signInWithPassword({email:email.trim(),password}));},
   async signOut(){return unwrapAuth(authClient.auth.signOut({scope:'local'}));},
-  async profile(){
+  async profile({signal}={}){
+   signal?.throwIfAborted();
    const {data,error}=await authClient.auth.getUser();
+   signal?.throwIfAborted();
    if(error){if(error.name==='AuthSessionMissingError'||error.status===401||error.status===403)return null;throw error;}
    if(!data.user)return null;
-   const valid=await unwrapAuth(authClient.rpc('access_session_valid'));
+   // These reads are independent once the user is verified. Do not expose a
+   // profile or accept an invitation until all access checks have succeeded.
+   const [valid,localProfile,assurance]=await Promise.all([
+    unwrapAuth(readSignal(authClient.rpc('access_session_valid'),signal)),
+    unwrapAuth(readSignal(dataClient.from('glf_profiles').select('*').eq('id',data.user.id).maybeSingle(),signal)),
+    unwrapAuth(authClient.auth.mfa.getAuthenticatorAssuranceLevel())
+   ]);
+   signal?.throwIfAborted();
    if(!valid)throw Error('ACCOUNT_INACTIVE');
-   let p=await unwrapAuth(dataClient.from('glf_profiles').select('*').eq('id',data.user.id).maybeSingle());
-   const assurance=await unwrapAuth(authClient.auth.mfa.getAuthenticatorAssuranceLevel());
+   let p=localProfile;
    if((!p||p.require_mfa||assurance.nextLevel==='aal2')&&assurance.currentLevel!=='aal2'){
     const factors=await unwrapAuth(authClient.auth.mfa.listFactors());
+    signal?.throwIfAborted();
     if(!factors.totp?.some(f=>f.status==='verified'))throw Error('MFA_SETUP_REQUIRED');
     throw Error('MFA_REQUIRED');
    }
-   if(!p){await unwrapAuth(dataClient.rpc('glf_accept_internal_invitation'));p=await unwrapAuth(dataClient.from('glf_profiles').select('*').eq('id',data.user.id).maybeSingle());}
+   if(!p){signal?.throwIfAborted();await unwrapAuth(dataClient.rpc('glf_accept_internal_invitation'));signal?.throwIfAborted();p=await unwrapAuth(readSignal(dataClient.from('glf_profiles').select('*').eq('id',data.user.id).maybeSingle(),signal));}
+   signal?.throwIfAborted();
    if(!p?.active)throw Error('NO_PROFILE');
    return {...p,email:data.user.email||''};
   },

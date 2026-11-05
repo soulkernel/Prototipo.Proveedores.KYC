@@ -30,3 +30,13 @@ Referencias técnicas: [división de código de esbuild](https://esbuild.github.
 El despliegue inicial de la optimización (`fb8020c`) entregó 421.709 bytes de JavaScript inicial (124.131 bytes transferidos con compresión y encabezados). En tres aperturas nuevas la pantalla estuvo disponible en 1.531, 712 y 716 ms; las reaperturas utilizaron la caché sin transferir nuevamente los scripts. Las muestras muestran variación de red: la reducción del peso y la reutilización de archivos son el resultado comprobado, no una promesa de tiempo fijo.
 
 Se añadió una comprobación de desconexión al cargar el manual desde una ficha con cambios: el borrador permanece en pantalla y se mantiene la advertencia al intentar salir. La confirmación de abandonar cambios se ejecuta después de descargar correctamente el módulo solicitado.
+
+## Apertura con sesión iniciada — 4 de noviembre de 2026
+
+La medición anterior cubría la pantalla de ingreso sin sesión, no la espera de identidad y datos de una sesión existente. Se vuelve a confirmar la caché pública: 734–1.339 ms para ingreso en aperturas nuevas y 189–215 ms en reaperturas, en este equipo y conexión.
+
+La identidad se verifica primero. Luego vigencia de acceso, perfil local y nivel MFA se consultan en paralelo. No se entrega el perfil ni se acepta una autorización pendiente antes de completar las comprobaciones. La interfaz muestra «Verificando acceso» y después «Cargando proveedores», con la línea gráfica habitual. Las lecturas de acceso y directorio tienen un plazo de 15 segundos por etapa y una opción de reintento. El transporte GET de autenticación también se cancela tras ese plazo para liberar esperas de sesión. No se reintentan automáticamente escrituras.
+
+Las lecturas tardías no reemplazan una sesión cerrada ni aceptan invitaciones después de vencer el plazo. Un fallo de directorio muestra un error recuperable, nunca un falso resultado vacío. Pruebas `tests/startup.test.mjs`, controles existentes de identidad/MFA/RLS, navegación de módulos y `scripts/qa-startup.mjs` con servicios simulados. Esta última verifica simultaneidad de las dos solicitudes, carga fallida, reintento, timeout y recuperación. No representa una medición de velocidad del servidor real.
+
+Para la prueba de navegador usar un build autenticado con URL/clave públicas ficticias, servidor local en 8783 y el script indicado, que intercepta todos los servicios Supabase. Nunca usar tokens o claves reales en fixtures. No hay cambios de configuración de Supabase, planes ni permisos.
