@@ -9,10 +9,11 @@ if(!demo){
  if(!(key.startsWith('sb_publishable_')||role==='anon'))throw Error('Only a Supabase publishable / anon key may enter the browser build.');
 }
 const logo=await fs.readFile(new URL('../public/glf-logo.png',import.meta.url));
+const recordsLogo=await fs.readFile(new URL('../public/glf-logo-oficio.png',import.meta.url));
 await fs.mkdir('dist',{recursive:true});
 // Content-hashed public assets can be cached without retaining stale application versions.
 // Dynamic imports keep KYC, administration, manuals and export libraries out of startup.
-const result=await build({entryPoints:{app:'src/app.js','manual-external':'src/manual-external.js'},bundle:true,splitting:true,format:'esm',outdir:'dist',entryNames:'assets/[name]-[hash]',chunkNames:'assets/[name]-[hash]',assetNames:'assets/[name]-[hash]',metafile:true,target:['es2022'],minify:true,define:{__CONFIG__:JSON.stringify({mode:demo?'demo':'supabase',kycSupportEmail:process.env.KYC_SUPPORT_EMAIL||'',url:demo?'':url,key:demo?'':key}),__LOGO__:JSON.stringify('data:image/png;base64,'+logo.toString('base64'))}});
+const result=await build({entryPoints:{app:'src/app.js','manual-external':'src/manual-external.js'},bundle:true,splitting:true,format:'esm',outdir:'dist',entryNames:'assets/[name]-[hash]',chunkNames:'assets/[name]-[hash]',assetNames:'assets/[name]-[hash]',metafile:true,target:['es2022'],minify:true,define:{__CONFIG__:JSON.stringify({mode:demo?'demo':'supabase',kycSupportEmail:process.env.KYC_SUPPORT_EMAIL||'',url:demo?'':url,key:demo?'':key}),__LOGO__:JSON.stringify('data:image/png;base64,'+logo.toString('base64')),__RECORDS_LOGO__:JSON.stringify('data:image/png;base64,'+recordsLogo.toString('base64'))}});
 const outputs=result.metafile.outputs;
 const publicPath=p=>'/'+p.replaceAll('\\','/').replace(/^dist\//,'');
 for(const [entry,template,script,css] of [['src/app.js','index.html','/app.js','/app.css'],['src/manual-external.js','manual-externo.html','/manual-external.js','/manual-external.css']]){

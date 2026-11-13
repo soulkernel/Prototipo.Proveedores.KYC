@@ -2,6 +2,7 @@ import {jsPDF} from 'jspdf';
 import {number,recordAttachments} from './records-model.js';
 
 export function recordsPdf(data,{logo=null,lang='es',draft=false}={}) {
+ const letterLogo=typeof __RECORDS_LOGO__==='undefined'?logo:__RECORDS_LOGO__;
  const es=lang==='es',doc=new jsPDF({unit:'mm',format:'a4',compress:true});
  const left=25,right=185,width=right-left,bottom=268;let y=40;
  doc.setProperties({title:`${number(data)} · ${data.subject}`,author:'Galápagos Life Fund'});
@@ -9,7 +10,7 @@ export function recordsPdf(data,{logo=null,lang='es',draft=false}={}) {
  const start=()=>{
   doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(30,57,105);
   doc.text('Galápagos Life Fund',left,22);
-  if(logo){doc.saveGraphicsState();doc.roundedRect(154,12,31,13.4,1.5,1.5,null);doc.clip();doc.discardPath();doc.addImage(logo,'PNG',154,12,31,13.4);doc.restoreGraphicsState();}
+  if(letterLogo){const image=doc.getImageProperties(letterLogo);doc.addImage(letterLogo,'PNG',154,12,31,31*image.height/image.width);}
   font();y=40;
  };
  const room=h=>{if(y+h>bottom){doc.addPage();start();}};
