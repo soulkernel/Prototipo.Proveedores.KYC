@@ -401,4 +401,12 @@ Código nuevo documentado en CORRESPONDENCIA.md. Pruebas locales: 17 generales, 
 
 Edge local verifica contraparte sin duplicar fila de destinatario, editor, importación de texto Word, aprobación/numeración, PDF, cargas, registro manual de firma y despacho, administración, idioma inglés y pantalla móvil de 390 px sin desbordamiento. PDF A4 renderizado e inspeccionado. Datos y constancias sintéticos; sin firma electrónica ni correo real. Compilación demo y transpilación de la función TypeScript correctas.
 
-No se han aplicado migraciones en Supabase, concedido permisos reales, configurado OAuth/Drive o desplegado Correspondencia en Vercel. La rama de integración conserva el resto de la aplicación. Antes de activar: verificar esquema real, OIDC/Storage, asignaciones y secuencia. Word extrae texto para revisión; firma comprobada externamente; envío incierto exige conciliación técnica.
+Estado al finalizar la preparación local: todavía no se habían aplicado migraciones ni desplegado Correspondencia. La activación posterior se registra a continuación. Word extrae texto para revisión; firma comprobada externamente; envío incierto exige conciliación técnica.
+
+## Correspondencia — activación y prueba publicada 2026-11-13
+
+PR #2 integrada en main (`cef5b83`), Vercel Production Ready. Migraciones 024/025/026 aplicadas mediante SQL Editor: operación satisfactoria. Verificación SQL: 17 tablas del esquema documental, todas con RLS; 110 columnas; bucket privado; RPC sin acceso anónimo y worker sin acceso autenticado de cliente. Los 22 proveedores y 11 expedientes KYC se conservan.
+
+Chrome, con sesión interna real y MFA existente: Administración guarda la asignación organizativa del administrador de prueba; vinculación al proveedor existente; institución independiente; oficio de salida guardado y aprobado, número anual y PDF descargado; oficio recibido restringido, PDF subido, responsable y fecha límite guardados. Dos documentos sintéticos; sin firmas ni correo real. No se concede acceso a otros usuarios ni se prueba su inicio de sesión. Se corrige el contacto vacío detectado al vincular un proveedor: cliente no lo envía, servidor no lo inserta y el selector omite entradas vacías históricas sin borrarlas. Pruebas de Correspondencia (13) y datos/identidad/proveedores (21) aprobadas después de esta corrección.
+
+Pendientes: OAuth y despliegue de la función Gmail, Drive, administración central interaplicaciones, asignaciones del personal y conciliación de numeración antes de emitir oficios oficiales.

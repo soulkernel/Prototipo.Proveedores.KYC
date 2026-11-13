@@ -2,9 +2,9 @@
 
 Aplicación ES/EN de directorio de proveedores y expedientes KYC: invitación, formulario externo o asistido, PDF y anexos, screening con revisión humana, decisión y respaldo. Las pruebas actuales utilizan datos ficticios. La administración central del portal y el correo automático siguen pendientes de integración.
 
-## Correspondencia y archivo (rama de integración)
+## Correspondencia y archivo
 
-La implementación de oficios, instituciones/contactos, firma externa, recepción, despacho y perfiles está descrita en [CORRESPONDENCIA.md](CORRESPONDENCIA.md). Reutiliza proveedores e identidad GLF. Las migraciones 024/025 y la conexión Gmail requieren activación separada; incorporar este código no configura automáticamente servicios externos ni concede permisos. `npm run test:records` verifica el modelo y `npm run qa:records` recorre la demostración local.
+La implementación de oficios, instituciones/contactos, firma externa, recepción, despacho y perfiles está descrita en [CORRESPONDENCIA.md](CORRESPONDENCIA.md). Reutiliza proveedores e identidad GLF. Publicada en Vercel el 13/11/2026, con migraciones 024/025/026 aplicadas y recorrido autenticado comprobado. Gmail automático y Drive siguen pendientes de configuración; el código no concede permisos nominales. `npm run test:records` verifica el modelo y `npm run qa:records` recorre la demostración local.
 
 ## Manuales existentes de Proveedores y KYC
 

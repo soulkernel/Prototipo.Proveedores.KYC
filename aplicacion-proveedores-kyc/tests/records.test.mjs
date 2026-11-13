@@ -24,6 +24,7 @@ test('Relational correspondence: workflow, server permissions, atomic numbering,
   await t.test('Supplier identity is linked once, live commercial edits remain visible',async()=>{
    const sid=(await db.query("insert into glf_suppliers(scope,person_type,country_code,country_name,id_country_code,id_type,id_number,legal_name,offer_type,city,email,phone,created_by,updated_by) values('glf','natural','EC','Ecuador','EC','cedula','0000077777','FICTICIO','services','Quito','qa@example.test','0000000000',$1,$1) returning id",[ids.writer])).rows[0].id;
    const p1=await run('writer',()=>rpc('party',null,null,{supplier_id:sid})),p2=await run('writer',()=>rpc('party',null,null,{supplier_id:sid}));assert.equal(p1.id,p2.id);
+   const empty=await run('writer',()=>rpc('party',null,null,{supplier_id:sid,contact:{name:' ',email:'',phone:'',job_title:''}}));assert.equal(empty.contacts.length,0);
    assert.equal((await db.query('select name from glf_records_private.parties where id=$1',[p1.id])).rows[0].name,null);
    await db.query("update glf_suppliers set legal_name='FICTICIO corregido' where id=$1",[sid]);assert.equal((await run('reader',()=>rpc('parties')))[0].name,'FICTICIO corregido');
   });

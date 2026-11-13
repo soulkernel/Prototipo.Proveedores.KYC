@@ -1,6 +1,6 @@
 # Correspondencia y archivo · versión de integración 2026-11-13
 
-Implementación local comprobada; las migraciones 024/025, el despacho Gmail y las asignaciones reales todavía no están activados. No sustituye la administración central interaplicaciones, que continúa pendiente. El directorio documental no crea cuentas ni recibe respuestas KYC.
+Módulo publicado en Vercel el 13/11/2026, con las migraciones 024/025/026 aplicadas en Supabase y recorrido autenticado comprobado con datos sintéticos. El despacho Gmail continúa pendiente de configuración. No sustituye la administración central interaplicaciones, que continúa pendiente. El directorio documental no crea cuentas ni recibe respuestas KYC.
 
 ## Recorrido operativo
 
@@ -77,7 +77,7 @@ No se añadió otra biblioteca: se reutilizan jsPDF y JSZip. El Word original se
 ## Activación controlada
 
 1. Verificar repositorio `soulkernel/Prototipo.Proveedores.KYC`, carpeta `aplicacion-proveedores-kyc`, rama de integración y esquema real. No publicar la carpeta documental superior.
-2. Probar en entorno separado con la identidad compartida. Aplicar 024 y 025 una sola vez, después de 001–023. Son aditivas: no borran proveedores, expedientes o identidades.
+2. Para otra instalación, probar en entorno separado con la identidad compartida. Aplicar 024, 025 y 026 una sola vez, después de 001–023. Son aditivas: no borran proveedores, expedientes o identidades. La 026 impide crear contactos vacíos; la interfaz también omite opciones vacías históricas, sin borrar registros.
 3. Comprobar acceso real MFA y Storage con dos cuentas internas y una sin permisos. Las pruebas locales usan PostgreSQL embebido y una interfaz de demostración, no demuestran por sí solas la conexión OIDC/Storage desplegada.
 4. Asignar miembros/perfiles explícitamente desde Administración. No ejecutar listas nominales por inferencia. Confirmar formato y consecutivo antes de documentos oficiales.
 5. Compilar/publicar la aplicación en Vercel con sus variables actuales, sin cambiarla a demostración. No es necesario desplegar Gmail para probar recepción, preparación, firma externa y constancia manual.
@@ -108,3 +108,11 @@ npm run audit:schema
 ```
 
 Pruebas cubren aislamiento, MFA, permisos, concurrencia optimista, numeración, cambio de origen, archivos, revisión y despacho. QA Edge usa datos ficticios y no simula una firma real: directorio, Word, PDF, carga, envío manual, Administración, inglés y móvil. Capturas/PDF de prueba se guardan en `test-results/records` local, fuera de la publicación. La comprobación de sintaxis TypeScript de la función no equivale a desplegarla en Deno ni a probar OAuth real.
+
+### Comprobación del despliegue — 13/11/2026
+
+La PR #2 se integró en main (`cef5b83`) y Vercel confirmó Production Ready. Las migraciones se ejecutaron mediante SQL Editor, con resultado satisfactorio, no mediante el historial automático de migraciones de la CLI. Consulta posterior: 17 tablas nuevas, todas con RLS, 110 columnas, bucket privado, sin ejecución anónima del RPC ni acceso del cliente al worker de correo. Se conservaron los 22 proveedores y 11 expedientes KYC existentes.
+
+Con la sesión interna y MFA existentes se verificaron: asignación organizativa del administrador de prueba; vínculo con proveedor sin duplicarlo; institución independiente; oficio de salida, archivo, aprobación, numeración y descarga PDF; recepción de oficio restringido, carga PDF, asignación y plazo. Los registros son sintéticos. No se firmaron documentos reales ni se enviaron correos. La comprobación con otros perfiles corresponde por ahora a las pruebas SQL locales, no a sesiones reales de otros usuarios.
+
+Las asignaciones de personal deben configurarse sobre cuentas verificadas. No se concedieron permisos nominales a otros miembros del GLF. La función de correo está preparada en código, pero no desplegada ni autorizada en Workspace. Drive, administración central entre aplicaciones y numeración oficial siguen pendientes de sus respectivas integraciones o definiciones.
