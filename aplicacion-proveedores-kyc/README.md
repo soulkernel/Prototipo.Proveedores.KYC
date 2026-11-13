@@ -2,7 +2,11 @@
 
 Aplicación ES/EN de directorio de proveedores y expedientes KYC: invitación, formulario externo o asistido, PDF y anexos, screening con revisión humana, decisión y respaldo. Las pruebas actuales utilizan datos ficticios. La administración central del portal y el correo automático siguen pendientes de integración.
 
-## Manuales de uso
+## Correspondencia y archivo (rama de integración)
+
+La implementación de oficios, instituciones/contactos, firma externa, recepción, despacho y perfiles está descrita en [CORRESPONDENCIA.md](CORRESPONDENCIA.md). Reutiliza proveedores e identidad GLF. Las migraciones 024/025 y la conexión Gmail requieren activación separada; incorporar este código no configura automáticamente servicios externos ni concede permisos. `npm run test:records` verifica el modelo y `npm run qa:records` recorre la demostración local.
+
+## Manuales existentes de Proveedores y KYC
 
 - **Manual interno** en el menú de la aplicación: 15 capítulos completos para todos los usuarios internos activos, sin filtrar contenido por rol. Leer el manual no modifica permisos operativos.
 - **Manual externo** en `/manual-externo.html`: 10 capítulos del formulario KYC. Accesible desde el formulario, la ayuda de cada etapa y las nuevas invitaciones; no necesita cuenta interna ni contiene procedimientos internos.
