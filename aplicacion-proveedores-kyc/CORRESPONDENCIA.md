@@ -128,3 +128,5 @@ Número de origen e interno son campos distintos. La migración conserva número
 Pruebas: 97 automatizadas (17 generales, 21 datos, 44 KYC, 15 documentales/PDF/migración); recorrido local Edge con recibido físico, PDF obligatorio, vista previa, numeración, filtros separados, respuesta vinculada, ES/EN y móvil. Migración probada sobre datos anteriores, preservando número y versión aprobada. Aplicar 027 antes de publicar esta interfaz; no cambia roles, identidad ni permisos.
 
 Referencia técnica del lector PDF: https://pdf-lib.js.org/docs/api/classes/pdfdocument#load
+
+Activación verificada: migración 027 aplicada en Supabase (Success. No rows returned), versión b653eac7e9ca3114d520be770daa35d7f996a2e8 publicada en main y Vercel satisfactorio. Lectura posterior confirma 22 proveedores, 11 expedientes KYC, RLS activo y bucket privado; número antiguo C-GLF-0001-2026 conservado. La sesión interna real registró un PDF sintético con GLF-EXT-2026-00001 y preparó su respuesta vinculada. No se firmaron ni enviaron documentos. Los identificadores de los registros de prueba y las comprobaciones posteriores se guardan en el contexto reservado.
