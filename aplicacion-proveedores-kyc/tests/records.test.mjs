@@ -4,7 +4,7 @@ import {recordsPdf} from '../src/records-pdf.js';
 test('Correspondence model: dates, codes, PDF pagination and mail',()=>{
  assert.equal(code('PROY','SC','GA'),'PROY-SC-GA');assert.equal(dateTimeToISO('2026-11-13T09:30'),'2026-11-13T15:30:00.000Z');
  const row={direction:'outgoing',subject:'Carta de prueba',document_date:'2026-02-30',body:'Texto formal de prueba',recipients:[{party:{id:'qa',name:'Entidad ficticia',email:'qa@example.test'},kind:'to'}]};
- assert.ok(validateDocument(row).includes('document_date'));row.document_date=day();assert.deepEqual(validateDocument(row),[]);
+ assert.deepEqual(validateDocument(row),[]);assert.ok(validateDocument({...row,direction:'incoming'}).includes('document_date'));row.document_date=day();
  const pdf=recordsPdf({...row,body:'Texto de prueba con párrafos.\n'.repeat(160),signer_name:'Nombre de prueba',job_title:'Cargo',origin_code:'PROY-SC-GA',sequence:1,year:2026});assert.ok(pdf.pages>2);assert.ok(pdf.buffer.byteLength>1000);assert.equal(invitationMail(row).to,'qa@example.test');
 });
 test('Relational correspondence: workflow, server permissions, atomic numbering, file isolation and history',async t=>{
@@ -37,7 +37,7 @@ test('Relational correspondence: workflow, server permissions, atomic numbering,
   });
   await t.test('Field, identity and optimistic concurrency validation',async()=>{
    await assert.rejects(run('writer',()=>rpc('save',doc,99,base)),/STALE_VERSION/);
-   await assert.rejects(run('writer',()=>rpc('save',null,null,{...base,document_date:'2099-12-31'})),/INVALID_DATE/);
+   const auto=await run('writer',()=>rpc('save',null,null,{...base,document_date:'2099-12-31'}));assert.equal((await run('writer',()=>rpc('read',auto))).document_date,day());
    await assert.rejects(run('writer',()=>rpc('save',null,null,{...base,signer_id:ids.reader})),/INVALID_SIGNER/);
    const other=await run('writer',()=>rpc('party',null,null,{kind:'natural',name:'Otra persona'}));
    await assert.rejects(run('writer',()=>rpc('save',null,null,{...base,recipients:[{kind:'to',party_id:other.id,contact_id:party.contacts[0].id}]})),/INVALID_CONTACT/);
@@ -115,6 +115,22 @@ test('Relational correspondence: workflow, server permissions, atomic numbering,
    assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'outgoing'}))).draft_count,countBefore);
    await run('writer',()=>rpc('submit',draftId,3));assert.equal((await run('writer',()=>rpc('read',draftId))).status,'review');
    assert.deepEqual((await db.query('select * from glf_records_private.counters order by direction,year')).rows,counters.rows);
+  });
+  await t.test('Server dates and frozen attachments survive approval and later reads',async()=>{
+   const fresh=await run('writer',()=>rpc('save',null,null,{...base,document_date:'invalid-client-date',place:'Lugar manual no permitido'}));
+   const serverDay=(await db.query("select (now() at time zone 'Pacific/Galapagos')::date::text as value")).rows[0].value;
+   assert.equal((await run('writer',()=>rpc('read',fresh))).document_date,serverDay);assert.equal((await run('writer',()=>rpc('read',fresh))).place,boot.sites.find(s=>s.id===site).name);
+   for(const [i,name] of ['Anexo A.pdf','Anexo B.pdf'].entries()){
+    const ticket=await run('writer',()=>rpc('upload',fresh,1+i,{kind:'attachment',filename:name,mime:'application/pdf',size:20}));
+    await db.query("insert into storage.objects(bucket_id,name,metadata) values('glf-correspondence',$1,$2)",[ticket.path,JSON.stringify({size:20})]);
+    await run('writer',()=>rpc('confirm_upload',fresh,1+i,{file_id:ticket.id}));
+   }
+   await db.query("update glf_records_private.documents set document_date='2020-01-01' where id=$1",[fresh]);
+   await run('writer',()=>rpc('submit',fresh,3));await run('signer',()=>rpc('approve',fresh,4));
+   const approved=await run('writer',()=>rpc('read',fresh));assert.equal(approved.document_date,serverDay);assert.equal(approved.revisions[0].snapshot.document_date,serverDay);
+   assert.deepEqual(approved.revisions[0].snapshot.attachments.map(f=>f.filename).sort(),['Anexo A.pdf','Anexo B.pdf']);
+   await assert.rejects(run('writer',()=>rpc('upload',fresh,5,{kind:'attachment',filename:'Tardío.pdf',mime:'application/pdf',size:20})),/FORBIDDEN/);
+   await assert.rejects(run('receiver',()=>rpc('save',null,null,{...base,direction:'incoming',document_date:'2099-12-31',signer_id:null,received_at:new Date().toISOString(),recipients:[{kind:'from',party_id:party.id}]})),/INVALID_DATE/);
   });
  }finally{await db.close();}
 });

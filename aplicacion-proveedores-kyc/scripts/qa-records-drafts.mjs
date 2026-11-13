@@ -4,7 +4,7 @@ await fs.mkdir('test-results/records',{recursive:true});
 try{
  browser=await chromium.launch({channel:'msedge',headless:true});page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:8786/');await page.getByRole('button',{name:'Correspondencia',exact:true}).click();await page.getByRole('button',{name:'Oficios de salida',exact:true}).click();await page.getByRole('button',{name:'Crear oficio',exact:true}).click();
- await page.locator('[name=subject]').fill('Borrador QA pendiente');await page.locator('[name=signer_id]').selectOption('');await page.getByRole('button',{name:'Guardar borrador',exact:true}).click();await page.getByText(/Borrador guardado ·/).waitFor();
+ await page.locator('[name=subject]').fill('Borrador QA pendiente');await page.getByRole('button',{name:'Cambiar persona que suscribe',exact:true}).click();await page.locator('select[name=signer_id]').selectOption('');await page.getByRole('button',{name:'Guardar borrador',exact:true}).click();await page.getByText(/Borrador guardado ·/).waitFor();
  await page.getByRole('button',{name:'Remitir para firma',exact:true}).click();await page.getByText(/Complete el destinatario, el contenido/).waitFor();
  await page.getByRole('button',{name:'Oficios de salida',exact:true}).click();await page.getByRole('button',{name:'Borradores (1)',exact:true}).click();await page.getByRole('button',{name:'Continuar edición',exact:true}).click();
  assert.equal(await page.locator('[name=subject]').inputValue(),'Borrador QA pendiente');await page.locator('[name=body]').fill('Cambios para retomar desde otro día.');

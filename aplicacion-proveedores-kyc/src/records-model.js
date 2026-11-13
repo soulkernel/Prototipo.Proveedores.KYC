@@ -14,7 +14,7 @@ export function validateDocument(d,{submit=false,today=day()}={}){
  const errors=[];
  if(!['outgoing','incoming'].includes(d.direction))errors.push('direction');
  if(d.subject?.trim().length<3||!d.subject||d.subject.length>300)errors.push('subject');
- if(!/^\d{4}-\d\d-\d\d$/.test(d.document_date||'')||Number.isNaN(Date.parse(d.document_date))||new Date(d.document_date).toISOString().slice(0,10)!==d.document_date||d.document_date>today)errors.push('document_date');
+ if(d.direction==='incoming'&&(!/^\d{4}-\d\d-\d\d$/.test(d.document_date||'')||Number.isNaN(Date.parse(d.document_date))||new Date(d.document_date).toISOString().slice(0,10)!==d.document_date||d.document_date>today))errors.push('document_date');
  if((submit||d.direction==='incoming')&&(!d.recipients?.length||d.recipients.some(r=>!r.party_id&&!r.party?.id)||!d.recipients.some(r=>r.kind===(d.direction==='incoming'?'from':'to'))))errors.push('party_id');
  if(d.body?.length>60000||submit&&d.body?.trim().length<10)errors.push('body');
  if(d.direction==='outgoing'&&submit&&!d.signer_id)errors.push('signer_id');
@@ -32,3 +32,5 @@ export function fileCheck(file,kind){
  if(file.size<1||file.size>20*1024*1024||!(pdf||kind==='source'&&word))throw Error('INVALID_FILE');
  return {kind,filename:file.name,mime:file.type,size:file.size};
 }
+
+export const recordAttachments=d=>(d.attachments||d.files?.filter(f=>f.kind==='attachment')||[]).slice().sort((a,b)=>a.filename.localeCompare(b.filename,'es'));

@@ -1,5 +1,5 @@
 import {jsPDF} from 'jspdf';
-import {number} from './records-model.js';
+import {number,recordAttachments} from './records-model.js';
 export function recordsPdf(data,{logo=null,lang='es',draft=false}={}) {
  const doc=new jsPDF({unit:'mm',format:'a4',compress:true});let y=40;const left=22,right=188,width=166;
  doc.setProperties({title:`${number(data)} · ${data.subject}`,author:'Galápagos Life Fund'});
@@ -13,11 +13,12 @@ export function recordsPdf(data,{logo=null,lang='es',draft=false}={}) {
  paragraph(`${lang==='es'?'Asunto':'Subject'}: ${data.subject}`,{bold:true,gap:6});
  paragraph(lang==='es'?'De mi consideración:':'Dear recipient,');
  for(const p of String(data.body||'').split('\n'))paragraph(p,{gap:2});
+ const attachments=recordAttachments(data);if(attachments.length){paragraph(lang==='es'?'Anexos:':'Attachments:',{bold:true,size:10});attachments.forEach((f,i)=>paragraph((i+1)+'. '+f.filename,{size:10,gap:1}));}
  room(43);paragraph(lang==='es'?'Atentamente,':'Sincerely,');y+=15;
  paragraph(data.signer_name||'',{bold:true,gap:0});paragraph(data.job_title||'',{size:10,gap:1});
  paragraph(data.origin_code||'',{size:8,gap:2});
  const copies=(data.recipients||[]).filter(r=>r.kind==='cc');if(copies.length)paragraph((lang==='es'?'Copia: ':'Cc: ')+copies.map(r=>r.party?.name).join('; '),{size:9});
- const attachments=data.attachments||[];if(attachments.length)paragraph((lang==='es'?'Anexos: ':'Attachments: ')+attachments.map(f=>f.filename).join('; '),{size:9});
+
  const total=doc.getNumberOfPages();for(let n=1;n<=total;n++){doc.setPage(n);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.text(lang==='es'?`Página ${n} de ${total}`:`Page ${n} of ${total}`,right,285,{align:'right'});}
  return {buffer:doc.output('arraybuffer'),pages:total,filename:(draft?'Borrador':number(data))+'.pdf'};
 }
