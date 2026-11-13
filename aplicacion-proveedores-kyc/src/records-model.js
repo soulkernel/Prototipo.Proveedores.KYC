@@ -15,7 +15,7 @@ export function validateDocument(d,{submit=false,today=day()}={}){
  if(!['outgoing','incoming'].includes(d.direction))errors.push('direction');
  if(d.subject?.trim().length<3||!d.subject||d.subject.length>300)errors.push('subject');
  if(!/^\d{4}-\d\d-\d\d$/.test(d.document_date||'')||Number.isNaN(Date.parse(d.document_date))||new Date(d.document_date).toISOString().slice(0,10)!==d.document_date||d.document_date>today)errors.push('document_date');
- if(!d.recipients?.length||d.recipients.some(r=>!r.party_id&&!r.party?.id)||!d.recipients.some(r=>r.kind===(d.direction==='incoming'?'from':'to')))errors.push('party_id');
+ if((submit||d.direction==='incoming')&&(!d.recipients?.length||d.recipients.some(r=>!r.party_id&&!r.party?.id)||!d.recipients.some(r=>r.kind===(d.direction==='incoming'?'from':'to'))))errors.push('party_id');
  if(d.body?.length>60000||submit&&d.body?.trim().length<10)errors.push('body');
  if(d.direction==='outgoing'&&submit&&!d.signer_id)errors.push('signer_id');
  if(d.direction==='incoming'&&(!d.received_at||Number.isNaN(Date.parse(d.received_at))||Date.parse(d.received_at)>Date.now()))errors.push('received_at');

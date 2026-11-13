@@ -96,5 +96,25 @@ test('Relational correspondence: workflow, server permissions, atomic numbering,
    assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'incoming',q:'Institución renombrada',person_id:ids.writer,date_from:day(),date_to:day()}))).rows.length,1);
    assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'incoming',date_from:'2099-01-01'}))).rows.length,0);
   });
+  await t.test('Incomplete drafts persist without numbering; submission and edits retain authorization',async()=>{
+   const counters=await db.query('select * from glf_records_private.counters order by direction,year');
+   const minimal={...base,subject:'Borrador para continuar mañana',recipients:[],body:'',signer_id:null};
+   const draftId=await run('writer',()=>rpc('save',null,null,minimal));
+   let saved=await run('writer',()=>rpc('read',draftId));assert.equal(saved.status,'draft');assert.equal(saved.sequence,null);assert.equal(saved.recipients.length,0);
+   assert.deepEqual((await db.query('select * from glf_records_private.counters order by direction,year')).rows,counters.rows);
+   await assert.rejects(run('writer',()=>rpc('submit',draftId,1)),/INVALID_STATE/);
+   const body={...minimal,body:'Contenido suficiente para remitir',signer_id:ids.signer};
+   await run('writer',()=>rpc('save',draftId,1,body));
+   await assert.rejects(run('writer',()=>rpc('submit',draftId,2)),/RECIPIENT_REQUIRED/);
+   await assert.rejects(run('writer',()=>rpc('save',draftId,1,body)),/STALE/);
+   await assert.rejects(run('reader',()=>rpc('save',draftId,2,body)),/FORBIDDEN/);
+   await run('writer',()=>rpc('save',draftId,2,{...body,recipients:base.recipients}));
+   const list=await run('writer',()=>rpc('list',null,null,{direction:'outgoing',status:'draft',q:minimal.subject}));assert.equal(list.rows.length,1);assert.equal(list.rows[0].author_name,'writer');assert.ok(list.rows[0].updated_at);assert.ok(list.draft_count>=1);
+   const countBefore=(await run('reader',()=>rpc('list',null,null,{direction:'outgoing'}))).draft_count;
+   await run('writer',()=>rpc('save',null,null,{...minimal,classification:'restricted'}));
+   assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'outgoing'}))).draft_count,countBefore);
+   await run('writer',()=>rpc('submit',draftId,3));assert.equal((await run('writer',()=>rpc('read',draftId))).status,'review');
+   assert.deepEqual((await db.query('select * from glf_records_private.counters order by direction,year')).rows,counters.rows);
+  });
  }finally{await db.close();}
 });

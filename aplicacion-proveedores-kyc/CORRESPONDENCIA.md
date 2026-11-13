@@ -130,3 +130,10 @@ Pruebas: 97 automatizadas (17 generales, 21 datos, 44 KYC, 15 documentales/PDF/m
 Referencia técnica del lector PDF: https://pdf-lib.js.org/docs/api/classes/pdfdocument#load
 
 Activación verificada: migración 027 aplicada en Supabase (Success. No rows returned), versión b653eac7e9ca3114d520be770daa35d7f996a2e8 publicada en main y Vercel satisfactorio. Lectura posterior confirma 22 proveedores, 11 expedientes KYC, RLS activo y bucket privado; número antiguo C-GLF-0001-2026 conservado. La sesión interna real registró un PDF sintético con GLF-EXT-2026-00001 y preparó su respuesta vinculada. No se firmaron ni enviaron documentos. Los identificadores de los registros de prueba y las comprobaciones posteriores se guardan en el contexto reservado.
+
+
+## Borradores de salida — 13/11/2026
+
+Acceso Borradores con conteo autorizado, asunto, autor y última modificación. Guardar borrador admite asunto con fecha precargada, sin destinatario, contenido ni firmante; estos se validan al remitir a firma, también en servidor. No asigna número ni envía correo. Continuar edición retoma el registro persistido con control de versión. Guardar y salir / Salir sin guardar / Seguir editando en navegación interna, incluidos cambios de módulo y cierre de sesión; al cerrar o recargar el navegador se mantiene el aviso nativo de cambios pendientes (no puede guardar desde ese diálogo). Guardado explícito con fecha y hora, sin autoguardado. Permisos y clasificación existentes conservados.
+
+Migración 028 reemplaza solo la RPC, sin nuevas tablas, columnas o privilegios; exige destinatario para pasar a revisión y conserva la exigencia de remitente para entradas. Conteo de borradores limitado a documentos legibles. Pruebas: 16 documentales y 17 generales; QA Edge de borradores y recorrido completo de Correspondencia, incluidos ES/EN y móvil, satisfactorios. Activación y verificación publicada se registrarán en el contexto compartido tras aplicar la migración.
