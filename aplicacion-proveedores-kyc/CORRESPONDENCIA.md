@@ -12,7 +12,7 @@ Módulo publicado en Vercel el 13/11/2026, con las migraciones 024/025/026 aplic
 6. Despacho prepara destinatarios, copias, asunto y mensaje. Si Gmail está configurado, una confirmación envía el PDF firmado y los anexos. Sin conexión, se copia el mensaje, se envía manualmente y se incorpora una constancia antes de marcar enviado. Descargar nunca marca enviado.
 7. Recepción registra los oficios entrantes, incorpora el original PDF, asigna responsable/plazo y enlaza una respuesta de salida. Archivo registra el cierre y su motivo.
 
-La numeración presentada es `C-GLF-0001-AÑO`; antes de emitir documentos reales hay que ratificar formato y conciliar el último consecutivo institucional. Debajo de la firma aparece `ÁREA-SEDE-INICIALES`, sin “Elaborado por”. SX corresponde a Santa Cruz y SC a San Cristóbal. La plantilla A4 incluye logotipo superior derecho y página X de Y inferior derecha.
+Numeración acordada: entrada `GLF-EXT-AÑO-00001`; salida `GLF-AÑO-00001`. Son secuencias anuales independientes, comunes para todas las áreas y sedes. Los números anteriores `C-GLF-0001-AÑO` se conservan. Antes de documentos reales se debe conciliar el consecutivo institucional. Debajo de la firma aparece `ÁREA-SEDE-INICIALES`, sin “Elaborado por”. SX corresponde a Santa Cruz y SC a San Cristóbal. La plantilla A4 incluye logotipo superior derecho y página X de Y inferior derecha.
 
 ## Modelo relacional y reutilización
 
@@ -72,7 +72,7 @@ Las copias JSON de versiones aprobadas y el sobre de correo son **evidencia hist
 
 ES/EN, estilos, botones e iconos compartidos con la aplicación. Correspondencia, PDF, Word y Administración se importan solo al abrirlos. Listados de 50 registros; búsquedas de contraparte desde el editor, índices de bandeja, autor, responsable, acceso y archivos. Se validan fechas en zona Galápagos, longitudes, tipos, destinatarios, permisos y estados en cliente y servidor. Los campos observados reciben foco y resaltado. La edición avisa antes de abandonar cambios sin guardar.
 
-No se añadió otra biblioteca: se reutilizan jsPDF y JSZip. El Word original se conserva y su texto se importa para revisión; no se promete reproducir exactamente estilos, tablas o imágenes del Word. No hay aplicación Windows separada, edición offline oficial ni sincronización Drive en esta entrega.
+Se reutilizan jsPDF y JSZip. La actualización de recepción incorpora pdf-lib con carga diferida para comprobar los PDF sin reescribirlos. El Word original se conserva y su texto se importa para revisión; no se promete reproducir exactamente estilos, tablas o imágenes del Word. No hay aplicación Windows separada, edición offline oficial ni sincronización Drive en esta entrega.
 
 ## Activación controlada
 
@@ -116,3 +116,15 @@ La PR #2 se integró en main (`cef5b83`) y Vercel confirmó Production Ready. La
 Con la sesión interna y MFA existentes se verificaron: asignación organizativa del administrador de prueba; vínculo con proveedor sin duplicarlo; institución independiente; oficio de salida, archivo, aprobación, numeración y descarga PDF; recepción de oficio restringido, carga PDF, asignación y plazo. Los registros son sintéticos. No se firmaron documentos reales ni se enviaron correos. La comprobación con otros perfiles corresponde por ahora a las pruebas SQL locales, no a sesiones reales de otros usuarios.
 
 Las asignaciones de personal deben configurarse sobre cuentas verificadas. No se concedieron permisos nominales a otros miembros del GLF. La función de correo está preparada en código, pero no desplegada ni autorizada en Workspace. Drive, administración central entre aplicaciones y numeración oficial siguen pendientes de sus respectivas integraciones o definiciones.
+
+## Bandejas y numeración acordadas — 13/11/2026
+
+Migración 027, después de 026. Dos bandejas: Oficios recibidos y Oficios de salida. Solo la segunda ofrece Crear oficio y firma/aprobación; la primera registra remitente, origen, recepción, canal, archivo y ubicación física opcional. Cada bandeja mantiene sus filtros. La búsqueda y paginación se aplican en el servidor por dirección, número GLF/de origen, asunto, contraparte, fechas, responsable/autor, firmante o plazo. La relación recibido-respuesta es navegable; crear una respuesta no marca el ingreso como atendido ni enviado.
+
+Recepción: datos básicos → comprobación del PDF → guardado técnico incompleto → carga privada y confirmación → Registrar recepción. Solo la última operación asigna número y estado Recibido. Una falla de carga no consume consecutivo; el registro incompleto puede retomarse. El servidor exige un PDF confirmado para numerar. Las cargas conservan originales y nuevas versiones, con motivo obligatorio al incorporar otro PDF principal. Anexos PDF separados después del registro. Máximo 20 MiB (20 MB en interfaz), en cliente, tickets y Storage; vista previa local, páginas y tamaño visibles. Comprobación estructural y rechazo de cifrado se realizan en navegador mediante pdf-lib; no equivalen a antivirus, verificación criptográfica ni garantía de legibilidad. El servidor comprueba permiso, formato declarado, tamaño, objeto y estado; no analiza el contenido binario del PDF.
+
+Número de origen e interno son campos distintos. La migración conserva números ya emitidos y contador de salida; nuevos números usan GLF-AÑO-00001 y GLF-EXT-AÑO-00001. Los ingresos históricos sin número interno se numeran explícitamente desde su detalle cuando cuentan con PDF; no se inventan registros ni se renumera automáticamente. Año del registro/aprobación en zona Galápagos. Idempotencia de completar recepción y restricciones únicas impiden consumir dos números en un reintento.
+
+Pruebas: 97 automatizadas (17 generales, 21 datos, 44 KYC, 15 documentales/PDF/migración); recorrido local Edge con recibido físico, PDF obligatorio, vista previa, numeración, filtros separados, respuesta vinculada, ES/EN y móvil. Migración probada sobre datos anteriores, preservando número y versión aprobada. Aplicar 027 antes de publicar esta interfaz; no cambia roles, identidad ni permisos.
+
+Referencia técnica del lector PDF: https://pdf-lib.js.org/docs/api/classes/pdfdocument#load

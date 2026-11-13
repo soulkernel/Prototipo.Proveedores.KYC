@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import {PGlite} from '@electric-sql/pglite';
-export async function database({records=true}={}) {
+export async function database({records=true,through='999999999999'}={}) {
  const db=new PGlite();
  await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;create table auth.users(id uuid primary key);
  create function auth.jwt() returns jsonb language sql stable as $$select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb$$;
@@ -10,7 +10,7 @@ export async function database({records=true}={}) {
  create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text unique,metadata jsonb);
  alter table storage.objects enable row level security;grant usage on schema storage to authenticated,anon;grant select,insert,update,delete on storage.objects to authenticated,anon;`);
  const directory=new URL('../supabase/migrations/',import.meta.url);
- for(const name of (await fs.readdir(directory)).filter(n=>n.endsWith('.sql')&&(records||!n.includes('records'))).sort())await db.exec(await fs.readFile(new URL(name,directory),'utf8'));
+ for(const name of (await fs.readdir(directory)).filter(n=>n.endsWith('.sql')&&n.slice(0,12)<=through&&(records||!n.includes('records'))).sort())await db.exec(await fs.readFile(new URL(name,directory),'utf8'));
  return db;
 }
 export const ids={admin:'00000000-0000-4000-8000-000000000091',writer:'00000000-0000-4000-8000-000000000092',reader:'00000000-0000-4000-8000-000000000093',signer:'00000000-0000-4000-8000-000000000094',receiver:'00000000-0000-4000-8000-000000000095'};

@@ -5,7 +5,9 @@ export const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 export const day=(now=new Date())=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Pacific/Galapagos',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
 export const localDateTime=(now=new Date())=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Pacific/Galapagos',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(now).replace(' ','T');
 export function dateTimeToISO(value){if(!/^\d{4}-\d\d-\d\dT\d\d:\d\d$/.test(value))throw Error('INVALID_DATE');return new Date(value+':00-06:00').toISOString();}
-export const number=d=>d.sequence?`C-GLF-${String(d.sequence).padStart(4,'0')}-${d.year}`:(d.external_number||'—');
+export const number=d=>d.internal_number||(d.sequence?`C-GLF-${String(d.sequence).padStart(4,'0')}-${d.year}`:'—');
+export const directionStatuses={incoming:['draft','received','assigned','closed','cancelled'],outgoing:['draft','review','prepared','signed','sent','closed','cancelled']};
+export const recordStatus=(status,direction,lang='es')=>status==='draft'&&direction==='incoming'?(lang==='es'?'Registro incompleto':'Incomplete registration'):(statusLabels[status]||[status,status])[lang==='es'?0:1];
 export function code(unit,site,initials){return [unit,site,initials].map(v=>String(v||'').trim().toUpperCase()).join('-');}
 export function canRecords(bootstrap,permission){return !!(bootstrap?.admin||bootstrap?.permissions?.includes(permission));}
 export function validateDocument(d,{submit=false,today=day()}={}){

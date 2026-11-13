@@ -46,7 +46,7 @@ test('Relational correspondence: workflow, server permissions, atomic numbering,
   await t.test('Only selected signer approves; numbering is shared and repeated clicks cannot consume twice',async()=>{
    await assert.rejects(run('writer',()=>rpc('approve',doc,2)),/FORBIDDEN/);
    await run('signer',()=>rpc('approve',doc,2));await assert.rejects(run('signer',()=>rpc('approve',doc,2)),/STALE_VERSION/);await run('signer',()=>rpc('approve',restricted,2));
-   const a=await run('signer',()=>rpc('read',doc)),b=await run('signer',()=>rpc('read',restricted));assert.equal(a.sequence,1);assert.equal(b.sequence,2);assert.equal(a.revisions.length,1);
+   const a=await run('signer',()=>rpc('read',doc)),b=await run('signer',()=>rpc('read',restricted));assert.equal(a.sequence,1);assert.equal(a.internal_number,'GLF-'+day().slice(0,4)+'-00001');assert.equal(b.sequence,2);assert.equal(a.revisions.length,1);
    await run('writer',()=>rpc('party',party.id,party.version,{name:'Institución renombrada',kind:'institution',address:'Nueva dirección'}));
    const c=await run('signer',()=>rpc('read',doc));assert.equal(c.revisions[0].snapshot.recipients[0].party.name,'Institución de prueba');assert.equal(c.recipients[0].party.name,'Institución renombrada');
   });
@@ -80,9 +80,21 @@ test('Relational correspondence: workflow, server permissions, atomic numbering,
   await t.test('Reception remains explicit; assignment and closing require the proper capabilities',async()=>{
    const incoming=await run('receiver',()=>rpc('save',null,null,{...base,direction:'incoming',signer_id:null,received_at:new Date().toISOString(),recipients:[{kind:'from',party_id:party.id}]}));
    await assert.rejects(run('writer',()=>rpc('assign',incoming,1,{assigned_to:ids.writer})),/FORBIDDEN/);
-   await run('receiver',()=>rpc('assign',incoming,1,{assigned_to:ids.writer,requires_response:true,due_date:day(),reason:'Atender solicitud'}));
-   await assert.rejects(run('writer',()=>rpc('close',incoming,2,{reason:'Respondido'})),/FORBIDDEN/);
-   await run('receiver',()=>rpc('close',incoming,2,{reason:'Respuesta completa documentada'}));
+   await assert.rejects(run('receiver',()=>rpc('register',incoming,1)),/FILE_MISSING/);
+   const ticket=await run('receiver',()=>rpc('upload',incoming,1,{kind:'incoming',filename:'recibido.pdf',mime:'application/pdf',size:20}));
+   await run('receiver',()=>db.query("insert into storage.objects(bucket_id,name,metadata) values('glf-correspondence',$1,$2)",[ticket.path,JSON.stringify({size:20})]));
+   await run('receiver',()=>rpc('confirm_upload',incoming,1,{file_id:ticket.id}));await run('receiver',()=>rpc('register',incoming,2));
+   const registered=await run('receiver',()=>rpc('read',incoming));assert.equal(registered.internal_number,'GLF-EXT-'+day().slice(0,4)+'-00001');
+   await run('receiver',()=>rpc('register',incoming,2));assert.equal((await run('receiver',()=>rpc('read',incoming))).sequence,1);
+   await run('receiver',()=>rpc('assign',incoming,3,{assigned_to:ids.writer,requires_response:true,due_date:day(),reason:'Atender solicitud'}));
+   await assert.rejects(run('writer',()=>rpc('close',incoming,4,{reason:'Respondido'})),/FORBIDDEN/);
+   await run('receiver',()=>rpc('close',incoming,4,{reason:'Respuesta completa documentada'}));
+   assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'incoming'}))).rows.length,1);
+   assert.ok((await run('reader',()=>rpc('list',null,null,{direction:'outgoing'}))).rows.every(d=>d.direction==='outgoing'));
+   assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'incoming',q:registered.internal_number}))).rows[0].id,incoming);
+   assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'outgoing',q:registered.internal_number}))).rows.length,0);
+   assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'incoming',q:'Institución renombrada',person_id:ids.writer,date_from:day(),date_to:day()}))).rows.length,1);
+   assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'incoming',date_from:'2099-01-01'}))).rows.length,0);
   });
  }finally{await db.close();}
 });
