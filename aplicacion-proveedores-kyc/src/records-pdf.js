@@ -3,7 +3,7 @@ import {number,recordAttachments} from './records-model.js';
 export function recordsPdf(data,{logo=null,lang='es',draft=false}={}) {
  const doc=new jsPDF({unit:'mm',format:'a4',compress:true});let y=40;const left=22,right=188,width=166;
  doc.setProperties({title:`${number(data)} · ${data.subject}`,author:'Galápagos Life Fund'});
- const start=()=>{if(logo)doc.addImage(logo,'PNG',157,12,31,13.4);y=40;};
+ const start=()=>{if(logo){doc.saveGraphicsState();doc.roundedRect(157,12,31,13.4,1.5,1.5,null);doc.clip();doc.discardPath();doc.addImage(logo,'PNG',157,12,31,13.4);doc.restoreGraphicsState();}y=40;};
  const room=h=>{if(y+h>266){doc.addPage();start();}};
  const paragraph=(text,{bold=false,size=11,gap=4}={})=>{doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);for(const line of doc.splitTextToSize(String(text||''),width)){room(5.5);doc.text(line,left,y);y+=5.5;}y+=gap;};
  start();
