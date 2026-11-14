@@ -4,7 +4,7 @@ import {bodyHtml,bodyParagraphs} from '../src/records-body.js';
 test('Body formatting is escaped, bounded and backward compatible',()=>{
  assert.match(bodyHtml('<img src=x onerror=alert(1)>',null),/&lt;img/);assert.doesNotMatch(bodyHtml('<script>',null),/<script>/);
  assert.equal(bodyParagraphs('Texto anterior')[0].align,'justify');
- assert.equal(bodyHtml('A😀B',{version:1,paragraphs:[{align:'center',bold:[[1,2]]}]}),'<p style="text-align:center">A<strong>😀</strong>B</p>');
+ assert.equal(bodyHtml('A😀B',{version:1,paragraphs:[{align:'center',bold:[[1,2]]}]}),'<p class="records-align-center">A<strong>😀</strong>B</p>');
  assert.doesNotMatch(bodyHtml('A',{version:1,paragraphs:[{align:'evil',bold:[[-1,10]]}]}),/evil|strong/);
 });
 test('Paragraph formatting persists, validates on server and freezes with approved revision',async()=>{
