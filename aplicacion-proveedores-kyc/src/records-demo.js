@@ -46,7 +46,7 @@ export function createRecordsDemo(store){
    if(input.direction==='outgoing')input={...input,document_date:day(),place:state.sites.find(s=>s.id===member?.site_id)?.name||''};
    if(!can(input.direction==='incoming'?'receive':'create'))fail('FORBIDDEN');if(!member)fail('MEMBER_REQUIRED');if(validateDocument(input).length)fail('INVALID');
    if(doc&&(!readable(doc)||doc.author_id!==p.id||doc.status!=='draft'||doc.version!==version))fail('STALE_VERSION');
-   const allowed=Object.fromEntries(['direction','subject','body','place','document_date','classification','signer_id','external_number','received_at','channel','parent_id','physical_location','recipients'].map(k=>[k,input[k]??null]));
+   const allowed=Object.fromEntries(['direction','subject','body','body_format','place','document_date','classification','signer_id','external_number','received_at','channel','parent_id','physical_location','recipients'].map(k=>[k,input[k]??null]));
    const fresh=doc||{id:uid(),author_id:p.id,unit_id:member.unit_id,site_id:member.site_id,version:0,status:'draft',files:[],events:[],revisions:[],dispatches:[]};
    Object.assign(fresh,allowed,{version:fresh.version+1,updated_at:new Date().toISOString()});fresh.events.unshift({action:'saved',created_at:fresh.updated_at,actor_name:p.display_name});if(!doc)state.documents.unshift(fresh);write(state);return fresh.id;
   }

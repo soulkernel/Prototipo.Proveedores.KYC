@@ -1,5 +1,6 @@
 import {jsPDF} from 'jspdf';
 import {number,recordAttachments} from './records-model.js';
+import {bodyParagraphs} from './records-body.js';
 
 export function recordsPdf(data,{logo=null,lang='es',draft=false}={}) {
  const letterLogo=typeof __RECORDS_LOGO__==='undefined'?logo:__RECORDS_LOGO__;
@@ -49,7 +50,22 @@ export function recordsPdf(data,{logo=null,lang='es',draft=false}={}) {
  subject.forEach((line,i)=>{room(5.3);if(i===0){font(11,true);doc.text(label,left,y);}font();doc.text(line,left+labelWidth,y);y+=5.3;});y+=7;
  for(const r of data.recipients||[])if(r.kind!=='cc')recipient(r);
  room(17);paragraph(es?'De mi consideración:':'Dear recipient,',{gap:5});
- for(const p of String(data.body||'').split('\n')){if(p.trim())paragraph(p,{gap:3,align:'justify'});else y+=2;}
+ for(const p of bodyParagraphs(data.body,data.body_format)){
+  if(!p.text.trim()){y+=5.28;continue;}
+  const tokens=[];for(const run of p.runs)for(const text of run.text.split(/(\s+)/).filter(Boolean)){font(11,run.bold);tokens.push({text,bold:run.bold,width:doc.getTextWidth(text)});}
+  const wrapped=[];let row=[],used=0;
+  const flush=()=>{while(row.length&&/^\s+$/.test(row.at(-1).text))row.pop();if(row.length)wrapped.push(row);row=[];used=0;};
+  for(const token of tokens){
+   if(/^\s+$/.test(token.text)){if(row.length){row.push(token);used+=token.width;}continue;}
+   if(used+token.width>width&&row.length)flush();
+   if(token.width<=width){row.push(token);used+=token.width;}
+   else{font(11,token.bold);for(const char of Array.from(token.text)){const w=doc.getTextWidth(char);if(used+w>width)flush();row.push({text:char,bold:token.bold,width:w});used+=w;}}
+  }flush();
+  wrapped.forEach((row,i)=>{room(5.28);const total=row.reduce((n,r)=>n+r.width,0),spaces=row.filter(r=>/^\s+$/.test(r.text)).length;
+   const extra=p.align==='justify'&&i<wrapped.length-1&&spaces?(width-total)/spaces:0;let x=p.align==='center'?left+(width-total)/2:left;
+   for(const r of row){font(11,r.bold);doc.text(r.text,x,y);x+=r.width+(/^\s+$/.test(r.text)?extra:0);}y+=5.28;
+  });y+=3;
+ }
  const signerHeight=lines(data.signer_name||'').length*5.28+lines(data.job_title||'',11,true).length*5.28;
  room(30+signerHeight);paragraph(es?'Atentamente,':'Sincerely,',{gap:0});y+=17;
  paragraph(data.signer_name||'',{gap:0});paragraph(data.job_title||'',{bold:true,gap:5});
