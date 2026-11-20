@@ -35,11 +35,16 @@ export function bindBodyEditor(container,onChange){
  editor.addEventListener('paste',ev=>{ev.preventDefault();document.execCommand('insertText',false,ev.clipboardData.getData('text/plain'));onChange();state();});
  for(const button of container.querySelectorAll('[data-body-command]')){
   button.addEventListener('mousedown',ev=>ev.preventDefault());
-  button.addEventListener('click',()=>{editor.focus();const s=window.getSelection();if(saved&&editor.contains(saved.commonAncestorContainer)){s.removeAllRanges();s.addRange(saved);}if(button.dataset.bodyCommand==='bold'){document.execCommand('styleWithCSS',false,false);document.execCommand('bold',false);}
+  button.addEventListener('click',ev=>{ev.preventDefault();
+   // Focusing can fire a selection update: preserve the intended range first.
+   const target=saved?.cloneRange();editor.focus({preventScroll:true});const s=window.getSelection();
+   if(target&&editor.contains(target.commonAncestorContainer)){s.removeAllRanges();s.addRange(target);}
+   else if(!s.rangeCount||!editor.contains(s.anchorNode)){const r=document.createRange();r.selectNodeContents(editor);r.collapse(false);s.removeAllRanges();s.addRange(r);}
+   if(button.dataset.bodyCommand==='bold'){document.execCommand('styleWithCSS',false,false);document.execCommand('bold',false);}
    else{
     let range=s.rangeCount?s.getRangeAt(0):null;
     const points=range?{start:range.startContainer,so:range.startOffset,end:range.endContainer,eo:range.endOffset}:null;
-    if(!editor.querySelector('p,div')){const p=document.createElement('p');while(editor.firstChild)p.append(editor.firstChild);editor.append(p);if(points){range=document.createRange();range.setStart(points.start,points.so);range.setEnd(points.end,points.eo);s.removeAllRanges();s.addRange(range);}}
+    if(!editor.querySelector('p,div')){const p=document.createElement('p');while(editor.firstChild)p.append(editor.firstChild);if(!p.firstChild)p.append(document.createElement('br'));editor.append(p);if(points){range=document.createRange();range.setStart(points.start===editor?p:points.start,points.so);range.setEnd(points.end===editor?p:points.end,points.eo);s.removeAllRanges();s.addRange(range);}}
     const blocks=[...editor.querySelectorAll('p,div')].filter(p=>!p.querySelector('p,div'));
     for(const p of blocks)if(!range||range.intersectsNode(p)){p.classList.remove('records-align-left','records-align-center','records-align-justify');p.classList.add('records-align-'+button.dataset.align);p.style.removeProperty('text-align');}
    }onChange();state();});

@@ -3,11 +3,34 @@ const http=server();const config=JSON.parse(await fs.readFile('vercel.json','utf
 try{
  browser=await chromium.launch({channel:'msedge',headless:true});page=await browser.newPage({viewport:{width:1350,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:8788/');await page.getByRole('button',{name:'Correspondencia',exact:true}).click();await page.getByRole('button',{name:'Oficios de salida',exact:true}).click();await page.getByRole('button',{name:'Crear oficio',exact:true}).click();await page.locator('[name=subject]').fill('Prueba de alineación y negrita');
- const ed=page.locator('[data-body-editor]');await ed.fill('Título de prueba');await ed.press('Control+Home');await ed.press('Control+Shift+End');await page.getByRole('button',{name:'Negrita',exact:true}).click();await page.getByRole('button',{name:'Centrar',exact:true}).click();
+ const ed=page.locator('[data-body-editor]');
+ await page.getByRole('button',{name:'Redactar contenido',exact:true}).click();
+ assert.equal(await page.locator('[data-letter-data]').evaluate(el=>el.open),false);
+ assert.equal(await ed.evaluate(el=>el===document.activeElement),true);
+ assert.equal(await page.locator('[data-body-command] svg').count(),4);
+ // Real typing after toolbar use: no locator.press/focus to hide lost-caret bugs.
+ await page.keyboard.type('Inicio');
+ for(const [name,align,text] of [['Centrar','center',' centrado'],['Justificar','justify',' justificado'],['Alinear a la izquierda','left',' izquierda']]){
+  await page.getByRole('button',{name,exact:true}).click();
+  assert.equal(await ed.evaluate(el=>el===document.activeElement),true);
+  await page.keyboard.type(text);
+  assert.equal(await ed.locator('p').first().evaluate(el=>getComputedStyle(el).textAlign),align);
+ }
+ assert.equal(await ed.innerText(),'Inicio centrado justificado izquierda');
+ // Clicking the content must not implicitly activate the first toolbar button.
+ await ed.click();assert.equal(await page.getByRole('button',{name:'Negrita',exact:true}).getAttribute('aria-pressed'),'false');
+ await page.keyboard.press('Control+End');await page.keyboard.type(' final');
+ assert.equal(await ed.innerText(),'Inicio centrado justificado izquierda final');
+ await page.getByRole('button',{name:'Centrar',exact:true}).focus();await page.keyboard.press('Enter');await page.keyboard.type(' teclado');
+ assert.equal(await ed.innerText(),'Inicio centrado justificado izquierda final teclado');
+ await page.keyboard.press('Enter');await page.keyboard.type('Segundo párrafo');assert.equal(await ed.locator('p').last().evaluate(el=>getComputedStyle(el).textAlign),'center');
+ await page.getByRole('button',{name:'Datos del oficio',exact:true}).click();await page.locator('[name=subject]').fill('Prueba de alineación y negrita');
+ await page.getByRole('button',{name:'Redactar',exact:true}).click();assert.match(await ed.innerText(),/Segundo párrafo/);
+ await ed.fill('Título de prueba');await ed.press('Control+Home');await ed.press('Control+Shift+End');await page.getByRole('button',{name:'Negrita',exact:true}).click();await page.getByRole('button',{name:'Centrar',exact:true}).click();
  await ed.press('End');await ed.press('Enter');await page.getByRole('button',{name:'Alinear a la izquierda',exact:true}).click();if(await page.getByRole('button',{name:'Negrita',exact:true}).getAttribute('aria-pressed')==='true')await page.getByRole('button',{name:'Negrita',exact:true}).click();
  await page.keyboard.insertText('Este párrafo queda a la izquierda y contiene una palabra importante.');await ed.press('Enter');await page.getByRole('button',{name:'Justificar',exact:true}).click();await page.keyboard.insertText('Este párrafo se extiende por varias líneas para comprobar que el contenido se distribuye en todo el ancho disponible y conserva sus palabras completas al descargar el documento PDF. '.repeat(3));
  await ed.evaluate(el=>{const walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let node;while(node=walker.nextNode()){const at=node.data.indexOf('importante');if(at>=0){const r=document.createRange();r.setStart(node,at);r.setEnd(node,at+10);const s=window.getSelection();s.removeAllRanges();s.addRange(r);el.dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));break;}}});await page.getByRole('button',{name:'Negrita',exact:true}).click();
- assert.match(await ed.innerHTML(),/important/);await page.screenshot({path:'test-results/records/body-editor.png',fullPage:true});
+ assert.match(await ed.innerHTML(),/important/);await page.locator('.records-writing').screenshot({path:'test-results/records/body-editor.png'});
  await page.getByRole('button',{name:'Guardar borrador',exact:true}).click();await page.getByText(/Borrador guardado/).waitFor();
  const ps=page.locator('.records-preview p');assert.equal(await ps.count(),3);assert.equal(await ps.nth(0).evaluate(el=>getComputedStyle(el).textAlign),'center');assert.equal(await ps.nth(1).evaluate(el=>getComputedStyle(el).textAlign),'left');assert.equal(await ps.nth(2).evaluate(el=>getComputedStyle(el).textAlign),'justify');assert.equal(await ps.nth(0).locator('strong').innerText(),'Título de prueba');assert.equal(await ps.nth(1).locator('strong').innerText(),'importante');
  await page.getByRole('button',{name:'Continuar edición',exact:true}).click();assert.equal(await ed.locator('strong').count(),2);await page.getByRole('button',{name:'Guardar borrador',exact:true}).click();await page.getByText(/Borrador guardado/).waitFor();
