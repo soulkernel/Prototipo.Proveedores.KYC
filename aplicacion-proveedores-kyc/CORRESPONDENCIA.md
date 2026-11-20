@@ -175,3 +175,8 @@ Se elimina el label envolvente que hacía activar implícitamente el primer bot�
 Referencia de proceso: Manual Quipux, Bandeja de Salida (MINTEL, octubre 2018), apartados 1.1, 1.2 y 1.5: https://www.gobiernoelectronico.gob.ec/wp-content/uploads/2019/03/Manual-de-usuario-QUIPUX-v1.1-Bandeja-de-Salida-09102018_1.pdf . Se utiliza solo como referencia de separación de datos, anexos y revisión. Se revisó NarrativeTextarea de Salvaguardas: es captura de texto plano con devolución de foco, no un editor enriquecido intercambiable.
 
 Prueba de regresión en scripts/qa-records-body.mjs: teclear inmediatamente después de cada icono sin reenfocar artificialmente, clic en contenido sin activar negrita, activación por teclado, Enter conservando alineación, cambio entre datos y redacción sin pérdida, guardado, reapertura, PDF, ES/EN y móvil, con CSP de producción. Estado de publicación registrado en contexto compartido.
+
+
+## Documentos debajo del contenido — 19/11/2026
+
+Lectura de oficios entrantes y salientes: contenido, documentos/anexos e historial en tarjetas sucesivas a todo el ancho, sin columna lateral. Edición de salida: tarjeta de anexos visible directamente debajo de la hoja; el botón superior Anexos solo desplaza a esa tarjeta y enfoca la carga. No duplica controles ni pliega los anexos al regresar a redactar. Recepción conserva el PDF de entrada debajo de las observaciones. Guardado, descarga, límites de archivo, permisos y flujo documental sin cambios. Verificación mediante recorridos existentes de anexos y formato, con inspección de distribución en escritorio/móvil; publicación registrada en contexto compartido.
