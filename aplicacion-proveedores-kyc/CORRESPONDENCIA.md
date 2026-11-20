@@ -180,3 +180,16 @@ Prueba de regresión en scripts/qa-records-body.mjs: teclear inmediatamente desp
 ## Documentos debajo del contenido — 19/11/2026
 
 Lectura de oficios entrantes y salientes: contenido, documentos/anexos e historial en tarjetas sucesivas a todo el ancho, sin columna lateral. Edición de salida: tarjeta de anexos visible directamente debajo de la hoja; el botón superior Anexos solo desplaza a esa tarjeta y enfoca la carga. No duplica controles ni pliega los anexos al regresar a redactar. Recepción conserva el PDF de entrada debajo de las observaciones. Guardado, descarga, límites de archivo, permisos y flujo documental sin cambios. Verificación mediante recorridos existentes de anexos y formato, con inspección de distribución en escritorio/móvil; publicación registrada en contexto compartido.
+
+
+## Recepción, seguimiento y respuesta — 19/11/2026
+
+La recepción separa el PDF obligatorio del oficio principal y los anexos PDF opcionales (selección múltiple, máximo 20 MiB por archivo). Se conservan originales y versiones. El número interno se asigna después de completar todas las cargas seleccionadas. La lectura destaca asunto y oficio principal; los anexos se consultan individualmente debajo, sin abrirlos automáticamente.
+
+Seguimiento y disposiciones muestra responsable actual, plazo, última instrucción y actuaciones con autor, fecha y respaldo opcional. Asignar/reasignar y Registrar disposición requieren la capacidad existente de asignación; Registrar atención corresponde al responsable asignado o a quien puede asignar. El registro técnico permanece desplegable. No se han concedido nuevos roles nominales.
+
+Responder crea un borrador persistido vinculado al ingreso, con destinatario del remitente y antecedente de número, fecha y asunto. Repite Continuar respuesta si existe un borrador legible, evitando duplicarlo mediante bloqueo transaccional del ingreso. Conserva autoría y permisos de edición; la confidencialidad del antecedente no puede rebajarse en su respuesta. Se asigna número de salida al aprobar. Crear, aprobar o verificar firma no constituye envío ni cierra el ingreso: el seguimiento muestra el envío únicamente cuando existe constancia registrada o despacho confirmado.
+
+Migración 031 aditiva: tres columnas relacionales en eventos (responsable de la actuación, plazo y referencia al archivo de respaldo). Conserva la lógica anterior en una función privada sin ejecución directa por usuarios y amplía la RPC pública bajo los mismos controles de identidad, MFA y lectura. No duplica contenido, contrapartes ni archivos. Aplicar después de 030 y antes de activar la nueva interfaz.
+
+Verificación local: 21 pruebas documentales, incluidos permisos, MFA, concurrencia, evidencia vinculada al mismo oficio, confidencialidad, borrador reutilizable y distinción firma/envío. Recorrido Edge con ingreso y dos anexos, asignación, disposición, atención, respuesta, permisos de lectura, ES/EN, móvil, formato, cursor, guardado y PDF. Estado de activación y despliegue se registra en el contexto compartido después de verificarlo.
