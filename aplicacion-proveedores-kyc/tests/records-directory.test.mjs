@@ -51,3 +51,30 @@ test('Supplier commercial contact is reused and legacy empty placeholders are ex
  const result=await directoryWorkbook([{name:'Supplier',kind:'institution',supplier_id:'linked',contact_name:'Commercial person',email:'sales@example.test',phone:'00123',contacts:[{name:'',job_title:'',email:'',phone:'',is_representative:true}]}],'en');
  const book=new ExcelJS.Workbook();await book.xlsx.load(result.buffer);assert.equal(book.getWorksheet('Contacts').rowCount,5);assert.equal(book.getWorksheet('Contacts').getCell('B5').value,'Commercial person');assert.equal(book.getWorksheet('Contacts').getCell('F5').value,'Commercial contact');
 });
+
+test('Export groups separate supplier counterparts from independent institutions and individuals',async()=>{
+ const fixtures=[
+  {id:'s',supplier_id:'supplier-1',kind:'natural',name:'Proveedor natural',contact_name:'Contacto comercial',email:'s@example.test',contacts:[]},
+  {id:'i',kind:'institution',name:'Institución administrativa',contacts:[{id:'a',name:'Presidenta',is_representative:true,active:true}]},
+  {id:'n',kind:'natural',name:'Contraparte particular',contacts:[{id:'b',name:'Persona particular',phone:'00099',active:true}]}
+ ];
+ const expected={all:3,suppliers:1,institutions:1,individuals:1};
+ for(const [group,count] of Object.entries(expected)){
+  const result=await directoryWorkbook([...fixtures,fixtures[0]],'es','consulta',new Date(),{group});
+  const book=new ExcelJS.Workbook();await book.xlsx.load(result.buffer);
+  assert.equal(book.getWorksheet('Instituciones').rowCount,4+count);
+  assert.equal(book.getWorksheet('Contactos').rowCount,4+count);
+  assert.match(book.worksheets[0].getCell('A2').value,/consulta/);
+  if(group==='institutions')assert.equal(book.worksheets[0].getCell('A5').value,'Institución administrativa');
+  if(group==='individuals')assert.equal(book.worksheets[0].getCell('A5').value,'Contraparte particular');
+ }
+ const result=await directoryWorkbook([...fixtures,fixtures[0]],'en','',new Date(),{group:'contacts'});
+ const book=new ExcelJS.Workbook();await book.xlsx.load(result.buffer);
+ assert.deepEqual(book.worksheets.map(s=>s.name),['Contacts']);assert.equal(book.worksheets[0].rowCount,7);
+ assert.equal(book.worksheets[0].getCell('J5').value,'Suppliers');
+ assert.equal(book.worksheets[0].getCell('J6').value,'Institutions and entities');
+ assert.equal(book.worksheets[0].getCell('J7').value,'Individuals');
+ assert.equal(book.worksheets[0].getCell('A6').value,'Institución administrativa');
+ const empty=await directoryWorkbook([],'es','ausente',new Date(),{group:'suppliers'});
+ const emptyBook=new ExcelJS.Workbook();await emptyBook.xlsx.load(empty.buffer);assert.equal(emptyBook.worksheets[0].rowCount,4);
+});
