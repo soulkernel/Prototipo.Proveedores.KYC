@@ -42,5 +42,5 @@ export async function manualDocx(manual,lang,images){
 }
 export async function downloadManual(manual,lang,format){
  if(!['pdf','docx'].includes(format))throw Error('INVALID_FORMAT');
- const images=await loadManualImages(manual,lang),blob=format==='pdf'?manualPdf(manual,lang,images):await manualDocx(manual,lang,images);const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`GLF_Manual_${manual.audience==='internal'?'Interno_Proveedores_KYC':'Externo_Formulario_KYC'}_${lang.toUpperCase()}_v${manual.version}.${format}`;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+ const images=await loadManualImages(manual,lang),blob=format==='pdf'?manualPdf(manual,lang,images):await manualDocx(manual,lang,images);const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`GLF_Manual_${manual.audience==='internal'?'Interno_Operaciones_KYC_Archivo':'Externo_Formulario_KYC'}_${lang.toUpperCase()}_v${manual.version}.${format}`;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
