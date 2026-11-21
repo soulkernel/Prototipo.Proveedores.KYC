@@ -11,6 +11,7 @@ import {createRecordsStore} from './records-store.js';
 import {canRecords,esc,day,localDateTime,dateTimeToISO,number,statusLabels,permissionLabels,validateDocument,invitationMail,code} from './records-model.js';
 export function createRecordsModule(baseStore,logo,{openSupplier}={}){
  let api,root,lang='es',profile,boot=null,mode='documents',rows=[],parties=[],suppliers=[],adminData=null,doc=null,draft=null,dirty=false,busy=false,error='',notice='',q='',status='',offset=0,partyBack=false,adminTab='units',editing=null;
+ let resumeNavigation=null;
  let writing=false,view='all',total=0,returnView=null,restoreScroll=null,previewDialog=null,previewUrl='';
  let draftCount=0,exitPending=false,choosingSigner=false,pendingAttachments=[],memberSiteFilter='';
  let direction='incoming',filters={},filterCache={},filterPeople=[],intakeFile=null,intakePreview='',intakePages=0,intakeUploaded=false;
@@ -155,6 +156,7 @@ export function createRecordsModule(baseStore,logo,{openSupplier}={}){
  async function saveMember(ev){ev.preventDefault();const f=new FormData(ev.target),data={...Object.fromEntries(f),roles:f.getAll('role')};if(!data.user_id||!data.unit_id||!data.site_id){showErrors(ev.target,['user_id','unit_id','site_id']);return;}run(async()=>{await api.rpc('member',null,editing?.version||null,data);editing=null;dirty=false;await refresh();notice=t('Asignación guardada.','Assignment saved.');});}
  async function saveRole(ev){ev.preventDefault();const f=new FormData(ev.target);run(async()=>{await api.rpc('role',editing?.id||null,editing?.version||null,{name:f.get('name'),reason:f.get('reason'),permissions:f.getAll('permission')});editing=null;dirty=false;await refresh();notice=t('Perfil actualizado. Revise sus usuarios asignados.','Role updated. Review its assigned users.');});}
  async function act(action,id){if(busy)return;
+ if(action==='dir-supplier'){const target=parties.find(p=>p.id===id);if(target?.supplier_id)await openSupplier?.(target.supplier_id);return;}
  if(action.startsWith('dir-')){await run(async()=>{const changed=await directoryDialog({api,action,id,lang,q,onSupplier:openSupplier});if(changed){await refresh();notice=t('Directorio actualizado.','Directory updated.');}});return;}
  if(action==='update-authority'){collect();const r=draft?.recipients[Number(id)],p=parties.find(p=>p.id===r?.party_id),c=currentContact(p);if(r&&c){r.contact_id=c.id;dirty=true;draw();}return;}
  if(action==='choose-party'){collect();await chooseParty();return;}
@@ -203,5 +205,21 @@ if(action==='change-signer'){collect();choosingSigner=!choosingSigner;draw();ret
 
  function relatedView(){return doc.related?.length?'<h3>'+t('Correspondencia relacionada','Related correspondence')+'</h3>'+doc.related.map(r=>'<div class="records-related">'+b('open',number(r)+' · '+r.subject,false,'data-id="'+r.id+'"')+'<small>'+esc(recordStatus(r.status,r.direction,lang))+'</small></div>').join(''):'';}
  function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
- return {canLeave:leave,async mount(el,language,account,{admin=false}={}){if(draft)collect();root=el;lang=language;profile=account;if(admin)mode='admin';if(!api)api=await createRecordsStore(baseStore);await run(refresh);},reset(){closePreview();view='all';total=0;returnView=null;restoreScroll=null;clearIntake();pendingAttachments=[];choosingSigner=false;direction='incoming';filters={};filterCache={};boot=null;doc=null;draft=null;dirty=false;mode='documents';adminData=null;editing=null;}};
+ function navigation(){return {mode, id:mode==='edit'?draft?.id:doc?.id,direction,view,q,status,offset,filters,adminTab};}
+ async function resumeLocation(saved,admin){
+  if(!saved)return;
+  direction=saved.direction;view=recordViews[direction].some(v=>v[0]===saved.view)?saved.view:'all';q=saved.q;status=saved.status;offset=saved.offset;filters=saved.filters;
+  adminTab=['units','sites','members','roles'].includes(saved.adminTab)?saved.adminTab:'units';
+  if(admin){mode='admin';return;}
+  mode=saved.mode==='contacts'||saved.mode==='party'?'contacts':'documents';
+  if(saved.id&&['detail','edit'].includes(saved.mode)){
+   doc=await api.rpc('read',saved.id);direction=doc.direction;mode='detail';
+   if(saved.mode==='edit'&&doc.status==='draft'&&doc.author_id===profile.id&&can(doc.direction==='incoming'?'receive':'create')){
+    draft={...structuredClone(doc),recipients:doc.recipients.map(r=>({party_id:r.party.id,contact_id:r.contact_id,kind:r.kind}))};
+    parties=await api.rpc('parties');for(const r of doc.recipients)if(r.party&&!parties.some(p=>p.id===r.party.id))parties.push(r.party);
+    suppliers=await api.directory();mode='edit';writing=true;
+   }
+  }
+ }
+ return {navigation,restoreNavigation(saved){resumeNavigation=saved;},canLeave:leave,async mount(el,language,account,{admin=false}={}){if(draft)collect();root=el;lang=language;profile=account;if(admin)mode='admin';if(!api)api=await createRecordsStore(baseStore);await run(async()=>{if(resumeNavigation){const saved=resumeNavigation;resumeNavigation=null;boot=await api.rpc('bootstrap');await resumeLocation(saved,admin);}await refresh();});},reset(){resumeNavigation=null;q='';status='';offset=0;adminTab='units';closePreview();view='all';total=0;returnView=null;restoreScroll=null;clearIntake();pendingAttachments=[];choosingSigner=false;direction='incoming';filters={};filterCache={};boot=null;doc=null;draft=null;dirty=false;mode='documents';adminData=null;editing=null;}};
 }

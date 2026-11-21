@@ -7,7 +7,7 @@
     "build": "node scripts/build.mjs",
     "build:demo": "node scripts/build.mjs --demo",
     "start": "node scripts/serve.mjs",
-    "test": "node --test tests/domain.test.mjs tests/export.test.mjs tests/pdf.test.mjs tests/import.test.mjs tests/startup.test.mjs",
+    "test": "node --test tests/domain.test.mjs tests/export.test.mjs tests/pdf.test.mjs tests/import.test.mjs tests/startup.test.mjs tests/navigation.test.mjs",
     "test:database": "node --test tests/database.test.mjs tests/shared-identity.test.mjs tests/images.test.mjs tests/supplier-details.test.mjs",
     "test:export": "node --test tests/export.test.mjs",
     "test:records": "node --test tests/records.test.mjs tests/records-dispatch.test.mjs tests/records-files.test.mjs tests/records-migration.test.mjs tests/records-body.test.mjs tests/records-followup.test.mjs tests/records-workspace.test.mjs tests/records-directory.test.mjs",
