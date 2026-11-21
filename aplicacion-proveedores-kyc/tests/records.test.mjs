@@ -47,8 +47,8 @@ test('Relational correspondence: workflow, server permissions, atomic numbering,
    await assert.rejects(run('writer',()=>rpc('approve',doc,2)),/FORBIDDEN/);
    await run('signer',()=>rpc('approve',doc,2));await assert.rejects(run('signer',()=>rpc('approve',doc,2)),/STALE_VERSION/);await run('signer',()=>rpc('approve',restricted,2));
    const a=await run('signer',()=>rpc('read',doc)),b=await run('signer',()=>rpc('read',restricted));assert.equal(a.sequence,1);assert.equal(a.internal_number,'GLF-'+day().slice(0,4)+'-00001');assert.equal(b.sequence,2);assert.equal(a.revisions.length,1);
-   await run('writer',()=>rpc('party',party.id,party.version,{name:'Institución renombrada',kind:'institution',address:'Nueva dirección'}));
-   const c=await run('signer',()=>rpc('read',doc));assert.equal(c.revisions[0].snapshot.recipients[0].party.name,'Institución de prueba');assert.equal(c.recipients[0].party.name,'Institución renombrada');
+   await run('writer',()=>rpc('directory_update',party.id,party.version,{name:'Institución renombrada',kind:'institution',address:'Nueva dirección'}));
+   const c=await run('signer',()=>rpc('read',doc));assert.equal(c.revisions[0].snapshot.recipients[0].party.name,'Institución de prueba');assert.equal(c.recipients[0].party.name,party.name);
   });
   await t.test('Private file tickets cannot overwrite, upload by readers, or mark missing objects complete',async()=>{
    await assert.rejects(run('reader',()=>rpc('upload',doc,3,{kind:'signed',filename:'a.pdf',mime:'application/pdf',size:20})),/FORBIDDEN/);

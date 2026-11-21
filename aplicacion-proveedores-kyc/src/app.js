@@ -22,7 +22,7 @@ const externalKyc=!!new URLSearchParams(location.hash.slice(1)).get('kyc');
 async function ensureModule(kind){
  if(kind==='guide'){if(!guideModule)guideModule=await import('./internal-manual.js');}
  else if(kind==='users'){if(!usersModule){const {createAdministrationModule}=await import('./administration-ui.js');usersModule=createAdministrationModule(store,__LOGO__);}}
- else if(kind==='records'){if(!recordsModule){const {createRecordsModule}=await import('./records-ui.js');recordsModule=createRecordsModule(store,__LOGO__);}}
+ else if(kind==='records'){if(!recordsModule){const {createRecordsModule}=await import('./records-ui.js');recordsModule=createRecordsModule(store,__LOGO__,{openSupplier:async id=>{if(!await leave())return;data=await store.load();await open(id);}});}}
  else if(!kyc){const {createKycModule}=await import('./kyc-ui.js');kyc=createKycModule(__CONFIG__,store,__LOGO__,{createSupplier:prepareKycSupplier});}
 }
 async function loadModule(kind,action){
