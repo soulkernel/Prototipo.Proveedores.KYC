@@ -47,14 +47,14 @@ test('Workbook contains every institution, current and former contacts, plain st
  assert.deepEqual(book.worksheets.map(s=>s.name),['Instituciones','Contactos']);assert.equal(book.worksheets[0].rowCount,61);assert.equal(book.worksheets[1].rowCount,62);assert.equal(book.worksheets[1].getCell('B5').value,'=1+1');assert.equal(book.worksheets[1].getCell('B5').type,ExcelJS.ValueType.String);assert.equal(book.worksheets[1].getCell('E5').value,'0009');assert.equal(book.worksheets[1].getCell('G5').value,'Anterior');assert.equal(book.worksheets[0].getCell('D5').value,'Vigente');assert.match(book.worksheets[0].getCell('A2').value,/Entidad/);
 });
 
-test('Supplier commercial contact is reused and legacy empty placeholders are excluded',async()=>{
- const result=await directoryWorkbook([{name:'Supplier',kind:'institution',supplier_id:'linked',contact_name:'Commercial person',email:'sales@example.test',phone:'00123',contacts:[{name:'',job_title:'',email:'',phone:'',is_representative:true}]}],'en');
- const book=new ExcelJS.Workbook();await book.xlsx.load(result.buffer);assert.equal(book.getWorksheet('Contacts').rowCount,5);assert.equal(book.getWorksheet('Contacts').getCell('B5').value,'Commercial person');assert.equal(book.getWorksheet('Contacts').getCell('F5').value,'Commercial contact');
+test('Documentary contact imported from supplier is used without live commercial data',async()=>{
+ const result=await directoryWorkbook([{name:'Supplier',kind:'institution',supplier_id:'linked',contact_name:'Commercial person',email:'sales@example.test',phone:'00123',contacts:[{name:'Commercial person',email:'sales@example.test',phone:'00123',active:true},{name:'',job_title:'',email:'',phone:''}]}],'en');
+ const book=new ExcelJS.Workbook();await book.xlsx.load(result.buffer);assert.equal(book.getWorksheet('Contacts').rowCount,5);assert.equal(book.getWorksheet('Contacts').getCell('B5').value,'Commercial person');assert.equal(book.getWorksheet('Contacts').getCell('F5').value,'Contact');
 });
 
 test('Export groups separate supplier counterparts from independent institutions and individuals',async()=>{
  const fixtures=[
-  {id:'s',supplier_id:'supplier-1',kind:'natural',name:'Proveedor natural',contact_name:'Contacto comercial',email:'s@example.test',contacts:[]},
+  {id:'s',supplier_id:'supplier-1',kind:'natural',name:'Proveedor natural',contact_name:'Contacto comercial',email:'s@example.test',contacts:[{name:'Contacto comercial',email:'s@example.test',active:true}]},
   {id:'i',kind:'institution',name:'Institución administrativa',contacts:[{id:'a',name:'Presidenta',is_representative:true,active:true}]},
   {id:'n',kind:'natural',name:'Contraparte particular',contacts:[{id:'b',name:'Persona particular',phone:'00099',active:true}]}
  ];

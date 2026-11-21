@@ -10,6 +10,6 @@ export function selectDirectory(parties,group='all'){
  return parties.filter(p=>{
   // Never merge different counterparts on name/email: either may be shared.
   if(p.id){if(seen.has(p.id))return false;seen.add(p.id);}
-  return ['all','contacts'].includes(group)||directoryCategory(p)===group;
+  return ['all','contacts'].includes(group)||(group==='suppliers'?!!p.supplier_id:group==='institutions'?p.kind!=='natural'&&(!p.supplier_id||p.administrative):group==='individuals'?p.kind==='natural'&&!p.supplier_id:directoryCategory(p)===group);
  });
 }

@@ -21,12 +21,12 @@ test('Relational correspondence: workflow, server permissions, atomic numbering,
    await assert.rejects(run('reader',()=>rpc('admin')),/FORBIDDEN/);await assert.rejects(run('reader',()=>rpc('party',null,null,{name:'No permitido',kind:'institution'})),/FORBIDDEN/);
    await assert.rejects(run('admin',()=>db.query('select * from glf_records_private.documents')),/permission denied/);
   });
-  await t.test('Supplier identity is linked once, live commercial edits remain visible',async()=>{
+  await t.test('Supplier identity is imported once and commercial edits do not change documentary data',async()=>{
    const sid=(await db.query("insert into glf_suppliers(scope,person_type,country_code,country_name,id_country_code,id_type,id_number,legal_name,offer_type,city,email,phone,created_by,updated_by) values('glf','natural','EC','Ecuador','EC','cedula','0000077777','FICTICIO','services','Quito','qa@example.test','0000000000',$1,$1) returning id",[ids.writer])).rows[0].id;
    const p1=await run('writer',()=>rpc('party',null,null,{supplier_id:sid})),p2=await run('writer',()=>rpc('party',null,null,{supplier_id:sid}));assert.equal(p1.id,p2.id);
-   const empty=await run('writer',()=>rpc('party',null,null,{supplier_id:sid,contact:{name:' ',email:'',phone:'',job_title:''}}));assert.equal(empty.contacts.length,0);
-   assert.equal((await db.query('select name from glf_records_private.parties where id=$1',[p1.id])).rows[0].name,null);
-   await db.query("update glf_suppliers set legal_name='FICTICIO corregido' where id=$1",[sid]);assert.equal((await run('reader',()=>rpc('parties')))[0].name,'FICTICIO corregido');
+   const empty=await run('writer',()=>rpc('party',null,null,{supplier_id:sid,contact:{name:' ',email:'',phone:'',job_title:''}}));assert.equal(empty.contacts.length,1);
+   assert.equal((await db.query('select name from glf_records_private.parties where id=$1',[p1.id])).rows[0].name,'FICTICIO');
+   await db.query("update glf_suppliers set legal_name='FICTICIO corregido' where id=$1",[sid]);assert.equal((await run('reader',()=>rpc('parties')))[0].name,'FICTICIO');
   });
   party=await run('writer',()=>rpc('party',null,null,{kind:'institution',name:'Institución de prueba',address:'Dirección de prueba',contact:{name:'Autoridad',email:'autoridad@example.test',is_representative:true}}));
   const base={direction:'outgoing',subject:'Oficio de prueba',body:'Solicito información para prueba del módulo.',place:'Santa Cruz',document_date:day(),classification:'ordinary',signer_id:ids.signer,recipients:[{kind:'to',party_id:party.id,contact_id:party.contacts[0].id}]};
@@ -47,7 +47,7 @@ test('Relational correspondence: workflow, server permissions, atomic numbering,
    await assert.rejects(run('writer',()=>rpc('approve',doc,2)),/FORBIDDEN/);
    await run('signer',()=>rpc('approve',doc,2));await assert.rejects(run('signer',()=>rpc('approve',doc,2)),/STALE_VERSION/);await run('signer',()=>rpc('approve',restricted,2));
    const a=await run('signer',()=>rpc('read',doc)),b=await run('signer',()=>rpc('read',restricted));assert.equal(a.sequence,1);assert.equal(a.internal_number,'GLF-'+day().slice(0,4)+'-00001');assert.equal(b.sequence,2);assert.equal(a.revisions.length,1);
-   await run('writer',()=>rpc('directory_update',party.id,party.version,{name:'Institución renombrada',kind:'institution',address:'Nueva dirección'}));
+   await run('writer',()=>rpc('directory_update',party.id,party.version,{name:'Institución de prueba',kind:'institution',address:'Nueva dirección'}));
    const c=await run('signer',()=>rpc('read',doc));assert.equal(c.revisions[0].snapshot.recipients[0].party.name,'Institución de prueba');assert.equal(c.recipients[0].party.name,party.name);
   });
   await t.test('Private file tickets cannot overwrite, upload by readers, or mark missing objects complete',async()=>{
@@ -88,12 +88,12 @@ test('Relational correspondence: workflow, server permissions, atomic numbering,
    await run('receiver',()=>rpc('register',incoming,2));assert.equal((await run('receiver',()=>rpc('read',incoming))).sequence,1);
    await run('receiver',()=>rpc('assign',incoming,3,{assigned_to:ids.writer,requires_response:true,due_date:day(),reason:'Atender solicitud'}));
    await assert.rejects(run('writer',()=>rpc('close',incoming,4,{reason:'Respondido'})),/FORBIDDEN/);
-   await run('receiver',()=>rpc('close',incoming,4,{reason:'Respuesta completa documentada'}));
+   await run('receiver',()=>rpc('close',incoming,4,{reason:'Excepción documentada: respuesta no necesaria',response_exception:true}));
    assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'incoming'}))).rows.length,1);
    assert.ok((await run('reader',()=>rpc('list',null,null,{direction:'outgoing'}))).rows.every(d=>d.direction==='outgoing'));
    assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'incoming',q:registered.internal_number}))).rows[0].id,incoming);
    assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'outgoing',q:registered.internal_number}))).rows.length,0);
-   assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'incoming',q:'Institución renombrada',person_id:ids.writer,date_from:day(),date_to:day()}))).rows.length,1);
+   assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'incoming',q:'Institución de prueba',person_id:ids.writer,date_from:day(),date_to:day()}))).rows.length,1);
    assert.equal((await run('reader',()=>rpc('list',null,null,{direction:'incoming',date_from:'2099-01-01'}))).rows.length,0);
   });
   await t.test('Incomplete drafts persist without numbering; submission and edits retain authorization',async()=>{

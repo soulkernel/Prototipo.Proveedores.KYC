@@ -1,0 +1,29 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {database,ids,as,call} from './records-fixture.mjs';import {day} from '../src/records-model.js';
+test('Audit: authority history, immutable institutions, independent supplier records and controlled document corrections',async()=>{
+ const db=await database();try{
+ for(const name of ['admin','reader'])await db.query('insert into glf_profiles(id,display_name,manage_users) values($1,$2,$3)',[ids[name],name,name==='admin']);
+ const rpc=(a,id=null,v=null,d={})=>as(db,ids.admin,()=>call(db,a,id,v,d));const boot=await rpc('bootstrap');await rpc('member',null,null,{user_id:ids.admin,unit_id:boot.units[0].id,site_id:boot.sites[0].id,initials:'QA',job_title:'QA',roles:[],reason:'Prueba sintética'});
+ let p=await rpc('party',null,null,{kind:'institution',name:'Consejo QA',contact:{name:'Representante anterior',is_representative:true,email:'old@example.test'}});
+ const base={direction:'outgoing',classification:'ordinary',subject:'Oficio de prueba',body:'Contenido suficientemente largo.',signer_id:ids.admin,recipients:[{party_id:p.id,contact_id:p.contacts[0].id,kind:'to'}]};
+ const id=await rpc('save',null,null,base);let d=await rpc('read',id);
+ const f=await rpc('upload',id,d.version,{kind:'attachment',filename:'retirar.pdf',mime:'application/pdf',size:20});await db.query("insert into storage.objects(bucket_id,name,metadata) values('glf-correspondence',$1,'{\"size\":20}')",[f.path]);await rpc('confirm_upload',id,d.version,{file_id:f.id});d=await rpc('read',id);
+ await assert.rejects(as(db,ids.reader,()=>call(db,'withdraw_attachment',id,d.version,{file_id:f.id,reason:'Retiro no autorizado'})),/FORBIDDEN/);
+ await rpc('withdraw_attachment',id,d.version,{file_id:f.id,reason:'Documento equivocado'});d=await rpc('read',id);assert.equal(d.files.length,0);assert.equal((await rpc('archive_bundle',id)).archive_files.length,1);
+ await rpc('submit',id,d.version);d=await rpc('read',id);await rpc('approve',id,d.version);d=await rpc('read',id);assert.equal(d.revisions[0].snapshot.attachments.length,0);
+ await assert.rejects(rpc('withdraw_attachment',id,d.version,{file_id:f.id,reason:'Retiro posterior no permitido'}),/FORBIDDEN_OR_STATE/);
+ await assert.rejects(rpc('directory_update',p.id,p.version,{name:'Nombre distinto',address:''}),/NEW_INSTITUTION_REQUIRED/);
+ p=await rpc('authority_change',p.id,p.version,{name:'Representante actual',job_title:'Presidente',email:'new@example.test',valid_from:day()});assert.equal(p.contacts.filter(c=>c.active&&c.is_representative).length,1);
+ assert.equal((await rpc('list',null,null,{q:'Representante anterior',direction:'outgoing'})).total,1);assert.match((await rpc('list',null,null,{q:'Representante anterior'})).rows[0].correspondent,/Representante anterior/);assert.equal((await rpc('read',id)).recipients[0].contact.name,'Representante anterior');
+ await rpc('cancel_document',id,d.version,{reason:'Corrección de contenido'});d=await rpc('read',id);assert.equal(d.status,'cancelled');const num=d.internal_number;
+ const next=await rpc('replace_document',id,d.version,{reason:'Preparar documento corregido'});let replacement=await rpc('read',next);assert.equal(replacement.replaces_id,id);assert.equal(replacement.status,'draft');assert.equal(replacement.internal_number,null);assert.equal(replacement.files.length,0);assert.equal((await rpc('read',id)).internal_number,num);assert.equal((await rpc('read',id)).replacements[0].id,next);
+ const incoming=(await db.query("insert into glf_records_private.documents(direction,subject,status,author_id,unit_id,site_id,received_at,requires_response) values('incoming','Entrada pendiente','received',$1,$2,$3,now(),true) returning id",[ids.admin,boot.units[0].id,boot.sites[0].id])).rows[0].id;
+ d=await rpc('read',incoming);await assert.rejects(rpc('close',incoming,d.version,{reason:'Cerrar sin contestar'}),/RESPONSE_PENDING/);await rpc('close',incoming,d.version,{reason:'No procede responder por duplicidad documentada',response_exception:true});d=await rpc('read',incoming);assert.equal(d.status,'closed');assert.ok(d.events.some(e=>e.action==='close_response_exception'));
+ const supplier=(await db.query("insert into glf_suppliers(person_type,id_type,id_number,legal_name,address,email,phone,contact_name,scope,country_code,country_name,id_country_code,offer_type,city,created_by,updated_by) values('legal','ruc','1799999999001','Proveedor fijo','Dirección original','sales@example.test','00123','Ventas','government','EC','Ecuador','EC','services','Quito',$1,$1) returning id",[ids.admin])).rows[0].id;
+ p=await rpc('party',null,null,{supplier_id:supplier});assert.equal(p.name,'Proveedor fijo');assert.equal(p.contacts[0].email,'sales@example.test');assert.equal((await rpc('party',null,null,{supplier_id:supplier})).id,p.id);
+ await db.query("update glf_suppliers set address='Dirección nueva',contact_name='Otro contacto',version=version+1 where id=$1",[supplier]);let own=(await rpc('directory_read',p.id)).party;assert.equal(own.address,'Dirección original');
+ const preview=await rpc('supplier_preview',p.id,p.version);p=await rpc('supplier_refresh',p.id,p.version,{supplier_version:preview.supplier_version,address:true,add_contact:true});assert.equal(p.address,'Dirección nueva');assert.ok(p.contacts.some(c=>c.name==='Otro contacto'&&!c.is_representative));
+ p=await rpc('directory_update',p.id,p.version,{name:p.name,address:p.address,administrative:true});assert.equal(p.administrative,true);
+ await assert.rejects(as(db,ids.reader,()=>call(db,'supplier_refresh',p.id,p.version,{supplier_version:preview.supplier_version,address:true})),/FORBIDDEN/);
+ await assert.rejects(as(db,ids.admin,()=>call(db,'archive_bundle',id), 'aal1'),/FORBIDDEN/);
+ }finally{await db.close();}
+});
