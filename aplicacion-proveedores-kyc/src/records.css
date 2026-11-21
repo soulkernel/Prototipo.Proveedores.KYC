@@ -65,3 +65,5 @@
 @media(max-width:420px){.records-recipient{grid-template-columns:1fr}.records-font-note{display:none}.records-party-dialog{padding:12px}}
 
 .records-sidebar button{white-space:normal;overflow-wrap:anywhere}.records-sidebar .action-icon{flex-shrink:0}
+
+.records-pdf-viewer{display:flex;flex-direction:column;min-height:0;flex:1}.records-preview-pages{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;padding:6px}.records-preview-pages button{font-size:12px;padding:7px}.records-preview-sheet{overflow:auto;flex:1;min-height:120px;padding:12px;background:#e6eaee;text-align:center}.records-preview-sheet canvas{display:block;max-width:100%;height:auto;margin:auto;background:white;box-shadow:0 2px 9px #102b4d33}
