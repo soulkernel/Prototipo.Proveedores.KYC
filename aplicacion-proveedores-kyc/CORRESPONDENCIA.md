@@ -193,3 +193,14 @@ Responder crea un borrador persistido vinculado al ingreso, con destinatario del
 Migración 031 aditiva: tres columnas relacionales en eventos (responsable de la actuación, plazo y referencia al archivo de respaldo). Conserva la lógica anterior en una función privada sin ejecución directa por usuarios y amplía la RPC pública bajo los mismos controles de identidad, MFA y lectura. No duplica contenido, contrapartes ni archivos. Aplicar después de 030 y antes de activar la nueva interfaz.
 
 Verificación local: 21 pruebas documentales, incluidos permisos, MFA, concurrencia, evidencia vinculada al mismo oficio, confidencialidad, borrador reutilizable y distinción firma/envío. Recorrido Edge con ingreso y dos anexos, asignación, disposición, atención, respuesta, permisos de lectura, ES/EN, móvil, formato, cursor, guardado y PDF. Estado de activación y despliegue se registra en el contexto compartido después de verificarlo.
+
+
+## Bandejas y superficie de trabajo — 21/11/2026
+
+Implementación de la distribución aprobada con referencia visual a Quipux, conservando el procedimiento GLF. Menú lateral separa recibidos (todos, en atención, cerrados) de salidas (borradores, para firma, por enviar, enviados y todos), con creación/recepción según permiso e instituciones/contactos. Cada vista conserva búsqueda, filtros, página y posición de regreso. No se duplican documentos ni se añaden estados.
+
+Migración 032: consultas agrupadas y total filtrado antes de paginar, siempre bajo readable/MFA. Conserva intacto el comportamiento 031 en una función privada sin ejecución directa por authenticated; no añade tablas, columnas ni privilegios. Aplicar antes de activar la interfaz. Compatibilidad con clientes anteriores sin parámetro view. Las nuevas vistas no permiten deducir existencia ni cantidades de oficios restringidos.
+
+Editor con acciones arriba, hoja amplia, información compacta y anexos debajo. Buscador de contrapartes en diálogo paginado; mantiene selección y directorio existente. Vista previa del borrador usa texto y anexos pendientes sin guardar, numerar, aprobar ni enviar. Visualizador del oficio principal carga solo su PDF bajo demanda, con descarga alternativa; URL blob revocada al cerrar. CSP habilita exclusivamente frames propios/blob; object-src continúa none. Firma y despacho permanecen separados.
+
+Verificaciones locales: 22 pruebas documentales/de base, incluyendo agrupación antes de paginación y privacidad de conteos. Recorridos Edge: redacción y formato/cursor/PDF, borradores (guardar, descartar, retomar), anexos, recepción principal/anexos, seguimiento y respuestas, despacho simulado, selector de contrapartes, vista previa sin efectos persistentes, retorno de filtros/página, ES/EN y móvil. Capturas inspeccionadas; se corrigió colisión de estilos globales del menú con la barra lateral. Sin correo ni firma reales. El estado de aplicación en Supabase y despliegue se registra aparte al verificarse.

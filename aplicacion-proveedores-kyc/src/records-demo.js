@@ -1,3 +1,4 @@
+import {viewStates} from './records-workspace.js';
 import {replyTemplate,operationalActions,replyActions} from './records-followup.js';
 // Fictional preview only. Production authorization and persistence are PostgreSQL RPC/RLS.
 import {canRecords,code,day,fileCheck,validateDocument,number} from './records-model.js';
@@ -39,10 +40,10 @@ export function createRecordsDemo(store){
    if(input.contact&&Object.values(input.contact).some(v=>typeof v==='string'&&v.trim()))entry.contacts.push({...input.contact,id:uid()});write(state);return party(entry);
   }
   if(action==='filter_people')return users();
-  if(action==='list')return {draft_count:state.documents.filter(d=>readable(d)&&d.direction==='outgoing'&&d.status==='draft').length,rows:state.documents.filter(readable).map(d=>({...d,author_name:users().find(u=>u.id===d.author_id)?.name,assigned_name:users().find(u=>u.id===d.assigned_to)?.name,correspondent:d.recipients.map(r=>party(state.parties.find(p=>p.id===r.party_id))?.name).join(' · ')})).filter(d=>{
+  if(action==='list'){const result={draft_count:state.documents.filter(d=>readable(d)&&d.direction==='outgoing'&&d.status==='draft').length,rows:state.documents.filter(readable).map(d=>({...d,author_name:users().find(u=>u.id===d.author_id)?.name,assigned_name:users().find(u=>u.id===d.assigned_to)?.name,correspondent:d.recipients.map(r=>party(state.parties.find(p=>p.id===r.party_id))?.name).join(' · ')})).filter(d=>{
    const date=d.direction==='incoming'?day(new Date(d.received_at)):d.document_date;
-   return (!input.direction||d.direction===input.direction)&&(!input.status||d.status===input.status)&&(!input.person_id||(d.direction==='incoming'?d.assigned_to:d.author_id)===input.person_id)&&(!input.signer_id||d.signer_id===input.signer_id)&&(!input.date_from||date>=input.date_from)&&(!input.date_to||date<=input.date_to)&&(!input.deadline||d.due_date&&!['closed','cancelled'].includes(d.status)&&(input.deadline==='overdue'?d.due_date<day():d.due_date>=day()))&&(!input.q||[d.subject,d.external_number,number(d),d.correspondent].join(' ').toLowerCase().includes(input.q.toLowerCase()));
-  }).sort((a,b)=>b.updated_at.localeCompare(a.updated_at)).slice(input.offset||0,(input.offset||0)+50)};
+   return (!input.direction||d.direction===input.direction)&&(!input.status||d.status===input.status)&&(!viewStates(input.direction,input.view).length||viewStates(input.direction,input.view).includes(d.status))&&(!input.person_id||(d.direction==='incoming'?d.assigned_to:d.author_id)===input.person_id)&&(!input.signer_id||d.signer_id===input.signer_id)&&(!input.date_from||date>=input.date_from)&&(!input.date_to||date<=input.date_to)&&(!input.deadline||d.due_date&&!['closed','cancelled'].includes(d.status)&&(input.deadline==='overdue'?d.due_date<day():d.due_date>=day()))&&(!input.q||[d.subject,d.external_number,number(d),d.correspondent].join(' ').toLowerCase().includes(input.q.toLowerCase()));
+  }).sort((a,b)=>b.updated_at.localeCompare(a.updated_at))};result.total=result.rows.length;result.rows=result.rows.slice(input.offset||0,(input.offset||0)+50);return result;}
   if(action==='reply'){
    if(!readable(doc)||!can('create'))fail('FORBIDDEN');if(doc.direction!=='incoming'||!['received','assigned'].includes(doc.status))fail('INVALID_STATE');
    const existing=state.documents.find(d=>d.parent_id===id&&d.status==='draft'&&readable(d));if(existing)return existing.id;
