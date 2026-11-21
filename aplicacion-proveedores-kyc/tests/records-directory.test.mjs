@@ -46,3 +46,8 @@ test('Workbook contains every institution, current and former contacts, plain st
  const result=await directoryWorkbook(parties,'es','Entidad');const book=new ExcelJS.Workbook();await book.xlsx.load(result.buffer);
  assert.deepEqual(book.worksheets.map(s=>s.name),['Instituciones','Contactos']);assert.equal(book.worksheets[0].rowCount,61);assert.equal(book.worksheets[1].rowCount,62);assert.equal(book.worksheets[1].getCell('B5').value,'=1+1');assert.equal(book.worksheets[1].getCell('B5').type,ExcelJS.ValueType.String);assert.equal(book.worksheets[1].getCell('E5').value,'0009');assert.equal(book.worksheets[1].getCell('G5').value,'Anterior');assert.equal(book.worksheets[0].getCell('D5').value,'Vigente');assert.match(book.worksheets[0].getCell('A2').value,/Entidad/);
 });
+
+test('Supplier commercial contact is reused and legacy empty placeholders are excluded',async()=>{
+ const result=await directoryWorkbook([{name:'Supplier',kind:'institution',supplier_id:'linked',contact_name:'Commercial person',email:'sales@example.test',phone:'00123',contacts:[{name:'',job_title:'',email:'',phone:'',is_representative:true}]}],'en');
+ const book=new ExcelJS.Workbook();await book.xlsx.load(result.buffer);assert.equal(book.getWorksheet('Contacts').rowCount,5);assert.equal(book.getWorksheet('Contacts').getCell('B5').value,'Commercial person');assert.equal(book.getWorksheet('Contacts').getCell('F5').value,'Commercial contact');
+});
